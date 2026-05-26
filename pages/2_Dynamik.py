@@ -17,6 +17,7 @@ formel = st.selectbox("Vælg formel", [
     "Impulsmomentloven:  F · Δt = Δp",
     "Kraftmoment:  τ = F · l",
     "Hældende plan",
+    "Atwood-maskine:  to masser over trisse",
     "Spænding og tøjning:  σ = F / A",
 ])
 
@@ -239,40 +240,89 @@ elif formel == "Kraftmoment:  τ = F · l":
 
 elif formel == "Hældende plan":
     st.latex(r"F_{\parallel} = m g \sin\theta \qquad N = m g \cos\theta \qquad f = \mu \cdot N")
-    st.markdown("Analyse af legeme på hældende plan med friktion")
+    st.markdown("Analyse af legeme på hældende plan. Valgfri ydre kraft langs planen (+ = op ad, − = ned ad).")
     st.divider()
 
-    c1, c2, c3 = st.columns(3)
-    m     = c1.number_input("m – masse (kg)", value=10.0, min_value=1e-12, format="%.6g")
-    theta = c2.number_input("θ – hældningsvinkel (grader)", value=30.0, min_value=0.0, max_value=89.9, format="%.6g")
-    mu    = c3.number_input("μ – friktionskoefficient (0 = ingen)", value=0.2, min_value=0.0, format="%.6g")
+    c1, c2, c3, c4 = st.columns(4)
+    m      = c1.number_input("m – masse (kg)", value=10.0, min_value=1e-12, format="%.6g")
+    theta  = c2.number_input("θ – hældningsvinkel (°)", value=30.0, min_value=0.0, max_value=89.9, format="%.6g")
+    mu     = c3.number_input("μ – friktionskoefficient (0 = ingen)", value=0.2, min_value=0.0, format="%.6g")
+    F_ext  = c4.number_input("F_ydre langs plan (N, + op, − ned, 0=ingen)", value=0.0, format="%.6g")
 
     th_r  = np.radians(theta)
     N     = m * G * np.cos(th_r)
-    F_par = m * G * np.sin(th_r)
-    f     = mu * N
-    F_net = F_par - f
-    a     = F_net / m
+    F_par = m * G * np.sin(th_r)   # tyngdekraft-komponent ned ad planen
+    f_max = mu * N
+
+    # Nettoretning: F_ext (op) mod F_par (ned) + friktion (modsat bevægelse)
+    # Friktion: modsat netto-bevægelse
+    F_tryk = F_ext - F_par          # positiv = objekt accelererer op
+    if abs(F_tryk) <= f_max and F_ext == 0.0:
+        friktion = F_par            # objekt holdes i ro af friktion
+        F_net = 0.0
+    elif F_tryk > 0:
+        friktion = -f_max           # friktion er ned ad (modsat bevægelse opad)
+        F_net = F_ext - F_par - f_max
+    else:
+        friktion = f_max            # friktion er op ad (modsat bevægelse nedad)
+        F_net = F_ext - F_par + f_max
+
+    a = F_net / m
 
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Normalkraft N", f"{N:.4g} N")
-    col2.metric("Friktionskraft f", f"{f:.4g} N")
-    col3.metric("Resultant­kraft", f"{F_net:.4g} N")
+    col2.metric("Tyngd.-komp. (ned)", f"{F_par:.4g} N")
+    col3.metric("Resultantkraft", f"{F_net:.4g} N")
     col4.metric("Acceleration a", f"{a:.4g} m/s²")
 
-    if F_net > 0:
-        st.info("Legemet accelererer ned ad planen.")
-    elif F_net < 0:
-        st.info("Friktion er større end tyngdekraftens komponent – legemet bevæger sig ikke.")
+    if abs(F_net) < 1e-9:
+        st.info("Legemet er i ligevægt (nul-acceleration).")
+    elif F_net > 0:
+        st.info("Netto­kraft OP ad planen – legemet accelererer opad.")
     else:
-        st.info("Legemet er i ligevægt.")
+        st.info("Netto­kraft NED ad planen – legemet accelererer nedad.")
 
     with st.expander("Vis udregning"):
-        st.latex(rf"N = m g \cos\theta = {m:.6g} \cdot {G} \cdot \cos({theta:.4g}°) = {N:.6g}\ \text{{N}}")
-        st.latex(rf"F_{{\parallel}} = m g \sin\theta = {m:.6g} \cdot {G} \cdot \sin({theta:.4g}°) = {F_par:.6g}\ \text{{N}}")
-        st.latex(rf"f = \mu N = {mu:.6g} \cdot {N:.6g} = {f:.6g}\ \text{{N}}")
-        st.latex(rf"F_{{net}} = F_{{\parallel}} - f = {F_par:.6g} - {f:.6g} = {F_net:.6g}\ \text{{N}}")
-        st.latex(rf"a = \frac{{F_{{net}}}}{{m}} = {a:.6g}\ \text{{m/s}}^2")
+        st.latex(rf"N = mg\cos\theta = {m:.4g}\cdot{G}\cdot\cos({theta:.4g}°) = {N:.4g}\ \text{{N}}")
+        st.latex(rf"F_{{\parallel}} = mg\sin\theta = {F_par:.4g}\ \text{{N (ned)}},\quad f_{{max}} = \mu N = {f_max:.4g}\ \text{{N}}")
+        st.latex(rf"F_{{net}} = F_{{ydre}} - F_{{\parallel}} \pm f = {F_ext:.4g} - {F_par:.4g} + ({friktion:.4g}) = {F_net:.4g}\ \text{{N}}")
+        st.latex(rf"a = \frac{{F_{{net}}}}{{m}} = {a:.4g}\ \text{{m/s}}^2")
+
+elif formel == "Atwood-maskine:  to masser over trisse":
+    st.latex(r"a = \frac{(m_2 - m_1)\,g}{m_1 + m_2} \qquad T = \frac{2\,m_1 m_2\,g}{m_1 + m_2}")
+    st.markdown("Trissen er masseløs og friktionsfri. m₂ > m₁ → m₂ accelererer nedad.")
+    st.divider()
+
+    beregn = st.radio("Beregn:", ["a og T (given m₁, m₂)", "m₂ (given a og m₁)"], horizontal=True)
+    st.divider()
+
+    if beregn == "a og T (given m₁, m₂)":
+        c1, c2 = st.columns(2)
+        m1 = c1.number_input("m₁ – lettere masse (kg)", value=1.0, min_value=1e-12, format="%.6g")
+        m2 = c2.number_input("m₂ – tungere masse (kg)", value=2.0, min_value=1e-12, format="%.6g")
+        a  = (m2 - m1) * G / (m1 + m2)
+        T  = 2 * m1 * m2 * G / (m1 + m2)
+        st.success(f"**a = {a:.4g} m/s²**   **T = {T:.4g} N**")
+        st.latex(rf"a = \frac{{({m2:.4g} - {m1:.4g}) \cdot {G}}}{{{m1:.4g} + {m2:.4g}}} = {a:.4g}\ \text{{m/s}}^2")
+        st.latex(rf"T = \frac{{2 \cdot {m1:.4g} \cdot {m2:.4g} \cdot {G}}}{{{m1:.4g} + {m2:.4g}}} = {T:.4g}\ \text{{N}}")
+        if a < 0:
+            st.info("a < 0: m₁ er tungere – m₁ accelererer nedad, m₂ opad.")
+        elif a > 0:
+            st.info("a > 0: m₂ er tungere – m₂ accelererer nedad, m₁ opad.")
+        else:
+            st.info("a = 0: ligevægt (m₁ = m₂).")
+
+    else:
+        c1, c2 = st.columns(2)
+        a_val = c1.number_input("a – acceleration (m/s²)", value=3.27, format="%.6g")
+        m1    = c2.number_input("m₁ – lette masse (kg)", value=1.0, min_value=1e-12, format="%.6g")
+        # a = (m2-m1)g/(m1+m2) → m2(g-a) = m1(g+a) → m2 = m1(g+a)/(g-a)
+        if abs(G - a_val) < 1e-9:
+            st.error("a = g – ingen løsning (uendelig masse)")
+        else:
+            m2 = m1 * (G + a_val) / (G - a_val)
+            st.success(f"**m₂ = {m2:.4g} kg**")
+            st.latex(rf"m_2 = m_1 \frac{{g + a}}{{g - a}} = {m1:.4g} \cdot \frac{{{G} + {a_val:.4g}}}{{{G} - {a_val:.4g}}} = {m2:.4g}\ \text{{kg}}")
 
 elif formel == "Spænding og tøjning:  σ = F / A":
     st.latex(r"\sigma = \frac{F}{A} \qquad \varepsilon = \frac{\Delta L}{L_0} \qquad E = \frac{\sigma}{\varepsilon}")

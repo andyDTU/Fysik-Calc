@@ -16,6 +16,7 @@ formel = st.selectbox("Vælg formel", [
     "Kastebevægelse (vandret kast)",
     "Kastebevægelse (skråt kast)",
     "Cirkulær bevægelse",
+    "Cirkulær bevægelse – RPM-omregner og centripetal",
 ])
 
 st.divider()
@@ -217,43 +218,59 @@ elif formel == "Kastebevægelse (vandret kast)":
     st.markdown("Startes vandret (v₀ₓ = v₀, v₀ᵧ = 0) fra højden h.")
     st.divider()
 
-    c1, c2 = st.columns(2)
-    v0 = c1.number_input("v₀ – vandret starthastighed (m/s)", value=15.0, min_value=0.001, format="%.6g")
-    h  = c2.number_input("h – starthøjde (m)", value=20.0, min_value=0.001, format="%.6g")
+    beregn_vkast = st.radio("Beregn:", ["x og slutfart (given v₀ og h)", "v₀ – given rækkevidde x og højde h"], horizontal=True)
+    st.divider()
 
-    t = np.sqrt(2 * h / G)
-    x = v0 * t
-    vy = G * t
-    v_end = np.sqrt(v0**2 + vy**2)
-    theta = np.degrees(np.arctan(vy / v0))
-
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Flyvetid t", f"{t:.4g} s")
-    col2.metric("Rækkevidde x", f"{x:.4g} m")
-    col3.metric("Slutfart", f"{v_end:.4g} m/s")
-    col4.metric("Nedslagsvinkel", f"{theta:.4g}°")
-
-    with st.expander("Vis udregning"):
-        st.latex(rf"t = \sqrt{{\frac{{2h}}{{g}}}} = \sqrt{{\frac{{2 \cdot {h:.6g}}}{{{G}}}}} = {t:.6g}\ \text{{s}}")
-        st.latex(rf"x = v_0 \cdot t = {v0:.6g} \cdot {t:.6g} = {x:.6g}\ \text{{m}}")
-        st.latex(rf"v_y = g \cdot t = {G} \cdot {t:.6g} = {vy:.6g}\ \text{{m/s}}")
-        st.latex(rf"v_{{slut}} = \sqrt{{v_0^2 + v_y^2}} = {v_end:.6g}\ \text{{m/s}}")
+    if beregn_vkast == "x og slutfart (given v₀ og h)":
+        c1, c2 = st.columns(2)
+        v0 = c1.number_input("v₀ – vandret starthastighed (m/s)", value=15.0, min_value=0.001, format="%.6g")
+        h  = c2.number_input("h – starthøjde (m)", value=20.0, min_value=0.001, format="%.6g")
+        t = np.sqrt(2 * h / G)
+        x = v0 * t
+        vy = G * t
+        v_end = np.sqrt(v0**2 + vy**2)
+        theta = np.degrees(np.arctan(vy / v0))
+        col1, col2, col3, col4 = st.columns(4)
+        col1.metric("Flyvetid t", f"{t:.4g} s")
+        col2.metric("Rækkevidde x", f"{x:.4g} m")
+        col3.metric("Slutfart", f"{v_end:.4g} m/s")
+        col4.metric("Nedslagsvinkel", f"{theta:.4g}°")
+        with st.expander("Vis udregning"):
+            st.latex(rf"t = \sqrt{{\frac{{2h}}{{g}}}} = {t:.6g}\ \text{{s}},\quad x = v_0 t = {x:.6g}\ \text{{m}}")
+            st.latex(rf"v_y = g t = {vy:.6g}\ \text{{m/s}},\quad v_{{slut}} = \sqrt{{v_0^2 + v_y^2}} = {v_end:.6g}\ \text{{m/s}}")
+    else:
+        c1, c2 = st.columns(2)
+        x_mål = c1.number_input("x – rækkevidde (m)", value=30.0, min_value=0.001, format="%.6g")
+        h     = c2.number_input("h – starthøjde (m)", value=20.0, min_value=0.001, format="%.6g")
+        t = np.sqrt(2 * h / G)
+        v0_calc = x_mål / t
+        vy = G * t
+        v_end = np.sqrt(v0_calc**2 + vy**2)
+        st.success(f"**v₀ = {v0_calc:.4g} m/s**   (flyvetid t = {t:.4g} s)")
+        st.latex(rf"t = \sqrt{{\frac{{2h}}{{g}}}} = {t:.6g}\ \text{{s}},\quad v_0 = \frac{{x}}{{t}} = \frac{{{x_mål:.4g}}}{{{t:.4g}}} = {v0_calc:.4g}\ \text{{m/s}}")
 
 # ── Skråt kast ─────────────────────────────────────────────────────────────────
 elif formel == "Kastebevægelse (skråt kast)":
-    st.latex(r"x = v_0 \cos\theta \cdot t \qquad y = v_0 \sin\theta \cdot t - \tfrac{1}{2}g t^2")
+    st.latex(r"x = v_0 \cos\theta \cdot t \qquad y = h_0 + v_0 \sin\theta \cdot t - \tfrac{1}{2}g t^2")
     st.divider()
 
-    c1, c2 = st.columns(2)
+    c1, c2, c3 = st.columns(3)
     v0    = c1.number_input("v₀ – starthastighed (m/s)", value=20.0, min_value=0.001, format="%.6g")
     theta = c2.number_input("θ – affyringsvinkel (grader)", value=45.0, min_value=0.1, max_value=89.9, format="%.6g")
+    h0    = c3.number_input("h₀ – starthøjde (m, 0=fra jorden)", value=0.0, format="%.6g")
 
     th_r = np.radians(theta)
     v0x = v0 * np.cos(th_r)
     v0y = v0 * np.sin(th_r)
     t_top = v0y / G
-    h_max = v0y**2 / (2 * G)
-    t_land = 2 * t_top
+    h_max = h0 + v0y**2 / (2 * G)
+
+    # Solve -½g t² + v0y t + h0 = 0 for landing time
+    disc = v0y**2 + 2 * G * h0
+    if disc < 0:
+        st.error("Bolden når ikke ned – diskriminant < 0")
+        st.stop()
+    t_land = (v0y + np.sqrt(disc)) / G
     x_max = v0x * t_land
 
     col1, col2, col3, col4 = st.columns(4)
@@ -263,11 +280,11 @@ elif formel == "Kastebevægelse (skråt kast)":
     col4.metric("Tid til top", f"{t_top:.4g} s")
 
     with st.expander("Vis udregning"):
-        st.latex(rf"v_{{0x}} = v_0 \cos\theta = {v0:.6g} \cdot \cos({theta:.4g}°) = {v0x:.6g}\ \text{{m/s}}")
-        st.latex(rf"v_{{0y}} = v_0 \sin\theta = {v0:.6g} \cdot \sin({theta:.4g}°) = {v0y:.6g}\ \text{{m/s}}")
-        st.latex(rf"t_{{top}} = \frac{{v_{{0y}}}}{{g}} = \frac{{{v0y:.6g}}}{{{G}}} = {t_top:.6g}\ \text{{s}}")
-        st.latex(rf"h_{{max}} = \frac{{v_{{0y}}^2}}{{2g}} = {h_max:.6g}\ \text{{m}}")
-        st.latex(rf"x_{{max}} = \frac{{v_0^2 \sin(2\theta)}}{{g}} = {x_max:.6g}\ \text{{m}}")
+        st.latex(rf"v_{{0x}} = {v0:.6g}\cos({theta:.4g}°) = {v0x:.6g}\ \text{{m/s}}")
+        st.latex(rf"v_{{0y}} = {v0:.6g}\sin({theta:.4g}°) = {v0y:.6g}\ \text{{m/s}}")
+        st.latex(rf"t_{{top}} = \frac{{v_{{0y}}}}{{g}} = {t_top:.6g}\ \text{{s}},\quad h_{{max}} = h_0 + \frac{{v_{{0y}}^2}}{{2g}} = {h_max:.6g}\ \text{{m}}")
+        st.latex(rf"t_{{land}}: \quad 0 = h_0 + v_{{0y}}t - \tfrac{{1}}{{2}}gt^2 \Rightarrow t = \frac{{v_{{0y}} + \sqrt{{v_{{0y}}^2 + 2g h_0}}}}{{g}} = {t_land:.6g}\ \text{{s}}")
+        st.latex(rf"x_{{max}} = v_{{0x}} \cdot t_{{land}} = {v0x:.6g} \cdot {t_land:.6g} = {x_max:.6g}\ \text{{m}}")
 
 # ── Cirkulær bevægelse ─────────────────────────────────────────────────────────
 elif formel == "Cirkulær bevægelse":
@@ -324,3 +341,55 @@ elif formel == "Cirkulær bevægelse":
         f = 1 / T
         st.success(f"**f = {f:.6g} Hz  (T = {T:.6g} s)**")
         st.latex(rf"f = \frac{{v}}{{2\pi r}} = {f:.6g}\ \text{{Hz}}")
+
+# ── Cirkulær bevægelse – RPM og centripetal ────────────────────────────────────
+elif formel == "Cirkulær bevægelse – RPM-omregner og centripetal":
+    st.latex(r"\omega = \frac{2\pi \cdot \text{rpm}}{60} \qquad a_c = \omega^2 r \qquad r = \frac{a_c}{\omega^2}")
+    st.markdown("Bruges til centrifuge-opgaver: omdan rpm → ω → find radius eller centripetal­acceleration.")
+    st.divider()
+
+    beregn = st.radio("Beregn:", [
+        "ω – vinkelhastighed fra RPM",
+        "r – radius (given ac og RPM)",
+        "ac – centripetal­acceleration (given r og RPM)",
+        "RPM – given ω",
+    ], horizontal=True)
+    st.divider()
+
+    if beregn == "ω – vinkelhastighed fra RPM":
+        rpm = st.number_input("RPM – omdrejninger pr. minut", value=10000.0, format="%.6g")
+        omega = rpm * 2 * np.pi / 60
+        f_hz = rpm / 60
+        T_s = 60 / rpm
+        st.success(f"**ω = {omega:.6g} rad/s**   (f = {f_hz:.6g} Hz, T = {T_s:.6g} s)")
+        st.latex(rf"\omega = \frac{{2\pi \cdot {rpm:.6g}}}{{60}} = {omega:.6g}\ \text{{rad/s}}")
+
+    elif beregn == "r – radius (given ac og RPM)":
+        st.markdown("**Eksempel: centrifuge med 10000 RPM og ac = 8500g → find r**")
+        c1, c2 = st.columns(2)
+        rpm = c1.number_input("RPM – omdrejninger pr. minut", value=10000.0, format="%.6g")
+        ac_g = c2.number_input("ac – centripetal­acceleration (× g)", value=8500.0, format="%.6g")
+        ac = ac_g * G
+        omega = rpm * 2 * np.pi / 60
+        r = ac / omega**2
+        st.success(f"**r = {r:.6g} m  =  {r*100:.4g} cm**")
+        st.latex(rf"\omega = \frac{{2\pi \cdot {rpm:.6g}}}{{60}} = {omega:.6g}\ \text{{rad/s}}")
+        st.latex(rf"a_c = {ac_g:.6g} \cdot g = {ac:.6g}\ \text{{m/s}}^2")
+        st.latex(rf"r = \frac{{a_c}}{{\omega^2}} = \frac{{{ac:.6g}}}{{{omega:.6g}^2}} = {r:.6g}\ \text{{m}}")
+        st.info(f"Check: aₐ/g = ω²r/g = {omega**2*r/G:.4g} (skal = {ac_g:.4g})")
+
+    elif beregn == "ac – centripetal­acceleration (given r og RPM)":
+        c1, c2 = st.columns(2)
+        rpm = c1.number_input("RPM – omdrejninger pr. minut", value=10000.0, format="%.6g")
+        r   = c2.number_input("r – radius (m)", value=0.076, min_value=1e-12, format="%.6g")
+        omega = rpm * 2 * np.pi / 60
+        ac = omega**2 * r
+        ac_g = ac / G
+        st.success(f"**ac = {ac:.6g} m/s²  =  {ac_g:.4g} × g**")
+        st.latex(rf"a_c = \omega^2 r = {omega:.6g}^2 \cdot {r:.6g} = {ac:.6g}\ \text{{m/s}}^2")
+
+    else:
+        omega = st.number_input("ω – vinkelhastighed (rad/s)", value=100.0, format="%.6g")
+        rpm = omega * 60 / (2 * np.pi)
+        st.success(f"**RPM = {rpm:.6g}  (f = {omega/(2*np.pi):.6g} Hz)**")
+        st.latex(rf"\text{{RPM}} = \frac{{\omega \cdot 60}}{{2\pi}} = \frac{{{omega:.6g} \cdot 60}}{{2\pi}} = {rpm:.6g}")

@@ -19,6 +19,7 @@ formel = st.selectbox("Vælg formel", [
     "Rulning uden glidning",
     "Impulsmoment:  L = I·ω",
     "Bevarelse af impulsmoment",
+    "Trisse + ophængt masse (Yo-Yo / Atwood med rotation)",
 ])
 
 st.divider()
@@ -422,3 +423,30 @@ elif formel == "Bevarelse af impulsmoment":
         I2 = I1 * w1 / w2
         st.success(f"**I₂ = {I2:.6g} kg·m²**")
         st.latex(rf"I_2 = \frac{{I_1 \omega_1}}{{\omega_2}} = \frac{{{I1:.6g} \cdot {w1:.6g}}}{{{w2:.6g}}} = {I2:.6g}\ \text{{kg·m}}^2")
+
+elif formel == "Trisse + ophængt masse (Yo-Yo / Atwood med rotation)":
+    st.latex(r"a = \frac{m\,g}{m + I/R^2} \qquad T = \frac{m\,g\,I/R^2}{m + I/R^2} \qquad \alpha = \frac{a}{R}")
+    st.markdown("Masse m ophængt i snor om trisse (radius R, inertimoment I). Snoren glider ikke.")
+    st.divider()
+
+    c1, c2, c3 = st.columns(3)
+    m = c1.number_input("m – ophængt masse (kg)", value=2.0, min_value=1e-12, format="%.6g")
+    I_trisse = c2.number_input("I – trissens inertimoment (kg·m²)", value=0.5, min_value=1e-12, format="%.6g")
+    R = c3.number_input("R – trissens radius (m)", value=0.2, min_value=1e-12, format="%.6g")
+
+    a = m * G / (m + I_trisse / R**2)
+    T = m * G * (I_trisse / R**2) / (m + I_trisse / R**2)
+    alpha_ang = a / R
+    omega_func = f"ω = √(2aΔy/R²)·R → ω² = 2aΔy/R²... brug ω=α·t"
+
+    st.success(f"**a = {a:.4g} m/s²**   **T = {T:.4g} N**   **α = {alpha_ang:.4g} rad/s²**")
+    st.latex(rf"a = \frac{{m\,g}}{{m + I/R^2}} = \frac{{{m:.4g}\cdot{G}}}{{{m:.4g} + {I_trisse:.4g}/{R:.4g}^2}} = {a:.4g}\ \text{{m/s}}^2")
+    st.latex(rf"T = m(g-a) = {m:.4g}({G} - {a:.4g}) = {m*(G-a):.4g}\ \text{{N (kontrol: T={T:.4g})}}")
+    st.latex(rf"\alpha = \frac{{a}}{{R}} = \frac{{{a:.4g}}}{{{R:.4g}}} = {alpha_ang:.4g}\ \text{{rad/s}}^2")
+
+    st.markdown("**Hastighed og vinkelhastighed efter fald Δy:**")
+    dy = st.number_input("Δy – faldet afstand (m)", value=1.0, min_value=0.0, format="%.6g")
+    v_end = np.sqrt(2 * a * dy)
+    omega_end = v_end / R
+    st.info(f"v = {v_end:.4g} m/s,   ω = {omega_end:.4g} rad/s   (efter {dy:.4g} m fald)")
+    st.latex(rf"v = \sqrt{{2a\Delta y}} = \sqrt{{2\cdot{a:.4g}\cdot{dy:.4g}}} = {v_end:.4g}\ \text{{m/s}},\quad \omega = v/R = {omega_end:.4g}\ \text{{rad/s}}")

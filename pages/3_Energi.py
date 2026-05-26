@@ -15,6 +15,7 @@ formel = st.selectbox("Vælg formel", [
     "Arbejde:  W = F · s · cos(θ)",
     "Effekt:  P = W / t = F · v",
     "Energibevarelse:  Ek₁ + Ep₁ = Ek₂ + Ep₂",
+    "Energibevarelse med friktion",
     "Mekanisk virkningsgrad:  η = P_ud / P_ind",
 ])
 
@@ -258,6 +259,69 @@ elif formel == "Energibevarelse:  Ek₁ + Ep₁ = Ek₂ + Ep₂":
         h1 = h2 + (v2**2 - v1**2) / (2 * G)
         st.success(f"**h₁ = {h1:.6g} m**")
         st.latex(rf"h_1 = h_2 + \frac{{v_2^2 - v_1^2}}{{2g}} = {h1:.6g}\ \text{{m}}")
+
+elif formel == "Energibevarelse med friktion":
+    st.latex(r"\tfrac{1}{2}mv_1^2 + mgh_1 = \tfrac{1}{2}mv_2^2 + mgh_2 + W_f")
+    st.latex(r"W_f = \mu\,m\,g\cos\theta \cdot s \quad \text{(friktion langs skråning)}")
+    st.markdown("Find hastighed eller friktion inkl. energitab til friktion.")
+    st.divider()
+
+    beregn = st.radio("Beregn:", ["v₂ – sluthastighed (m/s)", "μ – friktionskoefficient", "s – strækning (m)"], horizontal=True)
+    st.divider()
+
+    if beregn == "v₂ – sluthastighed (m/s)":
+        c1, c2, c3, c4, c5, c6 = st.columns(6)
+        m  = c1.number_input("m (kg)", value=5.0, min_value=1e-12, format="%.6g")
+        v1 = c2.number_input("v₁ (m/s)", value=0.0, format="%.6g")
+        h1 = c3.number_input("h₁ (m)", value=10.0, format="%.6g")
+        h2 = c4.number_input("h₂ (m)", value=0.0, format="%.6g")
+        mu_f = c5.number_input("μ", value=0.2, min_value=0.0, format="%.6g")
+        theta_f = c6.number_input("θ (°, hældning)", value=30.0, min_value=0.0, max_value=89.9, format="%.6g")
+        s_dist = st.number_input("s – strækning langs planen (m)", value=20.0, min_value=0.0, format="%.6g")
+        Wf = mu_f * m * G * np.cos(np.radians(theta_f)) * s_dist
+        val = v1**2 + 2*G*(h1-h2) - 2*Wf/m
+        if val < 0:
+            st.error(f"Friktionswork ({Wf:.4g} J) overstiger tilgængelig energi – legemet når ikke frem.")
+        else:
+            v2 = np.sqrt(val)
+            st.success(f"**v₂ = {v2:.4g} m/s**   (W_f = {Wf:.4g} J tab til friktion)")
+            st.latex(rf"v_2 = \sqrt{{v_1^2 + 2g(h_1-h_2) - 2W_f/m}} = {v2:.4g}\ \text{{m/s}}")
+
+    elif beregn == "μ – friktionskoefficient":
+        c1, c2, c3, c4, c5, c6 = st.columns(6)
+        m  = c1.number_input("m (kg)", value=5.0, min_value=1e-12, format="%.6g")
+        v1 = c2.number_input("v₁ (m/s)", value=10.0, format="%.6g")
+        h1 = c3.number_input("h₁ (m)", value=0.0, format="%.6g")
+        v2 = c4.number_input("v₂ (m/s)", value=0.0, format="%.6g")
+        h2 = c5.number_input("h₂ (m)", value=0.0, format="%.6g")
+        theta_f = c6.number_input("θ (°)", value=0.0, min_value=0.0, max_value=89.9, format="%.6g")
+        s_dist = st.number_input("s – strækning (m)", value=10.0, min_value=1e-12, format="%.6g")
+        Wf = 0.5*m*(v1**2 - v2**2) + m*G*(h1-h2)
+        N = m * G * np.cos(np.radians(theta_f))
+        if N * s_dist < 1e-12:
+            st.error("Kan ikke beregne μ – normalkraft eller strækning er nul.")
+        else:
+            mu_calc = Wf / (N * s_dist)
+            st.success(f"**μ = {mu_calc:.4g}**   (W_f = {Wf:.4g} J)")
+            st.latex(rf"\mu = \frac{{W_f}}{{N\cdot s}} = \frac{{{Wf:.4g}}}{{{N:.4g} \cdot {s_dist:.4g}}} = {mu_calc:.4g}")
+
+    else:
+        c1, c2, c3, c4, c5, c6 = st.columns(6)
+        m  = c1.number_input("m (kg)", value=5.0, min_value=1e-12, format="%.6g")
+        v1 = c2.number_input("v₁ (m/s)", value=10.0, format="%.6g")
+        h1 = c3.number_input("h₁ (m)", value=0.0, format="%.6g")
+        v2 = c4.number_input("v₂ (m/s)", value=0.0, format="%.6g")
+        h2 = c5.number_input("h₂ (m)", value=0.0, format="%.6g")
+        mu_f = c6.number_input("μ", value=0.3, min_value=0.0, format="%.6g")
+        theta_f = st.number_input("θ (°)", value=0.0, min_value=0.0, max_value=89.9, format="%.6g")
+        Wf = 0.5*m*(v1**2 - v2**2) + m*G*(h1-h2)
+        N = m * G * np.cos(np.radians(theta_f))
+        if abs(mu_f * N) < 1e-12:
+            st.error("μ=0 – kan ikke beregne s.")
+        else:
+            s_calc = Wf / (mu_f * N)
+            st.success(f"**s = {s_calc:.4g} m**   (W_f = {Wf:.4g} J)")
+            st.latex(rf"s = \frac{{W_f}}{{\mu N}} = \frac{{{Wf:.4g}}}{{{mu_f:.4g} \cdot {N:.4g}}} = {s_calc:.4g}\ \text{{m}}")
 
 elif formel == "Mekanisk virkningsgrad:  η = P_ud / P_ind":
     st.latex(r"\eta = \frac{P_{ud}}{P_{ind}} = \frac{W_{ud}}{W_{ind}}")
