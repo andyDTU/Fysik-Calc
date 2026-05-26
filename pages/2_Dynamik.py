@@ -8,6 +8,13 @@ st.divider()
 
 G = 9.82
 
+# Pre-fill from Eksamensopgaver guide
+if st.session_state.pop("example_dynamik_2024q14", None):
+    st.session_state["dyn_formel"] = "Spænding og tøjning:  σ = F / A"
+    st.session_state["dyn_spand_mode"] = "d – diameter af cirkulært tværsnit (given F og σ_max)"
+    st.session_state["dyn_F"] = 500000.0
+    st.session_state["dyn_sigma"] = 1.6e9
+
 formel = st.selectbox("Vælg formel", [
     "Newtons 2. lov:  F = m · a",
     "Tyngdekraft:  G = m · g",
@@ -19,7 +26,7 @@ formel = st.selectbox("Vælg formel", [
     "Hældende plan",
     "Atwood-maskine:  to masser over trisse",
     "Spænding og tøjning:  σ = F / A",
-])
+], key="dyn_formel")
 
 st.divider()
 
@@ -336,7 +343,7 @@ elif formel == "Spænding og tøjning:  σ = F / A":
         "d – diameter af cirkulært tværsnit (given F og σ_max)",
         "ε – tøjning (given ΔL og L₀)",
         "E – Youngs modul (given σ og ε)",
-    ])
+    ], key="dyn_spand_mode")
 
     st.divider()
 
@@ -367,13 +374,15 @@ elif formel == "Spænding og tøjning:  σ = F / A":
     elif beregn == "d – diameter af cirkulært tværsnit (given F og σ_max)":
         st.info("Cirkulært tværsnit: A = πd²/4  →  d = √(4F / (π·σ_max))")
         c1, c2 = st.columns(2)
-        F_val   = c1.number_input("F – kraft (N)", value=5000.0, format="%.6g")
-        sigma   = c2.number_input("σ_max – maksimal spænding (Pa)", value=50e6, min_value=1e-20, format="%.6g")
+        F_val   = c1.number_input("F – kraft (N)", value=5000.0, format="%.6g", key="dyn_F")
+        sigma   = c2.number_input("σ_max – maksimal spænding (Pa)", value=50e6, min_value=1e-20, format="%.6g", key="dyn_sigma")
         d = np.sqrt(4 * F_val / (np.pi * sigma))
         A_val = np.pi * d**2 / 4
         st.success(f"**d = {d:.6g} m = {d*1000:.6g} mm**")
         st.latex(rf"d = \sqrt{{\frac{{4F}}{{\pi \sigma_{{max}}}}}} = \sqrt{{\frac{{4 \cdot {F_val:.6g}}}{{\pi \cdot {sigma:.6g}}}}} = {d:.6g}\ \text{{m}}")
         st.latex(rf"A = \frac{{\pi d^2}}{{4}} = {A_val:.6g}\ \text{{m}}^2")
+        if abs(F_val - 500000.0) < 1 and abs(sigma - 1.6e9) < 1e6:
+            st.success(f"📋 **2024 Q14** – Kulfiber: m=50 kg, v=100 m/s, R=1 m → F=500 000 N, σ_max=1600 MPa → d ≈ 2.0 cm ✓")
 
     elif beregn == "ε – tøjning (given ΔL og L₀)":
         c1, c2 = st.columns(2)

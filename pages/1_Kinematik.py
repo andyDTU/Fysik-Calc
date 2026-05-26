@@ -8,6 +8,20 @@ st.divider()
 
 G = 9.82
 
+# Pre-fill from Eksamensopgaver guide
+if st.session_state.pop("example_kinematik_2025q7", None):
+    st.session_state["kin_formel"] = "Cirkulær bevægelse – RPM-omregner og centripetal"
+    st.session_state["kin_rpm_mode"] = "r – radius (given ac og RPM)"
+    st.session_state["kin_rpm_val"] = 10000.0
+    st.session_state["kin_ac_g"] = 8500.0
+
+if st.session_state.pop("example_kinematik_2025q4", None):
+    st.session_state["kin_formel"] = "Jævnt accelereret (2):  s = v₀·t + ½·a·t²"
+    st.session_state["kin_ja2_mode"] = "s (m)"
+    st.session_state["kin_ja2_v0"] = 50.0
+    st.session_state["kin_ja2_a"] = -9.82
+    st.session_state["kin_ja2_t"] = 2.0
+
 formel = st.selectbox("Vælg formel", [
     "Uniform bevægelse:  s = v · t",
     "Jævnt accelereret (1):  v = v₀ + a · t",
@@ -17,7 +31,7 @@ formel = st.selectbox("Vælg formel", [
     "Kastebevægelse (skråt kast)",
     "Cirkulær bevægelse",
     "Cirkulær bevægelse – RPM-omregner og centripetal",
-])
+], key="kin_formel")
 
 st.divider()
 
@@ -99,17 +113,19 @@ elif formel == "Jævnt accelereret (1):  v = v₀ + a · t":
 # ── s = v0*t + 0.5*a*t^2 ──────────────────────────────────────────────────────
 elif formel == "Jævnt accelereret (2):  s = v₀·t + ½·a·t²":
     st.latex(r"s = v_0 \cdot t + \tfrac{1}{2} a \cdot t^2")
-    beregn = st.radio("Beregn:", ["s (m)", "v₀ (m/s)", "a (m/s²)", "t (s)"], horizontal=True)
+    beregn = st.radio("Beregn:", ["s (m)", "v₀ (m/s)", "a (m/s²)", "t (s)"], horizontal=True, key="kin_ja2_mode")
     st.divider()
 
     if beregn == "s (m)":
         c1, c2, c3 = st.columns(3)
-        v0 = c1.number_input("v₀ (m/s)", value=0.0, format="%.6g")
-        a  = c2.number_input("a (m/s²)", value=2.0, format="%.6g")
-        t  = c3.number_input("t (s)", value=5.0, format="%.6g")
+        v0 = c1.number_input("v₀ (m/s)", value=0.0, format="%.6g", key="kin_ja2_v0")
+        a  = c2.number_input("a (m/s²)", value=2.0, format="%.6g", key="kin_ja2_a")
+        t  = c3.number_input("t (s)", value=5.0, format="%.6g", key="kin_ja2_t")
         s = v0 * t + 0.5 * a * t**2
         st.success(f"**s = {s:.6g} m**")
         st.latex(rf"s = {v0:.6g} \cdot {t:.6g} + \tfrac{{1}}{{2}} \cdot {a:.6g} \cdot {t:.6g}^2 = {s:.6g}\ \text{{m}}")
+        if abs(v0 - 50.0) < 0.01 and abs(a + 9.82) < 0.01 and abs(t - 2.0) < 0.01:
+            st.info("📋 **2025 Q4** – To bolde mødes: bold 1 kastes op (v₀=50 m/s), bold 2 slippes fra 100 m. De mødes ved h ≈ 80.4 m (t=2 s). ✓")
 
     elif beregn == "v₀ (m/s)":
         c1, c2, c3 = st.columns(3)
@@ -353,7 +369,7 @@ elif formel == "Cirkulær bevægelse – RPM-omregner og centripetal":
         "r – radius (given ac og RPM)",
         "ac – centripetal­acceleration (given r og RPM)",
         "RPM – given ω",
-    ], horizontal=True)
+    ], horizontal=True, key="kin_rpm_mode")
     st.divider()
 
     if beregn == "ω – vinkelhastighed fra RPM":
@@ -367,8 +383,8 @@ elif formel == "Cirkulær bevægelse – RPM-omregner og centripetal":
     elif beregn == "r – radius (given ac og RPM)":
         st.markdown("**Eksempel: centrifuge med 10000 RPM og ac = 8500g → find r**")
         c1, c2 = st.columns(2)
-        rpm = c1.number_input("RPM – omdrejninger pr. minut", value=10000.0, format="%.6g")
-        ac_g = c2.number_input("ac – centripetal­acceleration (× g)", value=8500.0, format="%.6g")
+        rpm = c1.number_input("RPM – omdrejninger pr. minut", value=10000.0, format="%.6g", key="kin_rpm_val")
+        ac_g = c2.number_input("ac – centripetal­acceleration (× g)", value=8500.0, format="%.6g", key="kin_ac_g")
         ac = ac_g * G
         omega = rpm * 2 * np.pi / 60
         r = ac / omega**2
@@ -377,6 +393,8 @@ elif formel == "Cirkulær bevægelse – RPM-omregner og centripetal":
         st.latex(rf"a_c = {ac_g:.6g} \cdot g = {ac:.6g}\ \text{{m/s}}^2")
         st.latex(rf"r = \frac{{a_c}}{{\omega^2}} = \frac{{{ac:.6g}}}{{{omega:.6g}^2}} = {r:.6g}\ \text{{m}}")
         st.info(f"Check: aₐ/g = ω²r/g = {omega**2*r/G:.4g} (skal = {ac_g:.4g})")
+        if abs(rpm - 10000.0) < 1 and abs(ac_g - 8500.0) < 1:
+            st.success("📋 **2025 Q7** – Centrifuge: 10 000 RPM, 8500g → r ≈ 7.6 cm ✓")
 
     elif beregn == "ac – centripetal­acceleration (given r og RPM)":
         c1, c2 = st.columns(2)

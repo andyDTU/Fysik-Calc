@@ -8,6 +8,14 @@ st.divider()
 
 G = 9.82
 
+# Pre-fill from Eksamensopgaver guide
+if st.session_state.pop("example_rotation_2024q13", None):
+    st.session_state["rot_formel"] = "Bevarelse af impulsmoment"
+    st.session_state["rot_bev_mode"] = "I₂ – slut­inertimoment (kg·m²)"
+    st.session_state["rot_I1"] = 3.0
+    st.session_state["rot_w1"] = 5.0
+    st.session_state["rot_w2"] = 3.0
+
 formel = st.selectbox("Vælg formel", [
     "Vinkelkinematik (analog til lineær kinematik)",
     "Sammenhæng lineær ↔ vinkelbevægelse",
@@ -20,7 +28,7 @@ formel = st.selectbox("Vælg formel", [
     "Impulsmoment:  L = I·ω",
     "Bevarelse af impulsmoment",
     "Trisse + ophængt masse (Yo-Yo / Atwood med rotation)",
-])
+], key="rot_formel")
 
 st.divider()
 
@@ -396,7 +404,7 @@ elif formel == "Bevarelse af impulsmoment":
     st.markdown("Bevaret når nettodrejningsmoment = 0 (ingen ydre drejningsmomenter).")
     st.divider()
 
-    beregn = st.radio("Beregn:", ["ω₂ – slut­vinkelhastighed (rad/s)", "I₂ – slut­inertimoment (kg·m²)"], horizontal=True)
+    beregn = st.radio("Beregn:", ["ω₂ – slut­vinkelhastighed (rad/s)", "I₂ – slut­inertimoment (kg·m²)"], horizontal=True, key="rot_bev_mode")
     st.divider()
 
     if beregn == "ω₂ – slut­vinkelhastighed (rad/s)":
@@ -417,12 +425,15 @@ elif formel == "Bevarelse af impulsmoment":
 
     else:
         c1, c2, c3 = st.columns(3)
-        I1 = c1.number_input("I₁ (kg·m²)", value=3.0, min_value=1e-12, format="%.6g")
-        w1 = c2.number_input("ω₁ (rad/s)", value=2.0, format="%.6g")
-        w2 = c3.number_input("ω₂ (rad/s)", value=6.0, min_value=1e-12, format="%.6g")
+        I1 = c1.number_input("I₁ (kg·m²)", value=3.0, min_value=1e-12, format="%.6g", key="rot_I1")
+        w1 = c2.number_input("ω₁ (rad/s)", value=2.0, format="%.6g", key="rot_w1")
+        w2 = c3.number_input("ω₂ (rad/s)", value=6.0, min_value=1e-12, format="%.6g", key="rot_w2")
         I2 = I1 * w1 / w2
         st.success(f"**I₂ = {I2:.6g} kg·m²**")
         st.latex(rf"I_2 = \frac{{I_1 \omega_1}}{{\omega_2}} = \frac{{{I1:.6g} \cdot {w1:.6g}}}{{{w2:.6g}}} = {I2:.6g}\ \text{{kg·m}}^2")
+        if abs(w2/w1 - 0.6) < 0.01:
+            I2_tilfojet = I2 - I1
+            st.info(f"📋 **2024 Q13** – Skive lander på skive: ω₂/ω₁ = 0.6 → I_total = {I2:.4g} → I₂_tilføjet = I_total − I₁ = {I2_tilfojet:.4g} = **{I2_tilfojet/I1:.4g}·I₁** (= 2/3·I₁ ✓)")
 
 elif formel == "Trisse + ophængt masse (Yo-Yo / Atwood med rotation)":
     st.latex(r"a = \frac{m\,g}{m + I/R^2} \qquad T = \frac{m\,g\,I/R^2}{m + I/R^2} \qquad \alpha = \frac{a}{R}")
