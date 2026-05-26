@@ -87,10 +87,13 @@ elif formel == "Jævnt accelereret (1):  v = v₀ + a · t":
         c1, c2, c3 = st.columns(3)
         v  = c1.number_input("v – sluthastig­hed (m/s)", value=10.0, format="%.6g")
         v0 = c2.number_input("v₀ – starthastig­hed (m/s)", value=0.0, format="%.6g")
-        a  = c3.number_input("a – acceleration (m/s²)", value=2.0, min_value=1e-12, format="%.6g")
-        t = (v - v0) / a
-        st.success(f"**t = {t:.6g} s**")
-        st.latex(rf"t = \frac{{v - v_0}}{{a}} = \frac{{{v:.6g} - {v0:.6g}}}{{{a:.6g}}} = {t:.6g}\ \text{{s}}")
+        a  = c3.number_input("a – acceleration (m/s²)", value=2.0, format="%.6g")
+        if abs(a) < 1e-12:
+            st.error("a = 0 – kan ikke beregne t")
+        else:
+            t = (v - v0) / a
+            st.success(f"**t = {t:.6g} s**")
+            st.latex(rf"t = \frac{{v - v_0}}{{a}} = \frac{{{v:.6g} - {v0:.6g}}}{{{a:.6g}}} = {t:.6g}\ \text{{s}}")
 
 # ── s = v0*t + 0.5*a*t^2 ──────────────────────────────────────────────────────
 elif formel == "Jævnt accelereret (2):  s = v₀·t + ½·a·t²":
@@ -188,19 +191,25 @@ elif formel == "Jævnt accelereret (3):  v² = v₀² + 2·a·s":
         c1, c2, c3 = st.columns(3)
         v  = c1.number_input("v (m/s)", value=10.0, format="%.6g")
         v0 = c2.number_input("v₀ (m/s)", value=0.0, format="%.6g")
-        s  = c3.number_input("s (m)", value=25.0, min_value=1e-12, format="%.6g")
-        a = (v**2 - v0**2) / (2 * s)
-        st.success(f"**a = {a:.6g} m/s²**")
-        st.latex(rf"a = \frac{{v^2 - v_0^2}}{{2s}} = {a:.6g}\ \text{{m/s}}^2")
+        s  = c3.number_input("s (m)", value=25.0, format="%.6g")
+        if abs(s) < 1e-12:
+            st.error("s = 0 – kan ikke beregne a")
+        else:
+            a = (v**2 - v0**2) / (2 * s)
+            st.success(f"**a = {a:.6g} m/s²**")
+            st.latex(rf"a = \frac{{v^2 - v_0^2}}{{2s}} = {a:.6g}\ \text{{m/s}}^2")
 
     else:
         c1, c2, c3 = st.columns(3)
         v  = c1.number_input("v (m/s)", value=10.0, format="%.6g")
         v0 = c2.number_input("v₀ (m/s)", value=0.0, format="%.6g")
-        a  = c3.number_input("a (m/s²)", value=2.0, min_value=1e-12, format="%.6g")
-        s = (v**2 - v0**2) / (2 * a)
-        st.success(f"**s = {s:.6g} m**")
-        st.latex(rf"s = \frac{{v^2 - v_0^2}}{{2a}} = {s:.6g}\ \text{{m}}")
+        a  = c3.number_input("a (m/s²)", value=2.0, format="%.6g")
+        if abs(a) < 1e-12:
+            st.error("a = 0 – kan ikke beregne s")
+        else:
+            s = (v**2 - v0**2) / (2 * a)
+            st.success(f"**s = {s:.6g} m**")
+            st.latex(rf"s = \frac{{v^2 - v_0^2}}{{2a}} = {s:.6g}\ \text{{m}}")
 
 # ── Vandret kast ───────────────────────────────────────────────────────────────
 elif formel == "Kastebevægelse (vandret kast)":
