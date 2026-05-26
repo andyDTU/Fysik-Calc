@@ -1,0 +1,274 @@
+import streamlit as st
+import numpy as np
+
+st.set_page_config(page_title="Dynamik", page_icon="💪", layout="wide")
+st.title("💪 Dynamik")
+st.markdown("Newtons love, kræfter, impuls og kraftmoment")
+st.divider()
+
+G = 9.82
+
+formel = st.selectbox("Vælg formel", [
+    "Newtons 2. lov:  F = m · a",
+    "Tyngdekraft:  G = m · g",
+    "Friktion:  f = μ · N",
+    "Centripetalkraft:  Fc = m · v² / r",
+    "Impuls:  p = m · v",
+    "Impulsmomentloven:  F · Δt = Δp",
+    "Kraftmoment:  τ = F · l",
+    "Hældende plan",
+])
+
+st.divider()
+
+if formel == "Newtons 2. lov:  F = m · a":
+    st.latex(r"F = m \cdot a")
+    beregn = st.radio("Beregn:", ["F – kraft (N)", "m – masse (kg)", "a – acceleration (m/s²)"], horizontal=True)
+    st.divider()
+
+    if beregn == "F – kraft (N)":
+        c1, c2 = st.columns(2)
+        m = c1.number_input("m – masse (kg)", value=10.0, min_value=1e-12, format="%.6g")
+        a = c2.number_input("a – acceleration (m/s²)", value=2.0, format="%.6g")
+        F = m * a
+        st.success(f"**F = {F:.6g} N**")
+        st.latex(rf"F = m \cdot a = {m:.6g} \cdot {a:.6g} = {F:.6g}\ \text{{N}}")
+
+    elif beregn == "m – masse (kg)":
+        c1, c2 = st.columns(2)
+        F = c1.number_input("F – kraft (N)", value=20.0, format="%.6g")
+        a = c2.number_input("a – acceleration (m/s²)", value=2.0, min_value=1e-12, format="%.6g")
+        m = F / a
+        st.success(f"**m = {m:.6g} kg**")
+        st.latex(rf"m = \frac{{F}}{{a}} = \frac{{{F:.6g}}}{{{a:.6g}}} = {m:.6g}\ \text{{kg}}")
+
+    else:
+        c1, c2 = st.columns(2)
+        F = c1.number_input("F – kraft (N)", value=20.0, format="%.6g")
+        m = c2.number_input("m – masse (kg)", value=10.0, min_value=1e-12, format="%.6g")
+        a = F / m
+        st.success(f"**a = {a:.6g} m/s²**")
+        st.latex(rf"a = \frac{{F}}{{m}} = \frac{{{F:.6g}}}{{{m:.6g}}} = {a:.6g}\ \text{{m/s}}^2")
+
+elif formel == "Tyngdekraft:  G = m · g":
+    st.latex(r"G = m \cdot g")
+    st.info(f"g = {G} m/s²")
+    beregn = st.radio("Beregn:", ["G – tyngdekraft (N)", "m – masse (kg)"], horizontal=True)
+    st.divider()
+
+    g_val = st.number_input("g – tyngdeacceleration (m/s²)", value=G, format="%.6g")
+
+    if beregn == "G – tyngdekraft (N)":
+        m = st.number_input("m – masse (kg)", value=10.0, min_value=1e-12, format="%.6g")
+        Fg = m * g_val
+        st.success(f"**G = {Fg:.6g} N**")
+        st.latex(rf"G = m \cdot g = {m:.6g} \cdot {g_val:.6g} = {Fg:.6g}\ \text{{N}}")
+
+    else:
+        Fg = st.number_input("G – tyngdekraft (N)", value=98.2, format="%.6g")
+        m = Fg / g_val
+        st.success(f"**m = {m:.6g} kg**")
+        st.latex(rf"m = \frac{{G}}{{g}} = \frac{{{Fg:.6g}}}{{{g_val:.6g}}} = {m:.6g}\ \text{{kg}}")
+
+elif formel == "Friktion:  f = μ · N":
+    st.latex(r"f = \mu \cdot N")
+    beregn = st.radio("Beregn:", ["f – friktionskraft (N)", "μ – friktionskoefficient", "N – normalkraft (N)"], horizontal=True)
+    st.divider()
+
+    if beregn == "f – friktionskraft (N)":
+        c1, c2 = st.columns(2)
+        mu = c1.number_input("μ – friktionskoefficient", value=0.3, min_value=0.0, format="%.6g")
+        N  = c2.number_input("N – normalkraft (N)", value=100.0, format="%.6g")
+        f = mu * N
+        st.success(f"**f = {f:.6g} N**")
+        st.latex(rf"f = \mu \cdot N = {mu:.6g} \cdot {N:.6g} = {f:.6g}\ \text{{N}}")
+
+    elif beregn == "μ – friktionskoefficient":
+        c1, c2 = st.columns(2)
+        f = c1.number_input("f – friktionskraft (N)", value=30.0, format="%.6g")
+        N = c2.number_input("N – normalkraft (N)", value=100.0, min_value=1e-12, format="%.6g")
+        mu = f / N
+        st.success(f"**μ = {mu:.6g}**")
+        st.latex(rf"\mu = \frac{{f}}{{N}} = \frac{{{f:.6g}}}{{{N:.6g}}} = {mu:.6g}")
+
+    else:
+        c1, c2 = st.columns(2)
+        f  = c1.number_input("f – friktionskraft (N)", value=30.0, format="%.6g")
+        mu = c2.number_input("μ – friktionskoefficient", value=0.3, min_value=1e-12, format="%.6g")
+        N = f / mu
+        st.success(f"**N = {N:.6g} N**")
+        st.latex(rf"N = \frac{{f}}{{\mu}} = \frac{{{f:.6g}}}{{{mu:.6g}}} = {N:.6g}\ \text{{N}}")
+
+elif formel == "Centripetalkraft:  Fc = m · v² / r":
+    st.latex(r"F_c = \frac{m \cdot v^2}{r} = m \cdot \omega^2 \cdot r")
+    beregn = st.radio("Beregn:", ["Fc (N)", "m (kg)", "v (m/s)", "r (m)"], horizontal=True)
+    st.divider()
+
+    if beregn == "Fc (N)":
+        c1, c2, c3 = st.columns(3)
+        m = c1.number_input("m – masse (kg)", value=2.0, min_value=1e-12, format="%.6g")
+        v = c2.number_input("v – hastighed (m/s)", value=10.0, format="%.6g")
+        r = c3.number_input("r – radius (m)", value=5.0, min_value=1e-12, format="%.6g")
+        Fc = m * v**2 / r
+        st.success(f"**Fc = {Fc:.6g} N**")
+        st.latex(rf"F_c = \frac{{m v^2}}{{r}} = \frac{{{m:.6g} \cdot {v:.6g}^2}}{{{r:.6g}}} = {Fc:.6g}\ \text{{N}}")
+
+    elif beregn == "m (kg)":
+        c1, c2, c3 = st.columns(3)
+        Fc = c1.number_input("Fc – centripetalkraft (N)", value=40.0, format="%.6g")
+        v  = c2.number_input("v – hastighed (m/s)", value=10.0, format="%.6g")
+        r  = c3.number_input("r – radius (m)", value=5.0, min_value=1e-12, format="%.6g")
+        m = Fc * r / v**2
+        st.success(f"**m = {m:.6g} kg**")
+        st.latex(rf"m = \frac{{F_c \cdot r}}{{v^2}} = {m:.6g}\ \text{{kg}}")
+
+    elif beregn == "v (m/s)":
+        c1, c2, c3 = st.columns(3)
+        Fc = c1.number_input("Fc – centripetalkraft (N)", value=40.0, format="%.6g")
+        m  = c2.number_input("m – masse (kg)", value=2.0, min_value=1e-12, format="%.6g")
+        r  = c3.number_input("r – radius (m)", value=5.0, min_value=1e-12, format="%.6g")
+        v = np.sqrt(Fc * r / m)
+        st.success(f"**v = {v:.6g} m/s**")
+        st.latex(rf"v = \sqrt{{\frac{{F_c \cdot r}}{{m}}}} = {v:.6g}\ \text{{m/s}}")
+
+    else:
+        c1, c2, c3 = st.columns(3)
+        Fc = c1.number_input("Fc – centripetalkraft (N)", value=40.0, format="%.6g")
+        m  = c2.number_input("m – masse (kg)", value=2.0, min_value=1e-12, format="%.6g")
+        v  = c3.number_input("v – hastighed (m/s)", value=10.0, format="%.6g")
+        r = m * v**2 / Fc
+        st.success(f"**r = {r:.6g} m**")
+        st.latex(rf"r = \frac{{m v^2}}{{F_c}} = {r:.6g}\ \text{{m}}")
+
+elif formel == "Impuls:  p = m · v":
+    st.latex(r"p = m \cdot v")
+    beregn = st.radio("Beregn:", ["p – impuls (kg·m/s)", "m – masse (kg)", "v – hastighed (m/s)"], horizontal=True)
+    st.divider()
+
+    if beregn == "p – impuls (kg·m/s)":
+        c1, c2 = st.columns(2)
+        m = c1.number_input("m – masse (kg)", value=70.0, min_value=1e-12, format="%.6g")
+        v = c2.number_input("v – hastighed (m/s)", value=5.0, format="%.6g")
+        p = m * v
+        st.success(f"**p = {p:.6g} kg·m/s**")
+        st.latex(rf"p = m \cdot v = {m:.6g} \cdot {v:.6g} = {p:.6g}\ \text{{kg·m/s}}")
+
+    elif beregn == "m – masse (kg)":
+        c1, c2 = st.columns(2)
+        p = c1.number_input("p – impuls (kg·m/s)", value=350.0, format="%.6g")
+        v = c2.number_input("v – hastighed (m/s)", value=5.0, min_value=1e-12, format="%.6g")
+        m = p / v
+        st.success(f"**m = {m:.6g} kg**")
+        st.latex(rf"m = \frac{{p}}{{v}} = \frac{{{p:.6g}}}{{{v:.6g}}} = {m:.6g}\ \text{{kg}}")
+
+    else:
+        c1, c2 = st.columns(2)
+        p = c1.number_input("p – impuls (kg·m/s)", value=350.0, format="%.6g")
+        m = c2.number_input("m – masse (kg)", value=70.0, min_value=1e-12, format="%.6g")
+        v = p / m
+        st.success(f"**v = {v:.6g} m/s**")
+        st.latex(rf"v = \frac{{p}}{{m}} = \frac{{{p:.6g}}}{{{m:.6g}}} = {v:.6g}\ \text{{m/s}}")
+
+elif formel == "Impulsmomentloven:  F · Δt = Δp":
+    st.latex(r"F \cdot \Delta t = \Delta p = m \cdot (v_2 - v_1)")
+    beregn = st.radio("Beregn:", ["F – gennemsnitskraft (N)", "Δt – tidinterval (s)", "Δp – impulsændring (kg·m/s)"], horizontal=True)
+    st.divider()
+
+    if beregn == "F – gennemsnitskraft (N)":
+        c1, c2, c3, c4 = st.columns(4)
+        m  = c1.number_input("m – masse (kg)", value=0.5, min_value=1e-12, format="%.6g")
+        v1 = c2.number_input("v₁ – starthastighed (m/s)", value=0.0, format="%.6g")
+        v2 = c3.number_input("v₂ – sluthastighed (m/s)", value=20.0, format="%.6g")
+        dt = c4.number_input("Δt – tid (s)", value=0.1, min_value=1e-12, format="%.6g")
+        dp = m * (v2 - v1)
+        F = dp / dt
+        st.success(f"**F = {F:.6g} N**  (Δp = {dp:.6g} kg·m/s)")
+        st.latex(rf"F = \frac{{\Delta p}}{{\Delta t}} = \frac{{{dp:.6g}}}{{{dt:.6g}}} = {F:.6g}\ \text{{N}}")
+
+    elif beregn == "Δt – tidinterval (s)":
+        c1, c2, c3, c4 = st.columns(4)
+        m  = c1.number_input("m – masse (kg)", value=0.5, min_value=1e-12, format="%.6g")
+        v1 = c2.number_input("v₁ (m/s)", value=0.0, format="%.6g")
+        v2 = c3.number_input("v₂ (m/s)", value=20.0, format="%.6g")
+        F  = c4.number_input("F – kraft (N)", value=100.0, min_value=1e-12, format="%.6g")
+        dp = m * (v2 - v1)
+        dt = dp / F
+        st.success(f"**Δt = {dt:.6g} s**")
+        st.latex(rf"\Delta t = \frac{{\Delta p}}{{F}} = \frac{{{dp:.6g}}}{{{F:.6g}}} = {dt:.6g}\ \text{{s}}")
+
+    else:
+        c1, c2, c3 = st.columns(3)
+        F  = c1.number_input("F – kraft (N)", value=100.0, format="%.6g")
+        dt = c2.number_input("Δt – tid (s)", value=0.1, min_value=1e-12, format="%.6g")
+        dp = F * dt
+        st.success(f"**Δp = {dp:.6g} kg·m/s**")
+        st.latex(rf"\Delta p = F \cdot \Delta t = {F:.6g} \cdot {dt:.6g} = {dp:.6g}\ \text{{kg·m/s}}")
+
+elif formel == "Kraftmoment:  τ = F · l":
+    st.latex(r"\tau = F \cdot l \cdot \sin\theta")
+    beregn = st.radio("Beregn:", ["τ – kraftmoment (N·m)", "F – kraft (N)", "l – arm (m)"], horizontal=True)
+    st.divider()
+
+    if beregn == "τ – kraftmoment (N·m)":
+        c1, c2, c3 = st.columns(3)
+        F     = c1.number_input("F – kraft (N)", value=50.0, format="%.6g")
+        l     = c2.number_input("l – kraftarm (m)", value=2.0, min_value=1e-12, format="%.6g")
+        theta = c3.number_input("θ – vinkel (grader)", value=90.0, min_value=0.0, max_value=180.0, format="%.6g")
+        tau = F * l * np.sin(np.radians(theta))
+        st.success(f"**τ = {tau:.6g} N·m**")
+        st.latex(rf"\tau = {F:.6g} \cdot {l:.6g} \cdot \sin({theta:.4g}°) = {tau:.6g}\ \text{{N·m}}")
+
+    elif beregn == "F – kraft (N)":
+        c1, c2, c3 = st.columns(3)
+        tau   = c1.number_input("τ – kraftmoment (N·m)", value=100.0, format="%.6g")
+        l     = c2.number_input("l – kraftarm (m)", value=2.0, min_value=1e-12, format="%.6g")
+        theta = c3.number_input("θ – vinkel (grader)", value=90.0, min_value=1.0, max_value=180.0, format="%.6g")
+        F = tau / (l * np.sin(np.radians(theta)))
+        st.success(f"**F = {F:.6g} N**")
+        st.latex(rf"F = \frac{{\tau}}{{l \sin\theta}} = {F:.6g}\ \text{{N}}")
+
+    else:
+        c1, c2, c3 = st.columns(3)
+        tau   = c1.number_input("τ – kraftmoment (N·m)", value=100.0, format="%.6g")
+        F     = c2.number_input("F – kraft (N)", value=50.0, min_value=1e-12, format="%.6g")
+        theta = c3.number_input("θ – vinkel (grader)", value=90.0, min_value=1.0, max_value=180.0, format="%.6g")
+        l = tau / (F * np.sin(np.radians(theta)))
+        st.success(f"**l = {l:.6g} m**")
+        st.latex(rf"l = \frac{{\tau}}{{F \sin\theta}} = {l:.6g}\ \text{{m}}")
+
+elif formel == "Hældende plan":
+    st.latex(r"F_{\parallel} = m g \sin\theta \qquad N = m g \cos\theta \qquad f = \mu \cdot N")
+    st.markdown("Analyse af legeme på hældende plan med friktion")
+    st.divider()
+
+    c1, c2, c3 = st.columns(3)
+    m     = c1.number_input("m – masse (kg)", value=10.0, min_value=1e-12, format="%.6g")
+    theta = c2.number_input("θ – hældningsvinkel (grader)", value=30.0, min_value=0.0, max_value=89.9, format="%.6g")
+    mu    = c3.number_input("μ – friktionskoefficient (0 = ingen)", value=0.2, min_value=0.0, format="%.6g")
+
+    th_r  = np.radians(theta)
+    N     = m * G * np.cos(th_r)
+    F_par = m * G * np.sin(th_r)
+    f     = mu * N
+    F_net = F_par - f
+    a     = F_net / m
+
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Normalkraft N", f"{N:.4g} N")
+    col2.metric("Friktionskraft f", f"{f:.4g} N")
+    col3.metric("Resultant­kraft", f"{F_net:.4g} N")
+    col4.metric("Acceleration a", f"{a:.4g} m/s²")
+
+    if F_net > 0:
+        st.info("Legemet accelererer ned ad planen.")
+    elif F_net < 0:
+        st.info("Friktion er større end tyngdekraftens komponent – legemet bevæger sig ikke.")
+    else:
+        st.info("Legemet er i ligevægt.")
+
+    with st.expander("Vis udregning"):
+        st.latex(rf"N = m g \cos\theta = {m:.6g} \cdot {G} \cdot \cos({theta:.4g}°) = {N:.6g}\ \text{{N}}")
+        st.latex(rf"F_{{\parallel}} = m g \sin\theta = {m:.6g} \cdot {G} \cdot \sin({theta:.4g}°) = {F_par:.6g}\ \text{{N}}")
+        st.latex(rf"f = \mu N = {mu:.6g} \cdot {N:.6g} = {f:.6g}\ \text{{N}}")
+        st.latex(rf"F_{{net}} = F_{{\parallel}} - f = {F_par:.6g} - {f:.6g} = {F_net:.6g}\ \text{{N}}")
+        st.latex(rf"a = \frac{{F_{{net}}}}{{m}} = {a:.6g}\ \text{{m/s}}^2")
