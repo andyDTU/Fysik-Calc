@@ -10,6 +10,7 @@ formel = st.selectbox("Vælg formel / kollisionstype", [
     "Bevarelse af impuls (generelt):  Σp_før = Σp_efter",
     "Fuldstændig uelastisk kollision (objekter hænger sammen)",
     "Elastisk kollision – 1D (KE bevaret)",
+    "Kollision i 2D – vektorkomponenter",
     "Koefficient for restitution:  e = Δv_efter / Δv_før",
     "Eksplosion / udskydning",
     "Massemidtpunkt og -hastighed",
@@ -127,6 +128,102 @@ elif formel == "Elastisk kollision – 1D (KE bevaret)":
         st.info("m₁ ≈ m₂: Hastighederne bytter — v₁' ≈ v₂ og v₂' ≈ v₁")
     if abs(v2) < 1e-9:
         st.info(f"m₂ i ro: v₁' = {v1_after:.4g} m/s,  v₂' = {v2_after:.4g} m/s")
+
+elif formel == "Kollision i 2D – vektorkomponenter":
+    st.latex(r"\sum p_x: \quad m_1 v_{1x} + m_2 v_{2x} = m_1 v_{1x}' + m_2 v_{2x}'")
+    st.latex(r"\sum p_y: \quad m_1 v_{1y} + m_2 v_{2y} = m_1 v_{1y}' + m_2 v_{2y}'")
+    st.info("Impuls bevares uafhængigt i x- og y-retning. Vælg kollisionstype for at finde ubekendte.")
+    st.divider()
+
+    mode = st.radio("Kollisionstype:", [
+        "Fuldstændig uelastisk (klæber sammen)",
+        "Givet v₁' – find v₂' (impulsbevarelse alene)",
+        "Vis samlet impuls og KE",
+    ], horizontal=True)
+    st.divider()
+
+    st.markdown("**Objekt 1 – før kollision:**")
+    c1, c2, c3 = st.columns(3)
+    m1  = c1.number_input("m₁ (kg)", value=2.0, min_value=1e-12, format="%.6g", key="2d_m1")
+    v1x = c2.number_input("v₁ₓ (m/s)", value=3.0, format="%.6g", key="2d_v1x")
+    v1y = c3.number_input("v₁ᵧ (m/s)", value=0.0, format="%.6g", key="2d_v1y")
+
+    st.markdown("**Objekt 2 – før kollision:**")
+    c4, c5, c6 = st.columns(3)
+    m2  = c4.number_input("m₂ (kg)", value=3.0, min_value=1e-12, format="%.6g", key="2d_m2")
+    v2x = c5.number_input("v₂ₓ (m/s)", value=-1.0, format="%.6g", key="2d_v2x")
+    v2y = c6.number_input("v₂ᵧ (m/s)", value=2.0, format="%.6g", key="2d_v2y")
+
+    px_tot = m1 * v1x + m2 * v2x
+    py_tot = m1 * v1y + m2 * v2y
+    KE_before = 0.5 * m1 * (v1x**2 + v1y**2) + 0.5 * m2 * (v2x**2 + v2y**2)
+
+    st.divider()
+
+    if mode == "Fuldstændig uelastisk (klæber sammen)":
+        M = m1 + m2
+        vx_f = px_tot / M
+        vy_f = py_tot / M
+        v_f  = np.sqrt(vx_f**2 + vy_f**2)
+        KE_after = 0.5 * M * v_f**2
+        angle = np.degrees(np.arctan2(vy_f, vx_f))
+
+        col1, col2, col3 = st.columns(3)
+        col1.success(f"**vₓ' = {vx_f:.6g} m/s**")
+        col2.success(f"**vᵧ' = {vy_f:.6g} m/s**")
+        col3.success(f"**|v'| = {v_f:.6g} m/s,  θ = {angle:.4g}°**")
+
+        col4, col5, col6 = st.columns(3)
+        col4.metric("KE før", f"{KE_before:.4g} J")
+        col5.metric("KE efter", f"{KE_after:.4g} J")
+        col6.metric("KE-tab", f"{KE_before - KE_after:.4g} J")
+
+        with st.expander("Vis udregning"):
+            st.latex(rf"v_x' = \frac{{p_x}}{{M}} = \frac{{{px_tot:.6g}}}{{{M:.6g}}} = {vx_f:.6g}\ \text{{m/s}}")
+            st.latex(rf"v_y' = \frac{{p_y}}{{M}} = \frac{{{py_tot:.6g}}}{{{M:.6g}}} = {vy_f:.6g}\ \text{{m/s}}")
+            st.latex(rf"|v'| = \sqrt{{v_x'^2 + v_y'^2}} = {v_f:.6g}\ \text{{m/s}}")
+            st.latex(rf"\theta = \arctan\!\left(\frac{{v_y'}}{{v_x'}}\right) = {angle:.4g}°")
+
+    elif mode == "Givet v₁' – find v₂' (impulsbevarelse alene)":
+        st.markdown("**Objekt 1 – efter kollision (kendte):**")
+        c7, c8 = st.columns(2)
+        v1x_after = c7.number_input("v₁ₓ' (m/s)", value=1.0, format="%.6g", key="2d_v1xa")
+        v1y_after = c8.number_input("v₁ᵧ' (m/s)", value=2.0, format="%.6g", key="2d_v1ya")
+
+        v2x_after = (px_tot - m1 * v1x_after) / m2
+        v2y_after = (py_tot - m1 * v1y_after) / m2
+        v2_after  = np.sqrt(v2x_after**2 + v2y_after**2)
+        angle2    = np.degrees(np.arctan2(v2y_after, v2x_after))
+
+        KE_after = (0.5 * m1 * (v1x_after**2 + v1y_after**2)
+                    + 0.5 * m2 * (v2x_after**2 + v2y_after**2))
+
+        col1, col2, col3 = st.columns(3)
+        col1.success(f"**v₂ₓ' = {v2x_after:.6g} m/s**")
+        col2.success(f"**v₂ᵧ' = {v2y_after:.6g} m/s**")
+        col3.success(f"**|v₂'| = {v2_after:.6g} m/s,  θ = {angle2:.4g}°**")
+
+        col4, col5, col6 = st.columns(3)
+        col4.metric("KE før", f"{KE_before:.4g} J")
+        col5.metric("KE efter", f"{KE_after:.4g} J")
+        col6.metric("ΔKE", f"{KE_after - KE_before:.4g} J")
+
+        with st.expander("Vis udregning"):
+            st.latex(rf"v_{{2x}}' = \frac{{p_x - m_1 v_{{1x}}'}}{{m_2}} = \frac{{{px_tot:.6g} - {m1:.6g} \cdot {v1x_after:.6g}}}{{{m2:.6g}}} = {v2x_after:.6g}\ \text{{m/s}}")
+            st.latex(rf"v_{{2y}}' = \frac{{p_y - m_1 v_{{1y}}'}}{{m_2}} = \frac{{{py_tot:.6g} - {m1:.6g} \cdot {v1y_after:.6g}}}{{{m2:.6g}}} = {v2y_after:.6g}\ \text{{m/s}}")
+
+    else:
+        p_tot = np.sqrt(px_tot**2 + py_tot**2)
+        angle_p = np.degrees(np.arctan2(py_tot, px_tot))
+        col1, col2, col3 = st.columns(3)
+        col1.metric("pₓ total", f"{px_tot:.6g} kg·m/s")
+        col2.metric("pᵧ total", f"{py_tot:.6g} kg·m/s")
+        col3.metric("|p| total", f"{p_tot:.6g} kg·m/s,  θ={angle_p:.4g}°")
+        st.metric("KE total (før)", f"{KE_before:.6g} J")
+        with st.expander("Vis udregning"):
+            st.latex(rf"p_x = m_1 v_{{1x}} + m_2 v_{{2x}} = {m1:.6g}\cdot{v1x:.6g} + {m2:.6g}\cdot{v2x:.6g} = {px_tot:.6g}\ \text{{kg·m/s}}")
+            st.latex(rf"p_y = m_1 v_{{1y}} + m_2 v_{{2y}} = {m1:.6g}\cdot{v1y:.6g} + {m2:.6g}\cdot{v2y:.6g} = {py_tot:.6g}\ \text{{kg·m/s}}")
+            st.latex(rf"|p| = \sqrt{{p_x^2+p_y^2}} = {p_tot:.6g}\ \text{{kg·m/s}}")
 
 elif formel == "Koefficient for restitution:  e = Δv_efter / Δv_før":
     st.latex(r"e = \frac{v_2' - v_1'}{v_1 - v_2} \quad (0 \leq e \leq 1)")

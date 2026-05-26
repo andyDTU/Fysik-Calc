@@ -17,6 +17,7 @@ formel = st.selectbox("Vælg formel", [
     "Impulsmomentloven:  F · Δt = Δp",
     "Kraftmoment:  τ = F · l",
     "Hældende plan",
+    "Spænding og tøjning:  σ = F / A",
 ])
 
 st.divider()
@@ -272,3 +273,79 @@ elif formel == "Hældende plan":
         st.latex(rf"f = \mu N = {mu:.6g} \cdot {N:.6g} = {f:.6g}\ \text{{N}}")
         st.latex(rf"F_{{net}} = F_{{\parallel}} - f = {F_par:.6g} - {f:.6g} = {F_net:.6g}\ \text{{N}}")
         st.latex(rf"a = \frac{{F_{{net}}}}{{m}} = {a:.6g}\ \text{{m/s}}^2")
+
+elif formel == "Spænding og tøjning:  σ = F / A":
+    st.latex(r"\sigma = \frac{F}{A} \qquad \varepsilon = \frac{\Delta L}{L_0} \qquad E = \frac{\sigma}{\varepsilon}")
+    st.markdown("Normalspænding, tøjning og Youngs modul. Tværsnitsareal for cirkulært tværsnit: A = πd²/4.")
+    st.divider()
+
+    beregn = st.selectbox("Beregn:", [
+        "σ – normalspænding (given F og A)",
+        "F – kraft (given σ og A)",
+        "A – areal (given F og σ)",
+        "d – diameter af cirkulært tværsnit (given F og σ_max)",
+        "ε – tøjning (given ΔL og L₀)",
+        "E – Youngs modul (given σ og ε)",
+    ])
+
+    st.divider()
+
+    if beregn == "σ – normalspænding (given F og A)":
+        c1, c2 = st.columns(2)
+        F_val = c1.number_input("F – kraft (N)", value=1000.0, format="%.6g")
+        A_val = c2.number_input("A – tværsnitsareal (m²)", value=1e-4, min_value=1e-20, format="%.6g")
+        sigma = F_val / A_val
+        st.success(f"**σ = {sigma:.6g} Pa = {sigma/1e6:.6g} MPa**")
+        st.latex(rf"\sigma = \frac{{F}}{{A}} = \frac{{{F_val:.6g}}}{{{A_val:.6g}}} = {sigma:.6g}\ \text{{Pa}}")
+
+    elif beregn == "F – kraft (given σ og A)":
+        c1, c2 = st.columns(2)
+        sigma = c1.number_input("σ – spænding (Pa)", value=1e6, format="%.6g")
+        A_val = c2.number_input("A – tværsnitsareal (m²)", value=1e-4, min_value=1e-20, format="%.6g")
+        F_val = sigma * A_val
+        st.success(f"**F = {F_val:.6g} N**")
+        st.latex(rf"F = \sigma \cdot A = {sigma:.6g} \cdot {A_val:.6g} = {F_val:.6g}\ \text{{N}}")
+
+    elif beregn == "A – areal (given F og σ)":
+        c1, c2 = st.columns(2)
+        F_val = c1.number_input("F – kraft (N)", value=1000.0, format="%.6g")
+        sigma = c2.number_input("σ – spænding (Pa)", value=1e6, min_value=1e-20, format="%.6g")
+        A_val = F_val / sigma
+        st.success(f"**A = {A_val:.6g} m²**")
+        st.latex(rf"A = \frac{{F}}{{\sigma}} = \frac{{{F_val:.6g}}}{{{sigma:.6g}}} = {A_val:.6g}\ \text{{m}}^2")
+
+    elif beregn == "d – diameter af cirkulært tværsnit (given F og σ_max)":
+        st.info("Cirkulært tværsnit: A = πd²/4  →  d = √(4F / (π·σ_max))")
+        c1, c2 = st.columns(2)
+        F_val   = c1.number_input("F – kraft (N)", value=5000.0, format="%.6g")
+        sigma   = c2.number_input("σ_max – maksimal spænding (Pa)", value=50e6, min_value=1e-20, format="%.6g")
+        d = np.sqrt(4 * F_val / (np.pi * sigma))
+        A_val = np.pi * d**2 / 4
+        st.success(f"**d = {d:.6g} m = {d*1000:.6g} mm**")
+        st.latex(rf"d = \sqrt{{\frac{{4F}}{{\pi \sigma_{{max}}}}}} = \sqrt{{\frac{{4 \cdot {F_val:.6g}}}{{\pi \cdot {sigma:.6g}}}}} = {d:.6g}\ \text{{m}}")
+        st.latex(rf"A = \frac{{\pi d^2}}{{4}} = {A_val:.6g}\ \text{{m}}^2")
+
+    elif beregn == "ε – tøjning (given ΔL og L₀)":
+        c1, c2 = st.columns(2)
+        dL = c1.number_input("ΔL – forlængelse (m)", value=0.001, format="%.6g")
+        L0 = c2.number_input("L₀ – original længde (m)", value=1.0, min_value=1e-12, format="%.6g")
+        eps = dL / L0
+        st.success(f"**ε = {eps:.6g}  ({eps*100:.4g}%)**")
+        st.latex(rf"\varepsilon = \frac{{\Delta L}}{{L_0}} = \frac{{{dL:.6g}}}{{{L0:.6g}}} = {eps:.6g}")
+
+    elif beregn == "E – Youngs modul (given σ og ε)":
+        c1, c2 = st.columns(2)
+        sigma = c1.number_input("σ – spænding (Pa)", value=1e6, format="%.6g")
+        eps   = c2.number_input("ε – tøjning (dimensionsløs)", value=0.01, min_value=1e-20, format="%.6g")
+        E_mod = sigma / eps
+        st.success(f"**E = {E_mod:.6g} Pa = {E_mod/1e9:.6g} GPa**")
+        st.latex(rf"E = \frac{{\sigma}}{{\varepsilon}} = \frac{{{sigma:.6g}}}{{{eps:.6g}}} = {E_mod:.6g}\ \text{{Pa}}")
+        st.markdown("**Typiske Youngs-moduler:**")
+        st.markdown("""
+| Materiale | E (GPa) |
+|-----------|---------|
+| Stål | ~200 |
+| Aluminium | ~70 |
+| Beton | ~30 |
+| Gummi | ~0.01–0.1 |
+""")
