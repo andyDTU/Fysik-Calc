@@ -14,21 +14,30 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     st.markdown("### 🏃 Kinematik")
-    st.markdown("Uniform bevægelse, jævnt accelereret bevægelse, kastebevægelse, cirkulær bevægelse")
+    st.markdown("Uniform bevægelse, jævnt accelereret, kastebevægelse, cirkulær bevægelse")
     st.markdown("---")
-    st.markdown("### ⚡ Elektricitet")
-    st.markdown("Ohms lov, serie/parallelkobling, kondensator, Coulombs lov, magnetfelt, Lorentzkraft")
+    st.markdown("### 💪 Dynamik")
+    st.markdown("Newtons love, friktion, centripetalkraft, impuls, kraftmoment, hældende plan")
+    st.markdown("---")
+    st.markdown("### 🔄 Rotation")
+    st.markdown("Vinkelkinematik, inertimoment, τ=Iα, rulning, impulsmoment — Lec. 11-12")
 
 with col2:
-    st.markdown("### 💪 Dynamik")
-    st.markdown("Newtons love, tyngdekraft, friktion, centripetalkraft, impuls, kraftmoment")
+    st.markdown("### 🔋 Energi & Arbejde")
+    st.markdown("Kinetisk/potentiel energi, fjederkraft, arbejde, effekt, energibevarelse")
+    st.markdown("---")
+    st.markdown("### 💥 Kollisioner")
+    st.markdown("Elastisk/uelastisk kollision, restitutionskoefficient, eksplosion — Lec. 10")
+    st.markdown("---")
+    st.markdown("### 🌡️ Termodynamik")
+    st.markdown("Ideel gaslov, varmekapacitet, faseovergang, 1. termodynamikslov, Carnot")
+
+with col3:
+    st.markdown("### ⚡ Elektricitet")
+    st.markdown("Ohms lov, serie/parallelkobling, kondensator, Coulombs lov, magnetfelt, Lorentzkraft")
     st.markdown("---")
     st.markdown("### 🌊 Bølger & Optik")
     st.markdown("Bølgehastighed, Snells lov, linsformel, Doppler-effekt, dobbeltspalte")
-
-with col3:
-    st.markdown("### 🔋 Energi & Arbejde")
-    st.markdown("Kinetisk/potentiel energi, fjederkraft, arbejde, effekt, energibevarelse")
     st.markdown("---")
     st.markdown("### ☢️ Atomfysik")
     st.markdown("Radioaktivt henfald, halvvejstid, E=mc², fotonenergI, de Broglie, Bohrs model")
@@ -37,8 +46,8 @@ st.divider()
 
 col_a, col_b = st.columns(2)
 with col_a:
-    st.markdown("### 🌡️ Termodynamik")
-    st.markdown("Ideel gaslov, varmekapacitet, faseovergang, 1. termodynamikslov, Carnot-virkningsgrad")
+    st.markdown("### 📏 Usikkerhed & Fejlanalyse")
+    st.markdown("Gennemsnit, standardafvigelse, fejlpropagation, type A/B usikkerhed — Lec. 3")
 
 st.divider()
 st.info("👈 Vælg et emne i menuen til venstre for at komme i gang.")
