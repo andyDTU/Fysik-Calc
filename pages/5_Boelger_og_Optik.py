@@ -1,7 +1,9 @@
 import streamlit as st
 import numpy as np
+from utils import render_search_sidebar
 
 st.set_page_config(page_title="Bølger & Optik", page_icon="🌊", layout="wide")
+render_search_sidebar()
 st.title("🌊 Bølger & Optik")
 st.markdown("Bølgehastighed, brydning, linser, Doppler og dobbeltspalte")
 st.divider()

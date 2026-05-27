@@ -1,7 +1,9 @@
 import streamlit as st
 import numpy as np
+from utils import render_search_sidebar
 
 st.set_page_config(page_title="Elektricitet", page_icon="⚡", layout="wide")
+render_search_sidebar()
 st.title("⚡ Elektricitet")
 st.markdown("Ohms lov, kredsløb, kondensatorer, Coulombs lov og magnetfelt")
 st.divider()

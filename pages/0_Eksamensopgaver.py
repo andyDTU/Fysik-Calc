@@ -1,7 +1,9 @@
 import streamlit as st
 import numpy as np
+from utils import render_search_sidebar
 
 st.set_page_config(page_title="Eksamensopgaver", page_icon="🎯", layout="wide")
+render_search_sidebar()
 st.title("🎯 Eksamensopgaver – Guide & Hurtig Adgang")
 st.markdown("Find hurtigt den rigtige beregner til din eksamensopgave. Klik på et eksempel for at indlæse værdier direkte.")
 st.divider()

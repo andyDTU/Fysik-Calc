@@ -1,7 +1,9 @@
 import streamlit as st
 import numpy as np
+from utils import render_search_sidebar
 
 st.set_page_config(page_title="Kinematik", page_icon="🏃", layout="wide")
+render_search_sidebar()
 st.title("🏃 Kinematik")
 st.markdown("Beregn størrelser inden for bevægelse og kinematik")
 st.divider()
@@ -32,6 +34,19 @@ formel = st.selectbox("Vælg formel", [
     "Cirkulær bevægelse",
     "Cirkulær bevægelse – RPM-omregner og centripetal",
 ], key="kin_formel")
+
+_KINEMATIK_CONTEXT = {
+    "Uniform bevægelse:  s = v · t": "Bruges til **jævn bevægelse** uden acceleration – bil på motorvej, båd med konstant hastighed.",
+    "Jævnt accelereret (1):  v = v₀ + a · t": "Bruges når du kender **tid og acceleration** – find slut- eller starthastighed.",
+    "Jævnt accelereret (2):  s = v₀·t + ½·a·t²": "Bruges til **frit fald, lodret kast** og 'to bolde mødes'-opgaver. Du kender tid.",
+    "Jævnt accelereret (3):  v² = v₀² + 2·a·s": "Bruges når du **ikke kender tid** – kun strækning og hastigheder.",
+    "Kastebevægelse (vandret kast)": "Bolden kastes **vandret** fra en højde. Vandret: jævn bevægelse. Lodret: frit fald.",
+    "Kastebevægelse (skråt kast)": "Bruges til **projektilbevægelse** med startvinkel. Find rækkevidde og maks. højde.",
+    "Cirkulær bevægelse": "Bruges til **omløbstid, vinkelhastighed og centripetal**acceleration.",
+    "Cirkulær bevægelse – RPM-omregner og centripetal": "Bruges til **centrifuge-opgaver**: omdan rpm → ω → find radius eller g-kraft.",
+}
+if formel in _KINEMATIK_CONTEXT:
+    st.info(f"💡 **Hvornår bruger du denne?** {_KINEMATIK_CONTEXT[formel]}")
 
 st.divider()
 

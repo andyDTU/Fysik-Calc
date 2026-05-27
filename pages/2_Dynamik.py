@@ -1,7 +1,9 @@
 import streamlit as st
 import numpy as np
+from utils import render_search_sidebar
 
 st.set_page_config(page_title="Dynamik", page_icon="💪", layout="wide")
+render_search_sidebar()
 st.title("💪 Dynamik")
 st.markdown("Newtons love, kræfter, impuls og kraftmoment")
 st.divider()
@@ -27,6 +29,21 @@ formel = st.selectbox("Vælg formel", [
     "Atwood-maskine:  to masser over trisse",
     "Spænding og tøjning:  σ = F / A",
 ], key="dyn_formel")
+
+_DYNAMIK_CONTEXT = {
+    "Newtons 2. lov:  F = m · a": "Bruges til at finde **ukendt kraft, masse eller acceleration** i Newtons 2. lov.",
+    "Tyngdekraft:  G = m · g": "Bruges til at beregne **tyngdekraften** på en masse (eller massen fra tyngdekraften).",
+    "Friktion:  f = μ · N": "Bruges når du vil finde **friktionskraft, normalkraft eller friktionskoefficient μ**.",
+    "Centripetalkraft:  Fc = m · v² / r": "Bruges til **cirkulær bevægelse** – find kraft mod centrum, masse, hastighed eller radius.",
+    "Impuls:  p = m · v": "Bruges til at beregne **impuls** (bevægelsesmængde) fra masse og hastighed.",
+    "Impulsmomentloven:  F · Δt = Δp": "Bruges ved **stødsartede kræfter** – stor kraft i kort tid (bold rammes, bremse, eksplosion).",
+    "Kraftmoment:  τ = F · l": "Bruges til **ligevægt og rotation** – drejningsmoment om et omdrejningspunkt.",
+    "Hældende plan": "Bruges til analyse af legeme på **skrå flade** – kombinerer tyngdekraft, normalkraft og friktion.",
+    "Atwood-maskine:  to masser over trisse": "To masser forbundet over en **trisse** – find acceleration og snorkraft.",
+    "Spænding og tøjning:  σ = F / A": "Bruges til **materialer og tværsnitsdimensionering** – find diameter, E-modul eller tøjning.",
+}
+if formel in _DYNAMIK_CONTEXT:
+    st.info(f"💡 **Hvornår bruger du denne?** {_DYNAMIK_CONTEXT[formel]}")
 
 st.divider()
 

@@ -1,7 +1,9 @@
 import streamlit as st
 import numpy as np
+from utils import render_search_sidebar
 
 st.set_page_config(page_title="Kollisioner", page_icon="💥", layout="wide")
+render_search_sidebar()
 st.title("💥 Kollisioner & Impulsbevarelse")
 st.markdown("Elastiske, uelastiske kollisioner og bevarelse af impuls — Lecture 10 (10060)")
 st.divider()

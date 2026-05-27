@@ -1,7 +1,9 @@
 import streamlit as st
 import numpy as np
+from utils import render_search_sidebar
 
 st.set_page_config(page_title="Termodynamik", page_icon="🌡️", layout="wide")
+render_search_sidebar()
 st.title("🌡️ Termodynamik")
 st.markdown("Ideel gaslov, varme, faseovergange og termodynamikkens love")
 st.divider()
@@ -19,6 +21,19 @@ formel = st.selectbox("Vælg formel", [
     "Carnot-virkningsgrad:  η = 1 − Tk/Tv",
     "Termisk udvidelse",
 ])
+
+_TERMO_CONTEXT = {
+    "Ideel gaslov:  p · V = n · R · T": "Bruges til **ideale gasser i én tilstand** – kend tre af p, V, n, T, find den fjerde.",
+    "Kombineret gaslov:  p₁V₁/T₁ = p₂V₂/T₂": "Bruges til at **sammenligne to tilstande** for samme gasmænde.",
+    "Varmekapacitet:  Q = m · c · ΔT": "Bruges til **opvarmning/afkøling** – kend masse, spec. varmekapacitet og ΔT.",
+    "Faseovergang:  Q = m · L": "Bruges ved **smeltning eller fordampning** – ingen temperaturændring, men energiudveksling.",
+    "Arbejde af gas:  W = p · ΔV": "Bruges til **gasekspansion** ved konstant tryk (isobar proces).",
+    "1. termodynamikslov:  ΔU = Q − W": "Bruges til at beregne **intern energiændring** fra tilført varme og udført arbejde.",
+    "Carnot-virkningsgrad:  η = 1 − Tk/Tv": "Bruges til den **ideelle varmemaskine** – øvre grænse for virkningsgrad.",
+    "Termisk udvidelse": "Bruges til at beregne **længde- eller volumeudvidelse** ved temperaturændring.",
+}
+if formel in _TERMO_CONTEXT:
+    st.info(f"💡 **Hvornår bruger du denne?** {_TERMO_CONTEXT[formel]}")
 
 st.divider()
 

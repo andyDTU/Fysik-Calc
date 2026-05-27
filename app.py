@@ -1,4 +1,5 @@
 import streamlit as st
+from utils import render_search_sidebar
 
 st.set_page_config(
     page_title="Fysik-Calc",
@@ -6,52 +7,104 @@ st.set_page_config(
     layout="wide",
 )
 
+render_search_sidebar()
+
 st.title("⚡ Fysik-Calc")
 st.subheader("Det ultimative regneværktøj til fysikeksamen")
+st.markdown("Klik på en opgavetype herunder, eller søg i sidepanelet.")
 st.divider()
 
-col1, col2, col3 = st.columns(3)
+TASKS = [
+    # Bevægelse
+    ("🏃 Bevægelse", [
+        ("📏", "Beregn strækning/tid", "s = v·t", "pages/1_Kinematik.py", "kin_formel", "Uniform bevægelse:  s = v · t"),
+        ("🚀", "Hastig. ved acceleration", "v = v₀ + a·t", "pages/1_Kinematik.py", "kin_formel", "Jævnt accelereret (1):  v = v₀ + a · t"),
+        ("📐", "Strækning ved acceleration", "s = v₀t + ½at²", "pages/1_Kinematik.py", "kin_formel", "Jævnt accelereret (2):  s = v₀·t + ½·a·t²"),
+        ("🎯", "Skråt kast", "rækkevidde og højde", "pages/1_Kinematik.py", "kin_formel", "Kastebevægelse (skråt kast)"),
+        ("🔁", "Cirkulær bevægelse", "v, ω, T, ac", "pages/1_Kinematik.py", "kin_formel", "Cirkulær bevægelse"),
+        ("🌀", "Centrifuge (RPM)", "ω → radius", "pages/1_Kinematik.py", "kin_formel", "Cirkulær bevægelse – RPM-omregner og centripetal"),
+    ]),
+    # Kræfter
+    ("💪 Kræfter", [
+        ("⚙️", "Kraft, masse, acceleration", "F = m·a", "pages/2_Dynamik.py", "dyn_formel", "Newtons 2. lov:  F = m · a"),
+        ("🏔️", "Hældende plan", "friktion og acceleration", "pages/2_Dynamik.py", "dyn_formel", "Hældende plan"),
+        ("🔗", "Friktion", "f = μ·N", "pages/2_Dynamik.py", "dyn_formel", "Friktion:  f = μ · N"),
+        ("💫", "Impulsmomentloven", "F·Δt = Δp", "pages/2_Dynamik.py", "dyn_formel", "Impulsmomentloven:  F · Δt = Δp"),
+        ("🧱", "Spænding og tøjning", "σ, ε, E-modul", "pages/2_Dynamik.py", "dyn_formel", "Spænding og tøjning:  σ = F / A"),
+        ("⚖️", "Atwood-maskine", "to masser over trisse", "pages/2_Dynamik.py", "dyn_formel", "Atwood-maskine:  to masser over trisse"),
+    ]),
+    # Energi
+    ("🔋 Energi", [
+        ("⚡", "Kinetisk energi", "Ek = ½mv²", "pages/3_Energi.py", None, None),
+        ("⬆️", "Potentiel energi", "Ep = mgh", "pages/3_Energi.py", None, None),
+        ("🌀", "Energibevarelse", "Ek₁+Ep₁ = Ek₂+Ep₂", "pages/3_Energi.py", None, None),
+        ("🔩", "Fjeder (Hookes lov)", "F = k·x", "pages/3_Energi.py", None, None),
+        ("💡", "Effekt", "P = W/t = F·v", "pages/3_Energi.py", None, None),
+        ("📉", "Energi med friktion", "friktionskorrektion", "pages/3_Energi.py", None, None),
+    ]),
+    # Elektricitet
+    ("⚡ Elektricitet", [
+        ("🔌", "Ohms lov", "U = R·I", "pages/4_Elektricitet.py", None, None),
+        ("🔋", "Kondensator", "Q = C·U", "pages/4_Elektricitet.py", None, None),
+        ("🧲", "Lorentzkraft", "F = q·v·B", "pages/4_Elektricitet.py", None, None),
+        ("⚡", "Faradays lov", "ε = −N·ΔΦ/Δt", "pages/4_Elektricitet.py", None, None),
+    ]),
+    # Termodynamik
+    ("🌡️ Termodynamik", [
+        ("💨", "Ideel gaslov", "pV = nRT", "pages/6_Termodynamik.py", None, None),
+        ("🔥", "Varmekapacitet", "Q = m·c·ΔT", "pages/6_Termodynamik.py", None, None),
+        ("💧", "Faseovergang", "Q = m·L", "pages/6_Termodynamik.py", None, None),
+        ("♻️", "Carnot-virkningsgrad", "η = 1 − Tk/Tv", "pages/6_Termodynamik.py", None, None),
+    ]),
+    # Bølger & Optik
+    ("🌊 Bølger & Optik", [
+        ("〰️", "Bølgehastighed", "v = f·λ", "pages/5_Boelger_og_Optik.py", None, None),
+        ("🔭", "Snells lov / Brydning", "n₁sinθ₁ = n₂sinθ₂", "pages/5_Boelger_og_Optik.py", None, None),
+        ("🔬", "Dobbeltspalte", "d·sin(θ) = nλ", "pages/5_Boelger_og_Optik.py", None, None),
+        ("📡", "Doppler-effekt", "frekvensforskydning", "pages/5_Boelger_og_Optik.py", None, None),
+    ]),
+    # Atomfysik
+    ("☢️ Atomfysik", [
+        ("☢️", "Radioaktivt henfald", "N = N₀·e^(−λt)", "pages/7_Atomfysik.py", None, None),
+        ("⚛️", "E = mc²", "massedefekt → energi", "pages/7_Atomfysik.py", None, None),
+        ("💫", "Fotonenergi", "E = h·f", "pages/7_Atomfysik.py", None, None),
+    ]),
+    # Rotation & Kollisioner
+    ("🔄 Rotation & Kollisioner", [
+        ("🔄", "Inertimoment", "standardlegemer", "pages/9_Rotation.py", "rot_formel", "Inertimoment – standardlegemer"),
+        ("🌀", "Impulsmomentbevarelse", "I₁ω₁ = I₂ω₂", "pages/9_Rotation.py", "rot_formel", "Bevarelse af impulsmoment"),
+        ("💥", "Elastisk kollision", "KE og impuls bevares", "pages/10_Kollisioner.py", None, None),
+        ("🫂", "Uelastisk kollision", "objekter hænger sammen", "pages/10_Kollisioner.py", None, None),
+    ]),
+    # Usikkerhed
+    ("📏 Usikkerhed", [
+        ("📊", "Gennemsnit og stdafv.", "statistik", "pages/8_Usikkerhed.py", None, None),
+        ("📉", "Fejlpropagation", "usikkerhed i formel", "pages/8_Usikkerhed.py", None, None),
+        ("📈", "Potenslov-fitting", "y = A·xᵅ (log-log)", "pages/8_Usikkerhed.py", None, None),
+    ]),
+]
 
-with col1:
-    st.markdown("### 🏃 Kinematik")
-    st.markdown("Uniform bevægelse, jævnt accelereret, kastebevægelse, cirkulær bevægelse")
-    st.markdown("---")
-    st.markdown("### 💪 Dynamik")
-    st.markdown("Newtons love, friktion, centripetalkraft, impuls, kraftmoment, hældende plan")
-    st.markdown("---")
-    st.markdown("### 🔄 Rotation")
-    st.markdown("Vinkelkinematik, inertimoment, τ=Iα, rulning, impulsmoment — Lec. 11-12")
-
-with col2:
-    st.markdown("### 🔋 Energi & Arbejde")
-    st.markdown("Kinetisk/potentiel energi, fjederkraft, arbejde, effekt, energibevarelse")
-    st.markdown("---")
-    st.markdown("### 💥 Kollisioner")
-    st.markdown("Elastisk/uelastisk kollision, restitutionskoefficient, eksplosion — Lec. 10")
-    st.markdown("---")
-    st.markdown("### 🌡️ Termodynamik")
-    st.markdown("Ideel gaslov, varmekapacitet, faseovergang, 1. termodynamikslov, Carnot")
-
-with col3:
-    st.markdown("### ⚡ Elektricitet")
-    st.markdown("Ohms lov, serie/parallelkobling, kondensator, Coulombs lov, magnetfelt, Lorentzkraft")
-    st.markdown("---")
-    st.markdown("### 🌊 Bølger & Optik")
-    st.markdown("Bølgehastighed, Snells lov, linsformel, Doppler-effekt, dobbeltspalte")
-    st.markdown("---")
-    st.markdown("### ☢️ Atomfysik")
-    st.markdown("Radioaktivt henfald, halvvejstid, E=mc², fotonenergI, de Broglie, Bohrs model")
+for gi, (group_name, tasks) in enumerate(TASKS):
+    st.markdown(f"#### {group_name}")
+    n_cols = min(len(tasks), 4)
+    cols = st.columns(max(n_cols, 1))
+    for i, (emoji, titel, under, page, nav_key, nav_value) in enumerate(tasks):
+        with cols[i % 4 if len(tasks) > 4 else i % len(tasks)]:
+            if st.button(
+                f"{emoji} **{titel}**\n\n_{under}_",
+                key=f"card_{gi}_{i}",
+                use_container_width=True,
+                help=under,
+            ):
+                if nav_key and nav_value:
+                    st.session_state[nav_key] = nav_value
+                try:
+                    st.switch_page(page)
+                except Exception:
+                    st.info(f"👈 Naviger til siden i menuen til venstre.")
+    st.markdown("")
 
 st.divider()
-
-col_a, col_b = st.columns(2)
-with col_a:
-    st.markdown("### 📏 Usikkerhed & Fejlanalyse")
-    st.markdown("Gennemsnit, standardafvigelse, fejlpropagation, type A/B usikkerhed — Lec. 3")
-
-st.divider()
-st.info("👈 Vælg et emne i menuen til venstre for at komme i gang.")
-
 with st.expander("📐 Konstanter"):
     st.markdown("""
 | Konstant | Symbol | Værdi |

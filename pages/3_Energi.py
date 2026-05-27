@@ -1,7 +1,9 @@
 import streamlit as st
 import numpy as np
+from utils import render_search_sidebar
 
 st.set_page_config(page_title="Energi & Arbejde", page_icon="🔋", layout="wide")
+render_search_sidebar()
 st.title("🔋 Energi & Arbejde")
 st.markdown("Kinetisk/potentiel energi, arbejde, effekt og energibevarelse")
 st.divider()
@@ -18,6 +20,19 @@ formel = st.selectbox("Vælg formel", [
     "Energibevarelse med friktion",
     "Mekanisk virkningsgrad:  η = P_ud / P_ind",
 ])
+
+_ENERGI_CONTEXT = {
+    "Kinetisk energi:  Ek = ½ · m · v²": "Bruges til at beregne **bevægelsesenergien** fra masse og hastighed.",
+    "Potentiel energi:  Ep = m · g · h": "Bruges til **gravitationsenergi** fra masse og højde.",
+    "Fjederkraft og -energi": "Bruges til **Hookes lov** – find fjederkraft, stivhed k eller kompression/forlængelse.",
+    "Arbejde:  W = F · s · cos(θ)": "Bruges til at beregne **udført arbejde** langs en strækning med en kraft i vinkel θ.",
+    "Effekt:  P = W / t = F · v": "Bruges til at beregne **effekt** – via arbejde/tid ELLER kraft × hastighed.",
+    "Energibevarelse:  Ek₁ + Ep₁ = Ek₂ + Ep₂": "Bruges i **friktionsfrie systemer** – forbinder hastighed og højde direkte.",
+    "Energibevarelse med friktion": "Bruges når systemet har **friktion** – beregn energitab eller sluthastig­hed.",
+    "Mekanisk virkningsgrad:  η = P_ud / P_ind": "Bruges til at beregne **nytteeffekt** i maskiner og motorer.",
+}
+if formel in _ENERGI_CONTEXT:
+    st.info(f"💡 **Hvornår bruger du denne?** {_ENERGI_CONTEXT[formel]}")
 
 st.divider()
 
