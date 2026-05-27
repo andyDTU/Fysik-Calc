@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar
+from utils import show_sidebar_constants, show_resultat_sidebar, show_tips
 
 st.set_page_config(page_title="Bølger & Optik", page_icon="🌊", layout="wide")
 show_sidebar_constants()
@@ -25,6 +25,16 @@ formel = st.selectbox("Vælg formel", [
     "Lysets brydningsindeks:  n = c / v",
 ], key="bolge_formel")
 
+BOLGE_TIPS = {
+    "Bølgehastighed:  v = f · λ": "v = f·λ. For lyd i luft ≈ 343 m/s. For lys = c = 3×10⁸ m/s.",
+    "Snells lov:  n₁·sin(θ₁) = n₂·sin(θ₂)": "n₁sin(θ₁) = n₂sin(θ₂). Større n → mindre θ (brydning mod normalen).",
+    "Totalrefleksion og kritisk vinkel": "sin(θ_c) = n₂/n₁ (kræver n₁ > n₂). Bruges i optiske fibre.",
+    "Linsformel:  1/f = 1/do + 1/di": "1/f = 1/do + 1/di. Konveks linse: f > 0. Konkav: f < 0. di < 0 → virtuelt billede.",
+    "Doppler-effekt": "Kilde nærmer sig → frekvens øges. Kilde fjerner sig → frekvens sænkes.",
+    "Dobbeltspalte (Young):  d·sin(θ) = n·λ": "Konstruktiv interferens: d·sin(θ) = nλ, n = 0,±1,±2,… Destruktiv: n + ½.",
+    "Stående bølger – streng/rør": "Streng (lukket-lukket): λ_n = 2L/n. Rør (åben-åben): samme. Åben-lukket: λ_n = 4L/(2n−1).",
+}
+show_tips(formel, BOLGE_TIPS)
 st.divider()
 
 c_light = 2.998e8

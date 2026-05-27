@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar
+from utils import show_sidebar_constants, show_resultat_sidebar, show_tips
 
 st.set_page_config(page_title="Usikkerhed", page_icon="📏", layout="wide")
 show_sidebar_constants()
@@ -30,6 +30,19 @@ formel = st.selectbox("Vælg beregning", [
     "Potenslov-fitting:  y = A · xᵅ  (log-log regression)",
 ], key="usk_formel")
 
+USK_TIPS = {
+    "Gennemsnit og standardafvigelse": "s er standardafvigelsen for stikprøven (n−1 i nævner). SEM = s/√n er usikkerheden på middelværdien.",
+    "Standardmåleusikkerhed (type A)": "Type A = statistisk. u_A = s/√n. Bruges når du har gentagne målinger.",
+    "Forenelighedstest – er ny måling OK?": "Beregn |x_ny − x̄| / u_A. Er det < 2 er målingen forenelig (95% konfidens).",
+    "Relativ og absolut usikkerhed": "Relativ usikkerhed = Δx/x (dimensionsløs). Absolut = Δx (samme enhed som x).",
+    "Fejlpropagation – addition/subtraktion": "Δz = √(Δx² + Δy²). Absolutte usikkerheder lægges i kvadrat sammen.",
+    "Fejlpropagation – multiplikation/division": "Δz/z = √((Δx/x)² + (Δy/y)²). Relative usikkerheder kombineres.",
+    "Fejlpropagation – potens:  z = xⁿ": "Δz/z = |n| · Δx/x. Eksponenten forstærker den relative usikkerhed.",
+    "Fejlpropagation – generel (numerisk)": "Numerisk partiel differentiering: variér én variabel ad gangen med ±Δ og se effekten.",
+    "Samlet usikkerhed (type A + B)": "u_total = √(u_A² + u_B²). Type B er f.eks. instrument­usikkerhed fra specifikationer.",
+    "Potenslov-fitting:  y = A · xᵅ  (log-log regression)": "ln(y) = ln(A) + α·ln(x). Hældningen på log-log-plot er α. R² tæt på 1 = godt fit.",
+}
+show_tips(formel, USK_TIPS)
 st.divider()
 
 if formel == "Gennemsnit og standardafvigelse":

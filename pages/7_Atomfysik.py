@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar
+from utils import show_sidebar_constants, show_resultat_sidebar, show_tips
 
 st.set_page_config(page_title="Atomfysik & Kvantemekanik", page_icon="☢️", layout="wide")
 show_sidebar_constants()
@@ -28,6 +28,16 @@ formel = st.selectbox("Vælg formel", [
     "Compton-spredning",
 ], key="atom_formel")
 
+ATOM_TIPS = {
+    "Radioaktivt henfald:  N = N₀ · e^(−λt)": "λ = ln(2)/T½. N(t) = N₀·e^(−λt). Aktivitet A = λN. Enheder: Bq = henfald/s.",
+    "Halvvejstid:  T½ = ln(2) / λ": "T½ = ln(2)/λ ≈ 0.693/λ. Efter n halvtider: N = N₀·(½)ⁿ.",
+    "Energi-masse:  E = Δm · c²": "Δm i kg, c = 3×10⁸ m/s. 1 u = 931.5 MeV/c². Bruges til binding­senergi og kernereaktioner.",
+    "Fotonenergí:  E = h · f = h·c / λ": "E = hf = hc/λ. h = 6.626×10⁻³⁴ J·s. 1 eV = 1.602×10⁻¹⁹ J.",
+    "de Broglie bølgelængde:  λ = h / (m·v)": "λ = h/(mv) = h/p. Partikler viser bølgeegenskaber. Gælder for elektroner, neutroner, etc.",
+    "Fotoelektrisk effekt": "E_k = hf − φ. φ = arbejdsfunktion (J eller eV). Ingen elektroner hvis f < f_grænse.",
+    "Bohrs model – hydrogenspektret": "E_n = −13.6 eV/n². Foton udsendes: ΔE = hf = E_i − E_f. n=1 er grundtilstand.",
+}
+show_tips(formel, ATOM_TIPS)
 st.divider()
 
 if formel == "Radioaktivt henfald:  N = N₀ · e^(−λt)":

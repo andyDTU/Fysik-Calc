@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar
+from utils import show_sidebar_constants, show_resultat_sidebar, show_tips
 
 st.set_page_config(page_title="Elektricitet", page_icon="⚡", layout="wide")
 show_sidebar_constants()
@@ -30,6 +30,17 @@ formel = st.selectbox("Vælg formel", [
     "Faradays lov:  ε = -N · ΔΦ / Δt",
 ], key="elek_formel")
 
+ELEK_TIPS = {
+    "Ohms lov:  U = R · I": "U i Volt, R i Ohm, I i Ampere. Husk: spænding OVER en modstand, strøm IGENNEM.",
+    "Elektrisk effekt": "P = U·I = U²/R = I²·R. Vælg den form der passer til de kendte størrelser.",
+    "Seriekobling af modstande": "R_total = R₁ + R₂ + ⋯. Samme strøm igennem alle. Spænding fordeles.",
+    "Parallelkobling af modstande": "1/R_total = 1/R₁ + 1/R₂ + ⋯. Samme spænding over alle. Strøm fordeles.",
+    "Kondensator:  Q = C · U": "Q i Coulomb, C i Farad, U i Volt. Ladning Q er på platerne, ikke i kredsløbet.",
+    "RC-kredsløb:  τ = R · C": "τ = R·C = tidskonstant. Efter tid τ er kondensatoren 63% ladet / 37% afladet.",
+    "Coulombs lov:  F = k · q₁ · q₂ / r²": "k = 8.988×10⁹ N·m²/C². Positiv F = frastødning, negativ = tiltrækning.",
+    "Lorentzkraft:  F = q · v · B": "F = qvB·sin(θ). θ er vinklen mellem v og B. Retning: højrehåndsregel (eller venstrehånd for elektroner).",
+}
+show_tips(formel, ELEK_TIPS)
 st.divider()
 
 if formel == "Ohms lov:  U = R · I":

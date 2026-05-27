@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar
+from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips
 
 st.set_page_config(page_title="Rotation", page_icon="🔄", layout="wide")
 show_sidebar_constants()
@@ -33,6 +33,18 @@ formel = st.selectbox("Vælg formel", [
     "Trisse + ophængt masse (Yo-Yo / Atwood med rotation)",
 ], key="rot_formel")
 
+ROT_TIPS = {
+    "Vinkelkinematik (analog til lineær kinematik)": "Analogt med lineær kinematik: α↔a, ω↔v, θ↔s. Husk enhederne: θ i rad, ω i rad/s, α i rad/s².",
+    "Sammenhæng lineær ↔ vinkelbevægelse": "v = ω·r, a_t = α·r, a_c = ω²·r. Tangential­acc. og centripetalacc. er vinkelrette.",
+    "Inertimoment – standardlegemer": "Solidt hulrum: I = ½MR². Tynd ring: I = MR². Kugle: I = ⅖MR². Stav: I = ⅟₁₂ML².",
+    "Steiners sætning:  I = Icm + M·d²": "Flyt rotationsakse parallelt med tyngdepunktsakse. d = afstand. Giver altid I > I_cm.",
+    "Rotationskinetisk energi:  K = ½·I·ω²": "Kombineret translationsenergi + rotationsenergi: K_total = ½mv² + ½Iω². Bruges ved rulning.",
+    "Newtons 2. lov for rotation:  τ = I·α": "Nettodrejningsmoment = I·α. τ = F·l (kraftarm). Husk fortegn på τ.",
+    "Bevarelse af impulsmoment": "L = I·ω bevares når ΣτExt = 0. Figur­skatøjer trækker arme ind → I mindskes → ω øges.",
+    "Rulning uden glidning": "v_cm = ω·R. Energi: K = ½mv² + ½Iω² = ½mv²(1 + I/mR²).",
+    "Trisse + ophængt masse (Yo-Yo / Atwood med rotation)": "Newton for masse: mg − T = ma. Newton for rotation: T·R = I·α = I·a/R. Løs systemet.",
+}
+show_tips(formel, ROT_TIPS)
 st.divider()
 
 if formel == "Vinkelkinematik (analog til lineær kinematik)":

@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar
+from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips
 
 st.set_page_config(page_title="Energi & Arbejde", page_icon="🔋", layout="wide")
 show_sidebar_constants()
@@ -22,6 +22,17 @@ formel = st.selectbox("Vælg formel", [
     "Mekanisk virkningsgrad:  η = P_ud / P_ind",
 ], key="energi_formel")
 
+ENERGI_TIPS = {
+    "Kinetisk energi:  Ek = ½ · m · v²": "Ek afhænger af v². Dobbelt hastighed → fire gange energien.",
+    "Potentiel energi:  Ep = m · g · h": "h er højde over reference­niveau (vælges frit). Ep = 0 ved h = 0.",
+    "Fjederkraft og -energi": "Hookes lov: F = k·x. Energi: Ef = ½k·x². Husk: x er forlængelsen fra ligevægt.",
+    "Arbejde:  W = F · s · cos(θ)": "θ er vinklen mellem kraft og bevægelsesretning. W < 0 når kraft modvirker bevægelse.",
+    "Effekt:  P = W / t = F · v": "Effekt er energi pr. tid. P = F·v gælder ved konstant kraft og hastighed.",
+    "Energibevarelse:  Ek₁ + Ep₁ = Ek₂ + Ep₂": "Kun gyldig uden friktion og andre ikke-konservative kræfter. Ek = ½mv², Ep = mgh.",
+    "Energibevarelse med friktion": "Tabsled: W_friktion = f·d = μ·N·d. Ek₁ + Ep₁ = Ek₂ + Ep₂ + |W_friktion|.",
+    "Mekanisk virkningsgrad:  η = P_ud / P_ind": "η < 1 altid. η = 1 svarer til ingen energitab (ideelt system).",
+}
+show_tips(formel, ENERGI_TIPS)
 st.divider()
 
 if formel == "Kinetisk energi:  Ek = ½ · m · v²":
@@ -36,6 +47,8 @@ if formel == "Kinetisk energi:  Ek = ½ · m · v²":
         Ek = 0.5 * m * v**2
         st.success(f"**Ek = {Ek:.6g} J**")
         st.latex(rf"E_k = \frac{{1}}{{2}} \cdot {m:.6g} \cdot {v:.6g}^2 = {Ek:.6g}\ \text{{J}}")
+        if st.button("📋 Gem Ek", key="gem_en_ek_Ek"):
+            gem_resultat(Ek, "J", "Ek")
 
     elif beregn == "m – masse (kg)":
         c1, c2 = st.columns(2)
@@ -44,6 +57,8 @@ if formel == "Kinetisk energi:  Ek = ½ · m · v²":
         m = 2 * Ek / v**2
         st.success(f"**m = {m:.6g} kg**")
         st.latex(rf"m = \frac{{2 E_k}}{{v^2}} = \frac{{2 \cdot {Ek:.6g}}}{{{v:.6g}^2}} = {m:.6g}\ \text{{kg}}")
+        if st.button("📋 Gem m", key="gem_en_ek_m"):
+            gem_resultat(m, "kg", "m")
 
     else:
         c1, c2 = st.columns(2)
@@ -52,6 +67,8 @@ if formel == "Kinetisk energi:  Ek = ½ · m · v²":
         v = np.sqrt(2 * Ek / m)
         st.success(f"**v = {v:.6g} m/s**")
         st.latex(rf"v = \sqrt{{\frac{{2 E_k}}{{m}}}} = \sqrt{{\frac{{2 \cdot {Ek:.6g}}}{{{m:.6g}}}}} = {v:.6g}\ \text{{m/s}}")
+        if st.button("📋 Gem v", key="gem_en_ek_v"):
+            gem_resultat(v, "m/s", "v")
 
 elif formel == "Potentiel energi:  Ep = m · g · h":
     st.latex(r"E_p = m \cdot g \cdot h")
@@ -66,6 +83,8 @@ elif formel == "Potentiel energi:  Ep = m · g · h":
         Ep = m * g_val * h
         st.success(f"**Ep = {Ep:.6g} J**")
         st.latex(rf"E_p = {m:.6g} \cdot {g_val:.6g} \cdot {h:.6g} = {Ep:.6g}\ \text{{J}}")
+        if st.button("📋 Gem Ep", key="gem_en_ep_Ep"):
+            gem_resultat(Ep, "J", "Ep")
 
     elif beregn == "m – masse (kg)":
         c1, c2 = st.columns(2)
@@ -74,6 +93,8 @@ elif formel == "Potentiel energi:  Ep = m · g · h":
         m = Ep / (g_val * h)
         st.success(f"**m = {m:.6g} kg**")
         st.latex(rf"m = \frac{{E_p}}{{g h}} = {m:.6g}\ \text{{kg}}")
+        if st.button("📋 Gem m", key="gem_en_ep_m"):
+            gem_resultat(m, "kg", "m")
 
     else:
         c1, c2 = st.columns(2)
@@ -82,6 +103,8 @@ elif formel == "Potentiel energi:  Ep = m · g · h":
         h = Ep / (m * g_val)
         st.success(f"**h = {h:.6g} m**")
         st.latex(rf"h = \frac{{E_p}}{{mg}} = {h:.6g}\ \text{{m}}")
+        if st.button("📋 Gem h", key="gem_en_ep_h"):
+            gem_resultat(h, "m", "h")
 
 elif formel == "Fjederkraft og -energi":
     st.latex(r"F = k \cdot x \qquad E_{fj} = \frac{1}{2} k x^2")

@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar
+from utils import show_sidebar_constants, show_resultat_sidebar, show_tips
 
 st.set_page_config(page_title="Kollisioner", page_icon="💥", layout="wide")
 show_sidebar_constants()
@@ -19,6 +19,14 @@ formel = st.selectbox("Vælg formel / kollisionstype", [
     "Massemidtpunkt og -hastighed",
 ], key="kol_formel")
 
+KOL_TIPS = {
+    "Bevarelse af impuls (generelt):  Σp_før = Σp_efter": "Impuls bevares altid (ingen ydre kræfter). To ukendte → behov for ekstra ligning (elastisk: KE bevares).",
+    "Fuldstændig uelastisk kollision (objekter hænger sammen)": "v_fælles = (m₁v₁ + m₂v₂)/(m₁+m₂). Størst energitab muligt. Objekter bevæger sig sammen.",
+    "Elastisk kollision – 1D (KE bevaret)": "Både impuls og kinetisk energi bevares. Formler: v₁' = (m₁−m₂)v₁/(m₁+m₂), v₂' = 2m₁v₁/(m₁+m₂).",
+    "Koefficient for restitution:  e = Δv_efter / Δv_før": "e = (v₂'−v₁')/(v₁−v₂). e=1: elastisk. e=0: fuldstændig uelastisk. 0 < e < 1: delvist uelastisk.",
+    "Eksplosion / udskydning": "Impuls bevares: 0 = m₁v₁' + m₂v₂'. Total impuls før = 0 (hvile).",
+}
+show_tips(formel, KOL_TIPS)
 st.divider()
 
 if formel == "Bevarelse af impuls (generelt):  Σp_før = Σp_efter":

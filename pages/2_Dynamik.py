@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar
+from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips
 
 st.set_page_config(page_title="Dynamik", page_icon="💪", layout="wide")
 show_sidebar_constants()
@@ -32,6 +32,20 @@ formel = st.selectbox("Vælg formel", [
     "Spænding og tøjning:  σ = F / A",
 ], key="dyn_formel")
 
+DYN_TIPS = {
+    "Newtons 2. lov:  F = m · a": "Brug nettokraften ΣF, ikke bare én kraft. Husk retning (fortegn).",
+    "Tyngdekraft:  G = m · g": "Tyngdekraft virker altid nedad. G = m·g = vægt i Newton.",
+    "Friktion:  f = μ · N": "Statisk friktion (μs) er større end kinetisk (μk). Friktionskraft modvirker bevægelse.",
+    "Centripetalkraft:  Fc = m · v² / r": "Centripetalkraft peger mod centrum. Den er en nettokraft, ikke en ekstra kraft.",
+    "Normalkraft i sløjfe (top/bund)": "Top: N = mv²/r − mg (mindst). Bund: N = mv²/r + mg (størst). Minimum v ved top: √(gr).",
+    "Impuls:  p = m · v": "Impuls bevares i isolerede systemer. p er en vektor (retning vigtig).",
+    "Impulsmomentloven:  F · Δt = Δp": "Bruges ved støde/slag: stor kraft i kort tid giver stor impulsændring.",
+    "Kraftmoment:  τ = F · l": "Kraftarm l er den vinkelrette afstand fra rotationsaksen til kraftlinjen.",
+    "Hældende plan": "Opsæt koordinater langs planen. Normal­kraft N = mg·cos(θ). Friktionsgrænse: f ≤ μN.",
+    "Atwood-maskine:  to masser over trisse": "Acceleration a = (m₂−m₁)g/(m₁+m₂). Snorkraft T = 2m₁m₂g/(m₁+m₂).",
+    "Spænding og tøjning:  σ = F / A": "σ = F/A. Cirkulært tværsnit: A = πd²/4 → d = √(4F/πσ). Youngs modul E = σ/ε.",
+}
+show_tips(formel, DYN_TIPS)
 st.divider()
 
 if formel == "Newtons 2. lov:  F = m · a":
@@ -46,6 +60,8 @@ if formel == "Newtons 2. lov:  F = m · a":
         F = m * a
         st.success(f"**F = {F:.6g} N**")
         st.latex(rf"F = m \cdot a = {m:.6g} \cdot {a:.6g} = {F:.6g}\ \text{{N}}")
+        if st.button("📋 Gem F", key="gem_dyn_n2_F"):
+            gem_resultat(F, "N", "F")
 
     elif beregn == "m – masse (kg)":
         c1, c2 = st.columns(2)
@@ -54,6 +70,8 @@ if formel == "Newtons 2. lov:  F = m · a":
         m = F / a
         st.success(f"**m = {m:.6g} kg**")
         st.latex(rf"m = \frac{{F}}{{a}} = \frac{{{F:.6g}}}{{{a:.6g}}} = {m:.6g}\ \text{{kg}}")
+        if st.button("📋 Gem m", key="gem_dyn_n2_m"):
+            gem_resultat(m, "kg", "m")
 
     else:
         c1, c2 = st.columns(2)
@@ -62,6 +80,8 @@ if formel == "Newtons 2. lov:  F = m · a":
         a = F / m
         st.success(f"**a = {a:.6g} m/s²**")
         st.latex(rf"a = \frac{{F}}{{m}} = \frac{{{F:.6g}}}{{{m:.6g}}} = {a:.6g}\ \text{{m/s}}^2")
+        if st.button("📋 Gem a", key="gem_dyn_n2_a"):
+            gem_resultat(a, "m/s²", "a")
 
 elif formel == "Tyngdekraft:  G = m · g":
     st.latex(r"G = m \cdot g")
@@ -76,12 +96,16 @@ elif formel == "Tyngdekraft:  G = m · g":
         Fg = m * g_val
         st.success(f"**G = {Fg:.6g} N**")
         st.latex(rf"G = m \cdot g = {m:.6g} \cdot {g_val:.6g} = {Fg:.6g}\ \text{{N}}")
+        if st.button("📋 Gem G", key="gem_dyn_tyng_G"):
+            gem_resultat(Fg, "N", "G")
 
     else:
         Fg = st.number_input("G – tyngdekraft (N)", value=98.2, format="%.6g")
         m = Fg / g_val
         st.success(f"**m = {m:.6g} kg**")
         st.latex(rf"m = \frac{{G}}{{g}} = \frac{{{Fg:.6g}}}{{{g_val:.6g}}} = {m:.6g}\ \text{{kg}}")
+        if st.button("📋 Gem m", key="gem_dyn_tyng_m"):
+            gem_resultat(m, "kg", "m")
 
 elif formel == "Friktion:  f = μ · N":
     st.latex(r"f = \mu \cdot N")
@@ -95,6 +119,8 @@ elif formel == "Friktion:  f = μ · N":
         f = mu * N
         st.success(f"**f = {f:.6g} N**")
         st.latex(rf"f = \mu \cdot N = {mu:.6g} \cdot {N:.6g} = {f:.6g}\ \text{{N}}")
+        if st.button("📋 Gem f", key="gem_dyn_frikt_f"):
+            gem_resultat(f, "N", "f")
 
     elif beregn == "μ – friktionskoefficient":
         c1, c2 = st.columns(2)
@@ -103,6 +129,8 @@ elif formel == "Friktion:  f = μ · N":
         mu = f / N
         st.success(f"**μ = {mu:.6g}**")
         st.latex(rf"\mu = \frac{{f}}{{N}} = \frac{{{f:.6g}}}{{{N:.6g}}} = {mu:.6g}")
+        if st.button("📋 Gem μ", key="gem_dyn_frikt_mu"):
+            gem_resultat(mu, "", "μ")
 
     else:
         c1, c2 = st.columns(2)
@@ -111,6 +139,8 @@ elif formel == "Friktion:  f = μ · N":
         N = f / mu
         st.success(f"**N = {N:.6g} N**")
         st.latex(rf"N = \frac{{f}}{{\mu}} = \frac{{{f:.6g}}}{{{mu:.6g}}} = {N:.6g}\ \text{{N}}")
+        if st.button("📋 Gem N", key="gem_dyn_frikt_N"):
+            gem_resultat(N, "N", "N")
 
 elif formel == "Centripetalkraft:  Fc = m · v² / r":
     st.latex(r"F_c = \frac{m \cdot v^2}{r} = m \cdot \omega^2 \cdot r")
@@ -125,6 +155,8 @@ elif formel == "Centripetalkraft:  Fc = m · v² / r":
         Fc = m * v**2 / r
         st.success(f"**Fc = {Fc:.6g} N**")
         st.latex(rf"F_c = \frac{{m v^2}}{{r}} = \frac{{{m:.6g} \cdot {v:.6g}^2}}{{{r:.6g}}} = {Fc:.6g}\ \text{{N}}")
+        if st.button("📋 Gem Fc", key="gem_dyn_cent_Fc"):
+            gem_resultat(Fc, "N", "Fc")
 
     elif beregn == "m (kg)":
         c1, c2, c3 = st.columns(3)
@@ -134,6 +166,8 @@ elif formel == "Centripetalkraft:  Fc = m · v² / r":
         m = Fc * r / v**2
         st.success(f"**m = {m:.6g} kg**")
         st.latex(rf"m = \frac{{F_c \cdot r}}{{v^2}} = {m:.6g}\ \text{{kg}}")
+        if st.button("📋 Gem m", key="gem_dyn_cent_m"):
+            gem_resultat(m, "kg", "m")
 
     elif beregn == "v (m/s)":
         c1, c2, c3 = st.columns(3)
@@ -143,6 +177,8 @@ elif formel == "Centripetalkraft:  Fc = m · v² / r":
         v = np.sqrt(Fc * r / m)
         st.success(f"**v = {v:.6g} m/s**")
         st.latex(rf"v = \sqrt{{\frac{{F_c \cdot r}}{{m}}}} = {v:.6g}\ \text{{m/s}}")
+        if st.button("📋 Gem v", key="gem_dyn_cent_v"):
+            gem_resultat(v, "m/s", "v")
 
     else:
         c1, c2, c3 = st.columns(3)
@@ -152,6 +188,8 @@ elif formel == "Centripetalkraft:  Fc = m · v² / r":
         r = m * v**2 / Fc
         st.success(f"**r = {r:.6g} m**")
         st.latex(rf"r = \frac{{m v^2}}{{F_c}} = {r:.6g}\ \text{{m}}")
+        if st.button("📋 Gem r", key="gem_dyn_cent_r"):
+            gem_resultat(r, "m", "r")
 
 elif formel == "Normalkraft i sløjfe (top/bund)":
     st.latex(r"\text{Bund:}\ N_{bund} = mg + \frac{mv^2}{r} \qquad \text{Top:}\ N_{top} = \frac{mv^2}{r} - mg")

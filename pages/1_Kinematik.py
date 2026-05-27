@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar
+from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips
 
 st.set_page_config(page_title="Kinematik", page_icon="🏃", layout="wide")
 show_sidebar_constants()
@@ -36,6 +36,17 @@ formel = st.selectbox("Vælg formel", [
     "Cirkulær bevægelse – RPM-omregner og centripetal",
 ], key="kin_formel")
 
+KIN_TIPS = {
+    "Uniform bevægelse:  s = v · t": "Bruges ved konstant fart (acceleration = 0). Husk: s er tilbagelagt strækning.",
+    "Jævnt accelereret (1):  v = v₀ + a · t": "Find slut- eller starthastighed. Brug a = −g = −9.82 m/s² ved frit fald.",
+    "Jævnt accelereret (2):  s = v₀·t + ½·a·t²": "Find strækning eller tid. Sæt v₀ = 0 ved start fra ro. Diskriminant < 0 → ingen reel løsning.",
+    "Jævnt accelereret (3):  v² = v₀² + 2·a·s": "Bruges når tid er ukendt. Find v eller strækning direkte fra start- og sluttilstand.",
+    "Kastebevægelse (vandret kast)": "x-retning: uniform (v₀). y-retning: frit fald (v₀y = 0). Flyvetid t = √(2h/g).",
+    "Kastebevægelse (skråt kast)": "Opdel i vₓ = v₀cos(θ) og vᵧ = v₀sin(θ). Maks. rækkevidde ved θ = 45° (uden luftmodstand).",
+    "Cirkulær bevægelse": "Centripetal­acceleration peger mod centrum: ac = v²/r = ω²r. Perioden T = 2πr/v.",
+    "Cirkulær bevægelse – RPM-omregner og centripetal": "RPM → ω: gang med 2π/60. Centrifuge: r = ac/ω².",
+}
+show_tips(formel, KIN_TIPS)
 st.divider()
 
 # ── Uniform bevægelse ──────────────────────────────────────────────────────────
@@ -51,6 +62,8 @@ if formel == "Uniform bevægelse:  s = v · t":
         s = v * t
         st.success(f"**s = {s:.6g} m**")
         st.latex(rf"s = {v:.6g} \cdot {t:.6g} = {s:.6g}\ \text{{m}}")
+        if st.button("📋 Gem s", key="gem_kin_unif_s"):
+            gem_resultat(s, "m", "s")
 
     elif beregn == "v – hastighed (m/s)":
         c1, c2 = st.columns(2)
@@ -59,6 +72,8 @@ if formel == "Uniform bevægelse:  s = v · t":
         v = s / t
         st.success(f"**v = {v:.6g} m/s**")
         st.latex(rf"v = \frac{{s}}{{t}} = \frac{{{s:.6g}}}{{{t:.6g}}} = {v:.6g}\ \text{{m/s}}")
+        if st.button("📋 Gem v", key="gem_kin_unif_v"):
+            gem_resultat(v, "m/s", "v")
 
     else:
         c1, c2 = st.columns(2)
@@ -67,6 +82,8 @@ if formel == "Uniform bevægelse:  s = v · t":
         t = s / v
         st.success(f"**t = {t:.6g} s**")
         st.latex(rf"t = \frac{{s}}{{v}} = \frac{{{s:.6g}}}{{{v:.6g}}} = {t:.6g}\ \text{{s}}")
+        if st.button("📋 Gem t", key="gem_kin_unif_t"):
+            gem_resultat(t, "s", "t")
 
 # ── v = v0 + at ────────────────────────────────────────────────────────────────
 elif formel == "Jævnt accelereret (1):  v = v₀ + a · t":
@@ -82,6 +99,8 @@ elif formel == "Jævnt accelereret (1):  v = v₀ + a · t":
         v = v0 + a * t
         st.success(f"**v = {v:.6g} m/s**")
         st.latex(rf"v = {v0:.6g} + {a:.6g} \cdot {t:.6g} = {v:.6g}\ \text{{m/s}}")
+        if st.button("📋 Gem v", key="gem_kin_ja1_v"):
+            gem_resultat(v, "m/s", "v")
 
     elif beregn == "v₀ (m/s)":
         c1, c2, c3 = st.columns(3)
@@ -91,6 +110,8 @@ elif formel == "Jævnt accelereret (1):  v = v₀ + a · t":
         v0 = v - a * t
         st.success(f"**v₀ = {v0:.6g} m/s**")
         st.latex(rf"v_0 = v - a \cdot t = {v:.6g} - {a:.6g} \cdot {t:.6g} = {v0:.6g}\ \text{{m/s}}")
+        if st.button("📋 Gem v₀", key="gem_kin_ja1_v0"):
+            gem_resultat(v0, "m/s", "v₀")
 
     elif beregn == "a (m/s²)":
         c1, c2, c3 = st.columns(3)
@@ -100,6 +121,8 @@ elif formel == "Jævnt accelereret (1):  v = v₀ + a · t":
         a = (v - v0) / t
         st.success(f"**a = {a:.6g} m/s²**")
         st.latex(rf"a = \frac{{v - v_0}}{{t}} = \frac{{{v:.6g} - {v0:.6g}}}{{{t:.6g}}} = {a:.6g}\ \text{{m/s}}^2")
+        if st.button("📋 Gem a", key="gem_kin_ja1_a"):
+            gem_resultat(a, "m/s²", "a")
 
     else:
         c1, c2, c3 = st.columns(3)
@@ -112,6 +135,8 @@ elif formel == "Jævnt accelereret (1):  v = v₀ + a · t":
             t = (v - v0) / a
             st.success(f"**t = {t:.6g} s**")
             st.latex(rf"t = \frac{{v - v_0}}{{a}} = \frac{{{v:.6g} - {v0:.6g}}}{{{a:.6g}}} = {t:.6g}\ \text{{s}}")
+            if st.button("📋 Gem t", key="gem_kin_ja1_t"):
+                gem_resultat(t, "s", "t")
 
 # ── s = v0*t + 0.5*a*t^2 ──────────────────────────────────────────────────────
 elif formel == "Jævnt accelereret (2):  s = v₀·t + ½·a·t²":
@@ -127,6 +152,8 @@ elif formel == "Jævnt accelereret (2):  s = v₀·t + ½·a·t²":
         s = v0 * t + 0.5 * a * t**2
         st.success(f"**s = {s:.6g} m**")
         st.latex(rf"s = {v0:.6g} \cdot {t:.6g} + \tfrac{{1}}{{2}} \cdot {a:.6g} \cdot {t:.6g}^2 = {s:.6g}\ \text{{m}}")
+        if st.button("📋 Gem s", key="gem_kin_ja2_s"):
+            gem_resultat(s, "m", "s")
         if abs(v0 - 50.0) < 0.01 and abs(a + 9.82) < 0.01 and abs(t - 2.0) < 0.01:
             st.info("📋 **2025 Q4** – To bolde mødes: bold 1 kastes op (v₀=50 m/s), bold 2 slippes fra 100 m. De mødes ved h ≈ 80.4 m (t=2 s). ✓")
 
@@ -138,6 +165,8 @@ elif formel == "Jævnt accelereret (2):  s = v₀·t + ½·a·t²":
         v0 = (s - 0.5 * a * t**2) / t
         st.success(f"**v₀ = {v0:.6g} m/s**")
         st.latex(rf"v_0 = \frac{{s - \frac{{1}}{{2}}a t^2}}{{t}} = {v0:.6g}\ \text{{m/s}}")
+        if st.button("📋 Gem v₀", key="gem_kin_ja2_v0"):
+            gem_resultat(v0, "m/s", "v₀")
 
     elif beregn == "a (m/s²)":
         c1, c2, c3 = st.columns(3)
@@ -147,6 +176,8 @@ elif formel == "Jævnt accelereret (2):  s = v₀·t + ½·a·t²":
         a = 2 * (s - v0 * t) / t**2
         st.success(f"**a = {a:.6g} m/s²**")
         st.latex(rf"a = \frac{{2(s - v_0 t)}}{{t^2}} = {a:.6g}\ \text{{m/s}}^2")
+        if st.button("📋 Gem a", key="gem_kin_ja2_a"):
+            gem_resultat(a, "m/s²", "a")
 
     else:
         c1, c2, c3 = st.columns(3)
@@ -159,6 +190,8 @@ elif formel == "Jævnt accelereret (2):  s = v₀·t + ½·a·t²":
             else:
                 t = s / v0
                 st.success(f"**t = {t:.6g} s**")
+                if st.button("📋 Gem t", key="gem_kin_ja2_t_lin"):
+                    gem_resultat(t, "s", "t")
         else:
             disc = v0**2 + 2 * a * s
             if disc < 0:
@@ -171,9 +204,16 @@ elif formel == "Jævnt accelereret (2):  s = v₀·t + ½·a·t²":
                     st.error("Ingen positiv tidsløsning")
                 elif len(solutions) == 1 or abs(solutions[0] - solutions[1]) < 1e-9:
                     st.success(f"**t = {solutions[0]:.6g} s**")
+                    if st.button("📋 Gem t", key="gem_kin_ja2_t1"):
+                        gem_resultat(solutions[0], "s", "t")
                 else:
                     st.success(f"**t₁ = {solutions[0]:.6g} s  |  t₂ = {solutions[1]:.6g} s**")
                     st.info("To løsninger – vælg den fysisk meningsfulde.")
+                    c_a, c_b = st.columns(2)
+                    if c_a.button(f"📋 Gem t₁ = {solutions[0]:.6g} s", key="gem_kin_ja2_ta"):
+                        gem_resultat(solutions[0], "s", "t₁")
+                    if c_b.button(f"📋 Gem t₂ = {solutions[1]:.6g} s", key="gem_kin_ja2_tb"):
+                        gem_resultat(solutions[1], "s", "t₂")
 
 # ── v^2 = v0^2 + 2as ──────────────────────────────────────────────────────────
 elif formel == "Jævnt accelereret (3):  v² = v₀² + 2·a·s":
@@ -193,6 +233,8 @@ elif formel == "Jævnt accelereret (3):  v² = v₀² + 2·a·s":
             v = np.sqrt(val)
             st.success(f"**v = {v:.6g} m/s**")
             st.latex(rf"v = \sqrt{{v_0^2 + 2as}} = \sqrt{{{v0:.6g}^2 + 2 \cdot {a:.6g} \cdot {s:.6g}}} = {v:.6g}\ \text{{m/s}}")
+            if st.button("📋 Gem v", key="gem_kin_ja3_v"):
+                gem_resultat(v, "m/s", "v")
 
     elif beregn == "v₀ (m/s)":
         c1, c2, c3 = st.columns(3)
@@ -206,6 +248,8 @@ elif formel == "Jævnt accelereret (3):  v² = v₀² + 2·a·s":
             v0 = np.sqrt(val)
             st.success(f"**v₀ = {v0:.6g} m/s**")
             st.latex(rf"v_0 = \sqrt{{v^2 - 2as}} = {v0:.6g}\ \text{{m/s}}")
+            if st.button("📋 Gem v₀", key="gem_kin_ja3_v0"):
+                gem_resultat(v0, "m/s", "v₀")
 
     elif beregn == "a (m/s²)":
         c1, c2, c3 = st.columns(3)
@@ -218,6 +262,8 @@ elif formel == "Jævnt accelereret (3):  v² = v₀² + 2·a·s":
             a = (v**2 - v0**2) / (2 * s)
             st.success(f"**a = {a:.6g} m/s²**")
             st.latex(rf"a = \frac{{v^2 - v_0^2}}{{2s}} = {a:.6g}\ \text{{m/s}}^2")
+            if st.button("📋 Gem a", key="gem_kin_ja3_a"):
+                gem_resultat(a, "m/s²", "a")
 
     else:
         c1, c2, c3 = st.columns(3)
@@ -230,6 +276,8 @@ elif formel == "Jævnt accelereret (3):  v² = v₀² + 2·a·s":
             s = (v**2 - v0**2) / (2 * a)
             st.success(f"**s = {s:.6g} m**")
             st.latex(rf"s = \frac{{v^2 - v_0^2}}{{2a}} = {s:.6g}\ \text{{m}}")
+            if st.button("📋 Gem s", key="gem_kin_ja3_s"):
+                gem_resultat(s, "m", "s")
 
 # ── Vandret kast ───────────────────────────────────────────────────────────────
 elif formel == "Kastebevægelse (vandret kast)":
@@ -257,6 +305,11 @@ elif formel == "Kastebevægelse (vandret kast)":
         with st.expander("Vis udregning"):
             st.latex(rf"t = \sqrt{{\frac{{2h}}{{g}}}} = {t:.6g}\ \text{{s}},\quad x = v_0 t = {x:.6g}\ \text{{m}}")
             st.latex(rf"v_y = g t = {vy:.6g}\ \text{{m/s}},\quad v_{{slut}} = \sqrt{{v_0^2 + v_y^2}} = {v_end:.6g}\ \text{{m/s}}")
+        ca, cb = st.columns(2)
+        if ca.button("📋 Gem x", key="gem_kin_vkast_x"):
+            gem_resultat(x, "m", "x")
+        if cb.button("📋 Gem v_slut", key="gem_kin_vkast_vslut"):
+            gem_resultat(v_end, "m/s", "v_slut")
     else:
         c1, c2 = st.columns(2)
         x_mål = c1.number_input("x – rækkevidde (m)", value=30.0, min_value=0.001, format="%.6g")
@@ -267,6 +320,8 @@ elif formel == "Kastebevægelse (vandret kast)":
         v_end = np.sqrt(v0_calc**2 + vy**2)
         st.success(f"**v₀ = {v0_calc:.4g} m/s**   (flyvetid t = {t:.4g} s)")
         st.latex(rf"t = \sqrt{{\frac{{2h}}{{g}}}} = {t:.6g}\ \text{{s}},\quad v_0 = \frac{{x}}{{t}} = \frac{{{x_mål:.4g}}}{{{t:.4g}}} = {v0_calc:.4g}\ \text{{m/s}}")
+        if st.button("📋 Gem v₀", key="gem_kin_vkast_v0"):
+            gem_resultat(v0_calc, "m/s", "v₀")
 
 # ── Skråt kast ─────────────────────────────────────────────────────────────────
 elif formel == "Kastebevægelse (skråt kast)":
@@ -284,7 +339,6 @@ elif formel == "Kastebevægelse (skråt kast)":
     t_top = v0y / G
     h_max = h0 + v0y**2 / (2 * G)
 
-    # Solve -½g t² + v0y t + h0 = 0 for landing time
     disc = v0y**2 + 2 * G * h0
     if disc < 0:
         st.error("Bolden når ikke ned – diskriminant < 0")
@@ -305,6 +359,14 @@ elif formel == "Kastebevægelse (skråt kast)":
         st.latex(rf"t_{{land}}: \quad 0 = h_0 + v_{{0y}}t - \tfrac{{1}}{{2}}gt^2 \Rightarrow t = \frac{{v_{{0y}} + \sqrt{{v_{{0y}}^2 + 2g h_0}}}}{{g}} = {t_land:.6g}\ \text{{s}}")
         st.latex(rf"x_{{max}} = v_{{0x}} \cdot t_{{land}} = {v0x:.6g} \cdot {t_land:.6g} = {x_max:.6g}\ \text{{m}}")
 
+    ca, cb, cc = st.columns(3)
+    if ca.button("📋 Gem x_max", key="gem_kin_skrat_x"):
+        gem_resultat(x_max, "m", "x_max")
+    if cb.button("📋 Gem h_max", key="gem_kin_skrat_h"):
+        gem_resultat(h_max, "m", "h_max")
+    if cc.button("📋 Gem t_land", key="gem_kin_skrat_t"):
+        gem_resultat(t_land, "s", "t_land")
+
 # ── Cirkulær bevægelse ─────────────────────────────────────────────────────────
 elif formel == "Cirkulær bevægelse":
     st.latex(r"v = \omega \cdot r \qquad a_c = \frac{v^2}{r} = \omega^2 r \qquad T = \frac{2\pi}{\omega}")
@@ -318,6 +380,8 @@ elif formel == "Cirkulær bevægelse":
         v = omega * r
         st.success(f"**v = {v:.6g} m/s**")
         st.latex(rf"v = \omega \cdot r = {omega:.6g} \cdot {r:.6g} = {v:.6g}\ \text{{m/s}}")
+        if st.button("📋 Gem v", key="gem_kin_circ_v"):
+            gem_resultat(v, "m/s", "v")
 
     elif beregn == "ω – vinkelhastighed (rad/s)":
         c1, c2 = st.columns(2)
@@ -327,6 +391,8 @@ elif formel == "Cirkulær bevægelse":
         T = 2 * np.pi / omega
         st.success(f"**ω = {omega:.6g} rad/s  (T = {T:.6g} s)**")
         st.latex(rf"\omega = \frac{{v}}{{r}} = \frac{{{v:.6g}}}{{{r:.6g}}} = {omega:.6g}\ \text{{rad/s}}")
+        if st.button("📋 Gem ω", key="gem_kin_circ_omega"):
+            gem_resultat(omega, "rad/s", "ω")
 
     elif beregn == "r – radius (m)":
         c1, c2 = st.columns(2)
@@ -335,6 +401,8 @@ elif formel == "Cirkulær bevægelse":
         r = v / omega
         st.success(f"**r = {r:.6g} m**")
         st.latex(rf"r = \frac{{v}}{{\omega}} = \frac{{{v:.6g}}}{{{omega:.6g}}} = {r:.6g}\ \text{{m}}")
+        if st.button("📋 Gem r", key="gem_kin_circ_r"):
+            gem_resultat(r, "m", "r")
 
     elif beregn == "ac – centripetal­acceleration (m/s²)":
         c1, c2 = st.columns(2)
@@ -343,6 +411,8 @@ elif formel == "Cirkulær bevægelse":
         ac = v**2 / r
         st.success(f"**aₐ = {ac:.6g} m/s²**")
         st.latex(rf"a_c = \frac{{v^2}}{{r}} = \frac{{{v:.6g}^2}}{{{r:.6g}}} = {ac:.6g}\ \text{{m/s}}^2")
+        if st.button("📋 Gem ac", key="gem_kin_circ_ac"):
+            gem_resultat(ac, "m/s²", "ac")
 
     elif beregn == "T – omløbstid (s)":
         c1, c2 = st.columns(2)
@@ -351,6 +421,8 @@ elif formel == "Cirkulær bevægelse":
         T = 2 * np.pi * r / v
         st.success(f"**T = {T:.6g} s**")
         st.latex(rf"T = \frac{{2\pi r}}{{v}} = \frac{{2\pi \cdot {r:.6g}}}{{{v:.6g}}} = {T:.6g}\ \text{{s}}")
+        if st.button("📋 Gem T", key="gem_kin_circ_T"):
+            gem_resultat(T, "s", "T")
 
     else:
         c1, c2 = st.columns(2)
@@ -360,6 +432,8 @@ elif formel == "Cirkulær bevægelse":
         f = 1 / T
         st.success(f"**f = {f:.6g} Hz  (T = {T:.6g} s)**")
         st.latex(rf"f = \frac{{v}}{{2\pi r}} = {f:.6g}\ \text{{Hz}}")
+        if st.button("📋 Gem f", key="gem_kin_circ_f"):
+            gem_resultat(f, "Hz", "f")
 
 # ── Cirkulær bevægelse – RPM og centripetal ────────────────────────────────────
 elif formel == "Cirkulær bevægelse – RPM-omregner og centripetal":
@@ -382,6 +456,8 @@ elif formel == "Cirkulær bevægelse – RPM-omregner og centripetal":
         T_s = 60 / rpm
         st.success(f"**ω = {omega:.6g} rad/s**   (f = {f_hz:.6g} Hz, T = {T_s:.6g} s)")
         st.latex(rf"\omega = \frac{{2\pi \cdot {rpm:.6g}}}{{60}} = {omega:.6g}\ \text{{rad/s}}")
+        if st.button("📋 Gem ω", key="gem_kin_rpm_omega"):
+            gem_resultat(omega, "rad/s", "ω")
 
     elif beregn == "r – radius (given ac og RPM)":
         st.markdown("**Eksempel: centrifuge med 10000 RPM og ac = 8500g → find r**")
@@ -398,6 +474,8 @@ elif formel == "Cirkulær bevægelse – RPM-omregner og centripetal":
         st.info(f"Check: aₐ/g = ω²r/g = {omega**2*r/G:.4g} (skal = {ac_g:.4g})")
         if abs(rpm - 10000.0) < 1 and abs(ac_g - 8500.0) < 1:
             st.success("📋 **2025 Q7** – Centrifuge: 10 000 RPM, 8500g → r ≈ 7.6 cm ✓")
+        if st.button("📋 Gem r", key="gem_kin_rpm_r"):
+            gem_resultat(r, "m", "r")
 
     elif beregn == "ac – centripetal­acceleration (given r og RPM)":
         c1, c2 = st.columns(2)
@@ -408,9 +486,13 @@ elif formel == "Cirkulær bevægelse – RPM-omregner og centripetal":
         ac_g = ac / G
         st.success(f"**ac = {ac:.6g} m/s²  =  {ac_g:.4g} × g**")
         st.latex(rf"a_c = \omega^2 r = {omega:.6g}^2 \cdot {r:.6g} = {ac:.6g}\ \text{{m/s}}^2")
+        if st.button("📋 Gem ac", key="gem_kin_rpm_ac"):
+            gem_resultat(ac, "m/s²", "ac")
 
     else:
         omega = st.number_input("ω – vinkelhastighed (rad/s)", value=100.0, format="%.6g")
         rpm = omega * 60 / (2 * np.pi)
         st.success(f"**RPM = {rpm:.6g}  (f = {omega/(2*np.pi):.6g} Hz)**")
         st.latex(rf"\text{{RPM}} = \frac{{\omega \cdot 60}}{{2\pi}} = \frac{{{omega:.6g} \cdot 60}}{{2\pi}} = {rpm:.6g}")
+        if st.button("📋 Gem RPM", key="gem_kin_rpm_rpm"):
+            gem_resultat(rpm, "RPM", "RPM")

@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar
+from utils import show_sidebar_constants, show_resultat_sidebar, show_tips
 
 st.set_page_config(page_title="Svingninger", page_icon="〰️", layout="wide")
 show_sidebar_constants()
@@ -20,6 +20,15 @@ formel = st.selectbox("Vælg formel", [
     "Dæmpet svingning:  x(t) = A·e^(−γt)·cos(ω't + φ)",
 ], key="sving_formel")
 
+SVING_TIPS = {
+    "Fjedermasse:  T = 2π√(m/k)": "T afhænger ikke af amplitude. Stivere fjeder (stor k) → kortere periode.",
+    "Simpelt pendul:  T = 2π√(L/g)": "Gælder kun for små vinkler (< ~15°). T afhænger ikke af masse!",
+    "Vinkelfrekvens:  ω = √(k/m)": "ω = 2πf = 2π/T. Enhed: rad/s. ω² = k/m for fjedermasse-system.",
+    "Bevægelsesligning:  x(t) = A·cos(ωt + φ)": "v(t) = −Aω·sin(ωt+φ), a(t) = −Aω²·cos(ωt+φ). Max fart ved x=0, max acc. ved x=±A.",
+    "Energi i svingning:  E = ½·k·A²": "E = ½kA² = konstant. Ved x=0: alt er kinetisk. Ved x=±A: alt er potentielt.",
+    "Dæmpet svingning:  x(t) = A·e^(−γt)·cos(ω't + φ)": "γ = b/(2m). Underdæmpet: γ < ω₀. Kritisk: γ = ω₀. Overdæmpet: γ > ω₀.",
+}
+show_tips(formel, SVING_TIPS)
 st.divider()
 
 if formel == "Fjedermasse:  T = 2π√(m/k)":

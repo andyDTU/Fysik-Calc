@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar
+from utils import show_sidebar_constants, show_resultat_sidebar, show_tips
 
 st.set_page_config(page_title="Termodynamik", page_icon="🌡️", layout="wide")
 show_sidebar_constants()
@@ -25,6 +25,16 @@ formel = st.selectbox("Vælg formel", [
     "Termisk udvidelse",
 ], key="termo_formel")
 
+TERMO_TIPS = {
+    "Ideel gaslov:  p · V = n · R · T": "T skal være i Kelvin (K = °C + 273.15). p i Pascal, V i m³, n i mol.",
+    "Kombineret gaslov:  p₁V₁/T₁ = p₂V₂/T₂": "Hold konstante størrelser på begge sider. Isokorm: V₁=V₂. Isobar: p₁=p₂.",
+    "Varmekapacitet:  Q = m · c · ΔT": "c for vand = 4186 J/(kg·K). Husk: ΔT i Kelvin = ΔT i Celsius.",
+    "Faseovergang:  Q = m · L": "L_v (vand→damp) ≈ 2.26×10⁶ J/kg. L_f (is→vand) ≈ 3.34×10⁵ J/kg. Ingen temp.-ændring!",
+    "Adiabatisk proces:  pV^γ = konst": "Q = 0. γ = Cp/Cv ≈ 1.4 for diatomisk gas. Gælder for hurtige processer.",
+    "1. termodynamikslov:  ΔU = Q − W": "ΔU = Q − W. Q > 0: varme TIL systemet. W > 0: arbejde AF systemet.",
+    "Carnot-virkningsgrad:  η = 1 − Tk/Tv": "η = 1 − Tk/Tv. Absolut temperatur! Max. virkningsgrad for enhver varmemaskine.",
+}
+show_tips(formel, TERMO_TIPS)
 st.divider()
 
 if formel == "Ideel gaslov:  p · V = n · R · T":
