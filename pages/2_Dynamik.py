@@ -1,7 +1,10 @@
 import streamlit as st
 import numpy as np
+from utils import show_sidebar_constants, show_resultat_sidebar
 
 st.set_page_config(page_title="Dynamik", page_icon="💪", layout="wide")
+show_sidebar_constants()
+show_resultat_sidebar()
 st.title("💪 Dynamik")
 st.markdown("Newtons love, kræfter, impuls og kraftmoment")
 st.divider()

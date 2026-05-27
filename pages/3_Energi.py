@@ -1,7 +1,10 @@
 import streamlit as st
 import numpy as np
+from utils import show_sidebar_constants, show_resultat_sidebar
 
 st.set_page_config(page_title="Energi & Arbejde", page_icon="🔋", layout="wide")
+show_sidebar_constants()
+show_resultat_sidebar()
 st.title("🔋 Energi & Arbejde")
 st.markdown("Kinetisk/potentiel energi, arbejde, effekt og energibevarelse")
 st.divider()
@@ -17,7 +20,7 @@ formel = st.selectbox("Vælg formel", [
     "Energibevarelse:  Ek₁ + Ep₁ = Ek₂ + Ep₂",
     "Energibevarelse med friktion",
     "Mekanisk virkningsgrad:  η = P_ud / P_ind",
-])
+], key="energi_formel")
 
 st.divider()
 

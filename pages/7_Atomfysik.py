@@ -1,7 +1,10 @@
 import streamlit as st
 import numpy as np
+from utils import show_sidebar_constants, show_resultat_sidebar
 
 st.set_page_config(page_title="Atomfysik & Kvantemekanik", page_icon="☢️", layout="wide")
+show_sidebar_constants()
+show_resultat_sidebar()
 st.title("☢️ Atomfysik & Kvantemekanik")
 st.markdown("Radioaktivitet, energi-masse-ækvivalens, fotoner og Bohrs model")
 st.divider()
@@ -23,7 +26,7 @@ formel = st.selectbox("Vælg formel", [
     "Bohrs model – hydrogenspektret",
     "Fotoelektrisk effekt",
     "Compton-spredning",
-])
+], key="atom_formel")
 
 st.divider()
 

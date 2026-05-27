@@ -1,7 +1,10 @@
 import streamlit as st
 import numpy as np
+from utils import show_sidebar_constants, show_resultat_sidebar
 
 st.set_page_config(page_title="Bølger & Optik", page_icon="🌊", layout="wide")
+show_sidebar_constants()
+show_resultat_sidebar()
 st.title("🌊 Bølger & Optik")
 st.markdown("Bølgehastighed, brydning, linser, Doppler og dobbeltspalte")
 st.divider()
@@ -20,7 +23,7 @@ formel = st.selectbox("Vælg formel", [
     "Malus' lov:  I = I₀·cos²(θ)",
     "Stående bølger – streng/rør",
     "Lysets brydningsindeks:  n = c / v",
-])
+], key="bolge_formel")
 
 st.divider()
 

@@ -1,7 +1,10 @@
 import streamlit as st
 import numpy as np
+from utils import show_sidebar_constants, show_resultat_sidebar
 
 st.set_page_config(page_title="Elektricitet", page_icon="⚡", layout="wide")
+show_sidebar_constants()
+show_resultat_sidebar()
 st.title("⚡ Elektricitet")
 st.markdown("Ohms lov, kredsløb, kondensatorer, Coulombs lov og magnetfelt")
 st.divider()
@@ -25,7 +28,7 @@ formel = st.selectbox("Vælg formel", [
     "Lorentzkraft på ledning:  F = B · I · L",
     "Induceret EMF:  ε = B · L · v",
     "Faradays lov:  ε = -N · ΔΦ / Δt",
-])
+], key="elek_formel")
 
 st.divider()
 

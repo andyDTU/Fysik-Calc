@@ -1,7 +1,10 @@
 import streamlit as st
 import numpy as np
+from utils import show_sidebar_constants, show_resultat_sidebar
 
 st.set_page_config(page_title="Rotation", page_icon="🔄", layout="wide")
+show_sidebar_constants()
+show_resultat_sidebar()
 st.title("🔄 Rotation")
 st.markdown("Vinkelkinematik, inertimoment, drejningsmoment, rulning og impulsmoment — Lectures 11-12 (10060)")
 st.divider()

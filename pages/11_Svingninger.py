@@ -1,7 +1,10 @@
 import streamlit as st
 import numpy as np
+from utils import show_sidebar_constants, show_resultat_sidebar
 
 st.set_page_config(page_title="Svingninger", page_icon="〰️", layout="wide")
+show_sidebar_constants()
+show_resultat_sidebar()
 st.title("〰️ Svingninger (SHM)")
 st.markdown("Fjedermasse-system, simpelt pendul og energi i harmonisk svingning")
 st.divider()
@@ -15,7 +18,7 @@ formel = st.selectbox("Vælg formel", [
     "Bevægelsesligning:  x(t) = A·cos(ωt + φ)",
     "Energi i svingning:  E = ½·k·A²",
     "Dæmpet svingning:  x(t) = A·e^(−γt)·cos(ω't + φ)",
-])
+], key="sving_formel")
 
 st.divider()
 

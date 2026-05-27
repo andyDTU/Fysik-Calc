@@ -1,7 +1,10 @@
 import streamlit as st
 import numpy as np
+from utils import show_sidebar_constants, show_resultat_sidebar
 
 st.set_page_config(page_title="Termodynamik", page_icon="🌡️", layout="wide")
+show_sidebar_constants()
+show_resultat_sidebar()
 st.title("🌡️ Termodynamik")
 st.markdown("Ideel gaslov, varme, faseovergange og termodynamikkens love")
 st.divider()
@@ -20,7 +23,7 @@ formel = st.selectbox("Vælg formel", [
     "1. termodynamikslov:  ΔU = Q − W",
     "Carnot-virkningsgrad:  η = 1 − Tk/Tv",
     "Termisk udvidelse",
-])
+], key="termo_formel")
 
 st.divider()
 

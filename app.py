@@ -1,4 +1,5 @@
 import streamlit as st
+from utils import show_sidebar_constants
 
 st.set_page_config(
     page_title="Fysik-Calc",
@@ -6,6 +7,7 @@ st.set_page_config(
     layout="wide",
 )
 
+show_sidebar_constants()
 st.title("⚡ Fysik-Calc")
 st.subheader("Det ultimative regneværktøj til fysikeksamen")
 st.divider()
