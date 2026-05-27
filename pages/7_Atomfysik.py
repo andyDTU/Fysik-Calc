@@ -210,24 +210,34 @@ elif formel == "de Broglie bølgelængde:  λ = h / (m·v)":
         st.success(f"**m = {m_val:.6g} kg**")
 
 elif formel == "Bohrs model – hydrogenspektret":
-    st.latex(r"E_n = -\frac{13{,}6\ \text{eV}}{n^2} \qquad \Delta E = E_{n_2} - E_{n_1} = h \cdot f")
-    st.info("Gælder for hydrogen (Z=1). Energien er negativ (bundne tilstande).")
+    st.latex(r"E_n = -\frac{13{,}6 \cdot Z^2\ \text{eV}}{n^2} \qquad \Delta E = E_{n_2} - E_{n_1} = h \cdot f")
     st.divider()
 
-    col1, col2 = st.columns(2)
+    col0, col1, col2 = st.columns(3)
+    Z  = col0.number_input("Z – atomnummer (H=1, He=2, Li=3…)", value=1, min_value=1, step=1)
     n1 = col1.number_input("n₁ – lavere energiniveau", value=2, min_value=1, step=1)
     n2 = col2.number_input("n₂ – højere energiniveau", value=3, min_value=2, step=1)
+
+    if Z == 1:
+        ion_navn = "H"
+    elif Z == 2:
+        ion_navn = "He⁺"
+    elif Z == 3:
+        ion_navn = "Li²⁺"
+    else:
+        ion_navn = f"Z={Z} ion"
 
     if n2 <= n1:
         st.error("n₂ skal være større end n₁")
     else:
-        E1 = -13.6 / n1**2
-        E2 = -13.6 / n2**2
+        E1 = -13.6 * Z**2 / n1**2
+        E2 = -13.6 * Z**2 / n2**2
         dE_eV = E2 - E1
         dE_J  = dE_eV * eV
         f_val = abs(dE_J) / h
         lam   = h * c / abs(dE_J)
 
+        st.info(f"Ion: **{ion_navn}**  (Z={Z})")
         col1, col2, col3 = st.columns(3)
         col1.metric(f"E_{n1}", f"{E1:.4f} eV")
         col2.metric(f"E_{n2}", f"{E2:.4f} eV")
@@ -235,21 +245,22 @@ elif formel == "Bohrs model – hydrogenspektret":
 
         st.success(f"**λ = {lam*1e9:.4g} nm  |  f = {f_val:.4g} Hz**")
 
-        if n1 == 1:
-            serie = "Lyman (UV)"
-        elif n1 == 2:
-            serie = "Balmer (synligt/UV)"
-        elif n1 == 3:
-            serie = "Paschen (IR)"
-        else:
-            serie = f"Serie med n₁={n1} (IR)"
-        st.info(f"Serie: **{serie}**")
+        if Z == 1:
+            if n1 == 1:
+                serie = "Lyman (UV)"
+            elif n1 == 2:
+                serie = "Balmer (synligt/UV)"
+            elif n1 == 3:
+                serie = "Paschen (IR)"
+            else:
+                serie = f"Serie med n₁={n1} (IR)"
+            st.info(f"Hydrogen-serie: **{serie}**")
 
         with st.expander("Vis udregning"):
-            st.latex(rf"E_{{{n1}}} = -\frac{{13.6}}{{{n1}^2}} = {E1:.4f}\ \text{{eV}}")
-            st.latex(rf"E_{{{n2}}} = -\frac{{13.6}}{{{n2}^2}} = {E2:.4f}\ \text{{eV}}")
-            st.latex(rf"\Delta E = {E2:.4f} - ({E1:.4f}) = {abs(dE_eV):.4f}\ \text{{eV}} = {abs(dE_J):.4g}\ \text{{J}}")
-            st.latex(rf"\lambda = \frac{{hc}}{{\Delta E}} = \frac{{{h:.4g} \cdot {c:.4g}}}{{{abs(dE_J):.4g}}} = {lam:.4g}\ \text{{m}} = {lam*1e9:.4g}\ \text{{nm}}")
+            st.latex(rf"E_{{{n1}}} = -\frac{{13.6 \cdot {Z}^2}}{{{n1}^2}} = {E1:.4f}\ \text{{eV}}")
+            st.latex(rf"E_{{{n2}}} = -\frac{{13.6 \cdot {Z}^2}}{{{n2}^2}} = {E2:.4f}\ \text{{eV}}")
+            st.latex(rf"\Delta E = {abs(dE_eV):.4f}\ \text{{eV}} = {abs(dE_J):.4g}\ \text{{J}}")
+            st.latex(rf"\lambda = \frac{{hc}}{{\Delta E}} = {lam:.4g}\ \text{{m}} = {lam*1e9:.4g}\ \text{{nm}}")
 
 elif formel == "Fotoelektrisk effekt":
     st.latex(r"E_k = h \cdot f - W \qquad W = h \cdot f_0")

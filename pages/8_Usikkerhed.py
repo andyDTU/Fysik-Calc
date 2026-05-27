@@ -6,6 +6,14 @@ st.title("📏 Usikkerhed & Fejlanalyse")
 st.markdown("Måleusikkerhed, fejlpropagation og statistik — Lecture 3 (10060)")
 st.divider()
 
+# Pre-fill fra Eksamensopgaver guide
+if st.session_state.pop("example_usikkerhed_2024q1", None):
+    st.session_state["usk_formel"] = "Fejlpropagation – generel (numerisk)"
+if st.session_state.pop("example_usikkerhed_2025q2", None):
+    st.session_state["usk_formel"] = "Forenelighedstest – er ny måling OK?"
+if st.session_state.pop("example_usikkerhed_2025q3", None):
+    st.session_state["usk_formel"] = "Potenslov-fitting:  y = A · xᵅ  (log-log regression)"
+
 formel = st.selectbox("Vælg beregning", [
     "Gennemsnit og standardafvigelse",
     "Standardmåleusikkerhed (type A)",
@@ -17,7 +25,7 @@ formel = st.selectbox("Vælg beregning", [
     "Fejlpropagation – generel (numerisk)",
     "Samlet usikkerhed (type A + B)",
     "Potenslov-fitting:  y = A · xᵅ  (log-log regression)",
-])
+], key="usk_formel")
 
 st.divider()
 
@@ -375,8 +383,11 @@ elif formel == "Potenslov-fitting:  y = A · xᵅ  (log-log regression)":
             n = len(x_vals)
 
             # Lineær regression på log-log: log_y = α·log_x + ln(A)
-            alpha, lnA = np.polyfit(log_x, log_y, 1)
+            coeffs, cov = np.polyfit(log_x, log_y, 1, cov=True)
+            alpha, lnA = coeffs
             A = np.exp(lnA)
+            sigma_alpha = np.sqrt(cov[0, 0])
+            sigma_lnA   = np.sqrt(cov[1, 1])
 
             # R² for log-log fit
             log_y_fit = alpha * log_x + lnA
@@ -384,13 +395,14 @@ elif formel == "Potenslov-fitting:  y = A · xᵅ  (log-log regression)":
             ss_tot = np.sum((log_y - np.mean(log_y))**2)
             R2 = 1 - ss_res / ss_tot if ss_tot > 0 else 1.0
 
-            st.success(f"**α = {alpha:.4g}**   (A = {A:.4g},  R² = {R2:.4f})")
-            st.latex(rf"{y_label} = {A:.4g} \cdot {x_label}^{{{alpha:.4g}}}")
+            st.success(f"**α = {alpha:.4g} ± {sigma_alpha:.4g}**   (A = {A:.4g},  R² = {R2:.4f})")
+            st.latex(rf"{y_label} = {A:.4g} \cdot {x_label}^{{{alpha:.4g} \pm {sigma_alpha:.4g}}}")
 
-            col1, col2, col3 = st.columns(3)
+            col1, col2, col3, col4 = st.columns(4)
             col1.metric("α (eksponent)", f"{alpha:.4g}")
-            col2.metric("A (præfaktor)", f"{A:.4g}")
-            col3.metric("R² (log-log)", f"{R2:.4f}")
+            col2.metric("σ_α (usikkerhed)", f"{sigma_alpha:.4g}")
+            col3.metric("A (præfaktor)", f"{A:.4g}")
+            col4.metric("R² (log-log)", f"{R2:.4f}")
 
             with st.expander("Vis data og residualer"):
                 rows = []

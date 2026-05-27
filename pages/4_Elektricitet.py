@@ -16,6 +16,8 @@ formel = st.selectbox("Vælg formel", [
     "Parallelkobling af modstande",
     "Kondensator:  Q = C · U",
     "Energi i kondensator:  E = ½ · C · U²",
+    "RC-kredsløb:  τ = R · C",
+    "RL-kredsløb:  τ = L / R",
     "Coulombs lov:  F = k · q₁ · q₂ / r²",
     "Elektrisk felt:  E = F / q = k · Q / r²",
     "Magnetfelt fra uendelig ledning:  B = μ₀·I / (2π·r)",
@@ -182,6 +184,80 @@ elif formel == "Energi i kondensator:  E = ½ · C · U²":
         E = Q**2 / (2 * C)
         st.success(f"**E = {E:.6g} J**")
         st.latex(rf"E = \frac{{Q^2}}{{2C}} = \frac{{{Q:.6g}^2}}{{2 \cdot {C:.6g}}} = {E:.6g}\ \text{{J}}")
+
+elif formel == "RC-kredsløb:  τ = R · C":
+    st.latex(r"\tau = R \cdot C")
+    st.markdown("**Opladning:** $V_C(t) = V_0(1 - e^{-t/\\tau})$   |   **Afladning:** $V_C(t) = V_0 \\cdot e^{-t/\\tau}$")
+    st.divider()
+
+    mode = st.radio("Proces:", ["Opladning – kondensator lades op", "Afladning – kondensator aflades"], horizontal=True)
+    st.divider()
+
+    c1, c2, c3 = st.columns(3)
+    R   = c1.number_input("R – modstand (Ω)", value=1000.0, min_value=1e-12, format="%.6g")
+    C   = c2.number_input("C – kapacitans (F)", value=100e-6, min_value=1e-12, format="%.6g")
+    V0  = c3.number_input("V₀ – kildespænding (V)", value=9.0, format="%.6g")
+    tau = R * C
+
+    st.success(f"**τ = {tau:.6g} s**   (63% nået efter {tau:.6g} s, 99% efter {5*tau:.6g} s)")
+    st.latex(rf"\tau = R \cdot C = {R:.6g} \cdot {C:.6g} = {tau:.6g}\ \text{{s}}")
+
+    t_val = st.number_input("t – beregn ved tid (s)", value=tau, min_value=0.0, format="%.6g")
+
+    if mode == "Opladning – kondensator lades op":
+        Vc = V0 * (1 - np.exp(-t_val / tau))
+        Ic = (V0 / R) * np.exp(-t_val / tau)
+        st.divider()
+        col1, col2 = st.columns(2)
+        col1.metric(f"V_C({t_val:.4g} s)", f"{Vc:.6g} V")
+        col2.metric(f"I({t_val:.4g} s)", f"{Ic:.6g} A")
+        st.latex(rf"V_C(t) = V_0\left(1 - e^{{-t/\tau}}\right) = {V0:.4g}\left(1 - e^{{-{t_val:.4g}/{tau:.4g}}}\right) = {Vc:.6g}\ \text{{V}}")
+    else:
+        Vc = V0 * np.exp(-t_val / tau)
+        Ic = (V0 / R) * np.exp(-t_val / tau)
+        st.divider()
+        col1, col2 = st.columns(2)
+        col1.metric(f"V_C({t_val:.4g} s)", f"{Vc:.6g} V")
+        col2.metric(f"I({t_val:.4g} s)", f"{Ic:.6g} A")
+        st.latex(rf"V_C(t) = V_0 \cdot e^{{-t/\tau}} = {V0:.4g} \cdot e^{{-{t_val:.4g}/{tau:.4g}}} = {Vc:.6g}\ \text{{V}}")
+
+    E_c = 0.5 * C * V0**2
+    st.caption(f"Energi lagret ved fuld opladning: E = ½CV₀² = {E_c:.6g} J")
+
+elif formel == "RL-kredsløb:  τ = L / R":
+    st.latex(r"\tau = \frac{L}{R}")
+    st.markdown("**Strøm til/frakobling:** $I(t) = \\frac{V}{R}(1 - e^{-t/\\tau})$   |   **Afladning:** $I(t) = I_0 \\cdot e^{-t/\\tau}$")
+    st.divider()
+
+    mode = st.radio("Proces:", ["Tilkobling – strøm opbygges", "Frakobling – strøm aftager"], horizontal=True)
+    st.divider()
+
+    c1, c2, c3 = st.columns(3)
+    R   = c1.number_input("R – modstand (Ω)", value=10.0, min_value=1e-12, format="%.6g")
+    L   = c2.number_input("L – induktans (H)", value=0.1, min_value=1e-12, format="%.6g")
+    V   = c3.number_input("V – forsyningsspænding (V)", value=12.0, format="%.6g")
+    tau = L / R
+    I_max = V / R
+
+    st.success(f"**τ = {tau:.6g} s**   (I_max = V/R = {I_max:.6g} A)")
+    st.latex(rf"\tau = \frac{{L}}{{R}} = \frac{{{L:.6g}}}{{{R:.6g}}} = {tau:.6g}\ \text{{s}}")
+
+    t_val = st.number_input("t – beregn ved tid (s)", value=tau, min_value=0.0, format="%.6g")
+
+    if mode == "Tilkobling – strøm opbygges":
+        I_t = I_max * (1 - np.exp(-t_val / tau))
+        st.divider()
+        st.metric(f"I({t_val:.4g} s)", f"{I_t:.6g} A")
+        st.latex(rf"I(t) = \frac{{V}}{{R}}\left(1 - e^{{-t/\tau}}\right) = {I_max:.4g}\left(1 - e^{{-{t_val:.4g}/{tau:.4g}}}\right) = {I_t:.6g}\ \text{{A}}")
+    else:
+        I0 = st.number_input("I₀ – startstrøm (A)", value=I_max, min_value=0.0, format="%.6g")
+        I_t = I0 * np.exp(-t_val / tau)
+        st.divider()
+        st.metric(f"I({t_val:.4g} s)", f"{I_t:.6g} A")
+        st.latex(rf"I(t) = I_0 \cdot e^{{-t/\tau}} = {I0:.4g} \cdot e^{{-{t_val:.4g}/{tau:.4g}}} = {I_t:.6g}\ \text{{A}}")
+
+    E_L = 0.5 * L * I_max**2
+    st.caption(f"Energi lagret ved fuld strøm: E = ½LI_max² = {E_L:.6g} J")
 
 elif formel == "Coulombs lov:  F = k · q₁ · q₂ / r²":
     st.latex(r"F = k \cdot \frac{q_1 \cdot q_2}{r^2}")
