@@ -16,7 +16,7 @@ formel = st.selectbox("Vælg formel / kollisionstype", [
     "Koefficient for restitution:  e = Δv_efter / Δv_før",
     "Eksplosion / udskydning",
     "Massemidtpunkt og -hastighed",
-])
+], key="koll_formel")
 
 st.divider()
 

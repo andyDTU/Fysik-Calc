@@ -19,7 +19,7 @@ formel = st.selectbox("Vælg beregning", [
     "Fejlpropagation – generel (numerisk)",
     "Samlet usikkerhed (type A + B)",
     "Potenslov-fitting:  y = A · xᵅ  (log-log regression)",
-])
+], key="usikk_formel")
 
 st.divider()
 

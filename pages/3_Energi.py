@@ -19,7 +19,7 @@ formel = st.selectbox("Vælg formel", [
     "Energibevarelse:  Ek₁ + Ep₁ = Ek₂ + Ep₂",
     "Energibevarelse med friktion",
     "Mekanisk virkningsgrad:  η = P_ud / P_ind",
-])
+], key="energi_formel")
 
 _ENERGI_CONTEXT = {
     "Kinetisk energi:  Ek = ½ · m · v²": "Bruges til at beregne **bevægelsesenergien** fra masse og hastighed.",

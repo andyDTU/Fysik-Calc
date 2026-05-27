@@ -25,7 +25,7 @@ formel = st.selectbox("Vælg formel", [
     "Lorentzkraft på ledning:  F = B · I · L",
     "Induceret EMF:  ε = B · L · v",
     "Faradays lov:  ε = -N · ΔΦ / Δt",
-])
+], key="el_formel")
 
 st.divider()
 

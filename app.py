@@ -35,26 +35,26 @@ TASKS = [
     ]),
     # Energi
     ("🔋 Energi", [
-        ("⚡", "Kinetisk energi", "Ek = ½mv²", "pages/3_Energi.py", None, None),
-        ("⬆️", "Potentiel energi", "Ep = mgh", "pages/3_Energi.py", None, None),
-        ("🌀", "Energibevarelse", "Ek₁+Ep₁ = Ek₂+Ep₂", "pages/3_Energi.py", None, None),
-        ("🔩", "Fjeder (Hookes lov)", "F = k·x", "pages/3_Energi.py", None, None),
-        ("💡", "Effekt", "P = W/t = F·v", "pages/3_Energi.py", None, None),
-        ("📉", "Energi med friktion", "friktionskorrektion", "pages/3_Energi.py", None, None),
+        ("⚡", "Kinetisk energi", "Ek = ½mv²", "pages/3_Energi.py", "energi_formel", "Kinetisk energi:  Ek = ½ · m · v²"),
+        ("⬆️", "Potentiel energi", "Ep = mgh", "pages/3_Energi.py", "energi_formel", "Potentiel energi:  Ep = m · g · h"),
+        ("🌀", "Energibevarelse", "Ek₁+Ep₁ = Ek₂+Ep₂", "pages/3_Energi.py", "energi_formel", "Energibevarelse:  Ek₁ + Ep₁ = Ek₂ + Ep₂"),
+        ("🔩", "Fjeder (Hookes lov)", "F = k·x", "pages/3_Energi.py", "energi_formel", "Fjederkraft og -energi"),
+        ("💡", "Effekt", "P = W/t = F·v", "pages/3_Energi.py", "energi_formel", "Effekt:  P = W / t = F · v"),
+        ("📉", "Energi med friktion", "friktionskorrektion", "pages/3_Energi.py", "energi_formel", "Energibevarelse med friktion"),
     ]),
     # Elektricitet
     ("⚡ Elektricitet", [
-        ("🔌", "Ohms lov", "U = R·I", "pages/4_Elektricitet.py", None, None),
-        ("🔋", "Kondensator", "Q = C·U", "pages/4_Elektricitet.py", None, None),
-        ("🧲", "Lorentzkraft", "F = q·v·B", "pages/4_Elektricitet.py", None, None),
-        ("⚡", "Faradays lov", "ε = −N·ΔΦ/Δt", "pages/4_Elektricitet.py", None, None),
+        ("🔌", "Ohms lov", "U = R·I", "pages/4_Elektricitet.py", "el_formel", "Ohms lov:  U = R · I"),
+        ("🔋", "Kondensator", "Q = C·U", "pages/4_Elektricitet.py", "el_formel", "Kondensator:  Q = C · U"),
+        ("🧲", "Lorentzkraft", "F = q·v·B", "pages/4_Elektricitet.py", "el_formel", "Lorentzkraft:  F = q · v · B"),
+        ("⚡", "Faradays lov", "ε = −N·ΔΦ/Δt", "pages/4_Elektricitet.py", "el_formel", "Faradays lov:  ε = -N · ΔΦ / Δt"),
     ]),
     # Termodynamik
     ("🌡️ Termodynamik", [
-        ("💨", "Ideel gaslov", "pV = nRT", "pages/6_Termodynamik.py", None, None),
-        ("🔥", "Varmekapacitet", "Q = m·c·ΔT", "pages/6_Termodynamik.py", None, None),
-        ("💧", "Faseovergang", "Q = m·L", "pages/6_Termodynamik.py", None, None),
-        ("♻️", "Carnot-virkningsgrad", "η = 1 − Tk/Tv", "pages/6_Termodynamik.py", None, None),
+        ("💨", "Ideel gaslov", "pV = nRT", "pages/6_Termodynamik.py", "termo_formel", "Ideel gaslov:  p · V = n · R · T"),
+        ("🔥", "Varmekapacitet", "Q = m·c·ΔT", "pages/6_Termodynamik.py", "termo_formel", "Varmekapacitet:  Q = m · c · ΔT"),
+        ("💧", "Faseovergang", "Q = m·L", "pages/6_Termodynamik.py", "termo_formel", "Faseovergang:  Q = m · L"),
+        ("♻️", "Carnot-virkningsgrad", "η = 1 − Tk/Tv", "pages/6_Termodynamik.py", "termo_formel", "Carnot-virkningsgrad:  η = 1 − Tk/Tv"),
     ]),
     # Bølger & Optik
     ("🌊 Bølger & Optik", [
@@ -65,22 +65,22 @@ TASKS = [
     ]),
     # Atomfysik
     ("☢️ Atomfysik", [
-        ("☢️", "Radioaktivt henfald", "N = N₀·e^(−λt)", "pages/7_Atomfysik.py", None, None),
-        ("⚛️", "E = mc²", "massedefekt → energi", "pages/7_Atomfysik.py", None, None),
-        ("💫", "Fotonenergi", "E = h·f", "pages/7_Atomfysik.py", None, None),
+        ("☢️", "Radioaktivt henfald", "N = N₀·e^(−λt)", "pages/7_Atomfysik.py", "atom_formel", "Radioaktivt henfald:  N = N₀ · e^(−λt)"),
+        ("⚛️", "E = mc²", "massedefekt → energi", "pages/7_Atomfysik.py", "atom_formel", "Energi-masse:  E = Δm · c²"),
+        ("💫", "Fotonenergi", "E = h·f", "pages/7_Atomfysik.py", "atom_formel", "Fotonenergí:  E = h · f = h·c / λ"),
     ]),
     # Rotation & Kollisioner
     ("🔄 Rotation & Kollisioner", [
         ("🔄", "Inertimoment", "standardlegemer", "pages/9_Rotation.py", "rot_formel", "Inertimoment – standardlegemer"),
         ("🌀", "Impulsmomentbevarelse", "I₁ω₁ = I₂ω₂", "pages/9_Rotation.py", "rot_formel", "Bevarelse af impulsmoment"),
-        ("💥", "Elastisk kollision", "KE og impuls bevares", "pages/10_Kollisioner.py", None, None),
-        ("🫂", "Uelastisk kollision", "objekter hænger sammen", "pages/10_Kollisioner.py", None, None),
+        ("💥", "Elastisk kollision", "KE og impuls bevares", "pages/10_Kollisioner.py", "koll_formel", "Elastisk kollision – 1D (KE bevaret)"),
+        ("🫂", "Uelastisk kollision", "objekter hænger sammen", "pages/10_Kollisioner.py", "koll_formel", "Fuldstændig uelastisk kollision (objekter hænger sammen)"),
     ]),
     # Usikkerhed
     ("📏 Usikkerhed", [
-        ("📊", "Gennemsnit og stdafv.", "statistik", "pages/8_Usikkerhed.py", None, None),
-        ("📉", "Fejlpropagation", "usikkerhed i formel", "pages/8_Usikkerhed.py", None, None),
-        ("📈", "Potenslov-fitting", "y = A·xᵅ (log-log)", "pages/8_Usikkerhed.py", None, None),
+        ("📊", "Gennemsnit og stdafv.", "statistik", "pages/8_Usikkerhed.py", "usikk_formel", "Gennemsnit og standardafvigelse"),
+        ("📉", "Fejlpropagation", "usikkerhed i formel", "pages/8_Usikkerhed.py", "usikk_formel", "Fejlpropagation – generel (numerisk)"),
+        ("📈", "Potenslov-fitting", "y = A·xᵅ (log-log)", "pages/8_Usikkerhed.py", "usikk_formel", "Potenslov-fitting:  y = A · xᵅ  (log-log regression)"),
     ]),
 ]
 

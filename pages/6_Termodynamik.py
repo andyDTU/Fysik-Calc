@@ -20,7 +20,7 @@ formel = st.selectbox("Vælg formel", [
     "1. termodynamikslov:  ΔU = Q − W",
     "Carnot-virkningsgrad:  η = 1 − Tk/Tv",
     "Termisk udvidelse",
-])
+], key="termo_formel")
 
 _TERMO_CONTEXT = {
     "Ideel gaslov:  p · V = n · R · T": "Bruges til **ideale gasser i én tilstand** – kend tre af p, V, n, T, find den fjerde.",

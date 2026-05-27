@@ -25,7 +25,7 @@ formel = st.selectbox("Vælg formel", [
     "Bohrs model – hydrogenspektret",
     "Fotoelektrisk effekt",
     "Compton-spredning",
-])
+], key="atom_formel")
 
 st.divider()
 
