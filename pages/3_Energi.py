@@ -209,9 +209,18 @@ elif formel == "Effekt:  P = W / t = F · v":
         st.latex(rf"v = \frac{{P}}{{F}} = {v:.6g}\ \text{{m/s}}")
 
 elif formel == "Energibevarelse:  Ek₁ + Ep₁ = Ek₂ + Ep₂":
-    st.latex(r"E_{k1} + E_{p1} = E_{k2} + E_{p2}")
-    st.latex(r"\frac{1}{2}mv_1^2 + mgh_1 = \frac{1}{2}mv_2^2 + mgh_2")
+    st.latex(r"\tfrac{1}{2}(1+c_I)mv_1^2 + mgh_1 = \tfrac{1}{2}(1+c_I)mv_2^2 + mgh_2")
     st.markdown("Find den ukendte hastighed eller højde i et friktionsfrit system.")
+
+    rot = st.checkbox("Inkluder rotationsenergi (rullende legeme)")
+    if rot:
+        legeme_map = {"Massiv kugle (c=2/5)": 2/5, "Massiv cylinder/skive (c=1/2)": 1/2,
+                      "Tynd ring (c=1)": 1.0, "Hul kugle (c=2/3)": 2/3}
+        leg = st.selectbox("Legemets form:", list(legeme_map.keys()))
+        c_I = legeme_map[leg]
+        st.info(f"c_I = {c_I:.4g}  →  effektiv masse = (1 + {c_I:.4g})·m")
+    else:
+        c_I = 0.0
     st.divider()
 
     beregn = st.radio("Beregn:", ["v₂ – sluthastighed (m/s)", "v₁ – starthastighed (m/s)", "h₂ – sluthøjde (m)", "h₁ – starthøjde (m)"], horizontal=True)
@@ -222,20 +231,20 @@ elif formel == "Energibevarelse:  Ek₁ + Ep₁ = Ek₂ + Ep₂":
         v1 = c1.number_input("v₁ – starthastighed (m/s)", value=0.0, format="%.6g")
         h1 = c2.number_input("h₁ – starthøjde (m)", value=10.0, format="%.6g")
         h2 = c3.number_input("h₂ – sluthøjde (m)", value=0.0, format="%.6g")
-        val = v1**2 + 2 * G * (h1 - h2)
+        val = v1**2 + 2 * G * (h1 - h2) / (1 + c_I)
         if val < 0:
             st.error("Ingen reel løsning – energien rækker ikke til sluthøjden.")
         else:
             v2 = np.sqrt(val)
             st.success(f"**v₂ = {v2:.6g} m/s**")
-            st.latex(rf"v_2 = \sqrt{{v_1^2 + 2g(h_1 - h_2)}} = \sqrt{{{v1:.6g}^2 + 2 \cdot {G} \cdot ({h1:.6g} - {h2:.6g})}} = {v2:.6g}\ \text{{m/s}}")
+            st.latex(rf"v_2 = \sqrt{{\frac{{v_1^2 + 2g(h_1 - h_2)}}{{1+c_I}}}} = {v2:.6g}\ \text{{m/s}}")
 
     elif beregn == "v₁ – starthastighed (m/s)":
         c1, c2, c3 = st.columns(3)
-        v2 = c1.number_input("v₂ – sluthastighed (m/s)", value=14.0, format="%.6g")
+        v2 = c1.number_input("v₂ – sluthastighed (m/s)", value=10.0, format="%.6g")
         h1 = c2.number_input("h₁ – starthøjde (m)", value=10.0, format="%.6g")
         h2 = c3.number_input("h₂ – sluthøjde (m)", value=0.0, format="%.6g")
-        val = v2**2 - 2 * G * (h1 - h2)
+        val = v2**2 - 2 * G * (h1 - h2) / (1 + c_I)
         if val < 0:
             st.error("Ingen reel løsning.")
         else:
@@ -247,18 +256,18 @@ elif formel == "Energibevarelse:  Ek₁ + Ep₁ = Ek₂ + Ep₂":
         v1 = c1.number_input("v₁ (m/s)", value=0.0, format="%.6g")
         h1 = c2.number_input("h₁ (m)", value=10.0, format="%.6g")
         v2 = c3.number_input("v₂ (m/s)", value=0.0, format="%.6g")
-        h2 = h1 + (v1**2 - v2**2) / (2 * G)
+        h2 = h1 + (1 + c_I) * (v1**2 - v2**2) / (2 * G)
         st.success(f"**h₂ = {h2:.6g} m**")
-        st.latex(rf"h_2 = h_1 + \frac{{v_1^2 - v_2^2}}{{2g}} = {h2:.6g}\ \text{{m}}")
+        st.latex(rf"h_2 = h_1 + \frac{{(1+c_I)(v_1^2 - v_2^2)}}{{2g}} = {h2:.6g}\ \text{{m}}")
 
     else:
         c1, c2, c3 = st.columns(3)
         v1 = c1.number_input("v₁ (m/s)", value=0.0, format="%.6g")
         h2 = c2.number_input("h₂ (m)", value=0.0, format="%.6g")
-        v2 = c3.number_input("v₂ (m/s)", value=14.0, format="%.6g")
-        h1 = h2 + (v2**2 - v1**2) / (2 * G)
+        v2 = c3.number_input("v₂ (m/s)", value=10.0, format="%.6g")
+        h1 = h2 + (1 + c_I) * (v2**2 - v1**2) / (2 * G)
         st.success(f"**h₁ = {h1:.6g} m**")
-        st.latex(rf"h_1 = h_2 + \frac{{v_2^2 - v_1^2}}{{2g}} = {h1:.6g}\ \text{{m}}")
+        st.latex(rf"h_1 = h_2 + \frac{{(1+c_I)(v_2^2 - v_1^2)}}{{2g}} = {h1:.6g}\ \text{{m}}")
 
 elif formel == "Energibevarelse med friktion":
     st.latex(r"\tfrac{1}{2}mv_1^2 + mgh_1 = \tfrac{1}{2}mv_2^2 + mgh_2 + W_f")

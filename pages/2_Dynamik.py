@@ -264,8 +264,8 @@ elif formel == "Hældende plan":
     # Nettoretning: F_ext (op) mod F_par (ned) + friktion (modsat bevægelse)
     # Friktion: modsat netto-bevægelse
     F_tryk = F_ext - F_par          # positiv = objekt accelererer op
-    if abs(F_tryk) <= f_max and F_ext == 0.0:
-        friktion = F_par            # objekt holdes i ro af friktion
+    if abs(F_tryk) <= f_max:
+        friktion = -F_tryk          # statisk friktion balancerer nettotendensen
         F_net = 0.0
     elif F_tryk > 0:
         friktion = -f_max           # friktion er ned ad (modsat bevægelse opad)

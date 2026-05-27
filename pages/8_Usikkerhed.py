@@ -30,6 +30,9 @@ if formel == "Gennemsnit og standardafvigelse":
     try:
         vals = np.array([float(x.strip()) for x in raw.split(",") if x.strip()])
         n = len(vals)
+        if n < 2:
+            st.error("Mindst 2 måleværdier kræves for at beregne standardafvigelse.")
+            st.stop()
         mean = np.mean(vals)
         std  = np.std(vals, ddof=1)
         sem  = std / np.sqrt(n)
@@ -40,7 +43,8 @@ if formel == "Gennemsnit og standardafvigelse":
         col3.metric("s – std.afvigelse", f"{std:.4g}")
         col4.metric("u(x̄) – std.usikkerhed", f"{sem:.4g}")
 
-        st.success(f"**Resultat: x̄ = {mean:.6g} ± {sem:.4g}**   (relativ usikkerhed: {sem/mean*100:.3g}%)")
+        rel_str = f"  (relativ usikkerhed: {sem/abs(mean)*100:.3g}%)" if abs(mean) > 1e-12 else ""
+        st.success(f"**Resultat: x̄ = {mean:.6g} ± {sem:.4g}**{rel_str}")
 
         with st.expander("Vis tabel"):
             rows = [{"i": i+1, "xᵢ": v, "xᵢ − x̄": f"{v-mean:.4g}", "(xᵢ − x̄)²": f"{(v-mean)**2:.4g}"} for i, v in enumerate(vals)]
@@ -123,42 +127,44 @@ elif formel == "Relativ og absolut usikkerhed":
         st.latex(rf"\Delta x = \frac{{\text{{rel}}\%}}{{100}} \cdot x = \frac{{{rel:.6g}}}{{100}} \cdot {x:.6g} = {dx:.6g}")
 
 elif formel == "Fejlpropagation – addition/subtraktion":
-    st.latex(r"z = x \pm y \implies \Delta z = \Delta x + \Delta y")
-    st.info("Absolutte usikkerheder adderes altid ved addition og subtraktion.")
+    st.latex(r"z = x \pm y \implies u(z) = \sqrt{(\Delta x)^2 + (\Delta y)^2} \quad \text{(uafhængige fejl, RSS)}")
+    st.info("For uafhængige målinger bruges RSS (kvadratisk sum). Absolut sum gælder kun for maksimalt korrelerede fejl.")
     st.divider()
 
     c1, c2 = st.columns(2)
     with c1:
-        x  = st.number_input("x", value=10.0, format="%.6g")
-        dx = st.number_input("Δx", value=0.1, min_value=0.0, format="%.6g")
+        x  = st.number_input("x", value=10.0, format="%.6g", key="add_x")
+        dx = st.number_input("Δx", value=0.1, min_value=0.0, format="%.6g", key="add_dx")
     with c2:
-        y  = st.number_input("y", value=5.0, format="%.6g")
-        dy = st.number_input("Δy", value=0.05, min_value=0.0, format="%.6g")
+        y  = st.number_input("y", value=5.0, format="%.6g", key="add_y")
+        dy = st.number_input("Δy", value=0.05, min_value=0.0, format="%.6g", key="add_dy")
 
     op = st.radio("Operation:", ["x + y", "x − y"], horizontal=True)
     z = x + y if op == "x + y" else x - y
-    dz = dx + dy
-    rel = dz / abs(z) * 100 if z != 0 else float('inf')
+    dz_rss = np.sqrt(dx**2 + dy**2)
+    dz_abs = dx + dy
+    rel = dz_rss / abs(z) * 100 if abs(z) > 1e-12 else float('inf')
 
-    st.success(f"**z = {z:.6g} ± {dz:.6g}**   (relativ: {rel:.3g}%)")
+    st.success(f"**z = {z:.6g} ± {dz_rss:.4g}** (RSS)   (relativ: {rel:.3g}%)")
     if op == "x + y":
         st.latex(rf"z = {x:.6g} + {y:.6g} = {z:.6g}")
     else:
         st.latex(rf"z = {x:.6g} - {y:.6g} = {z:.6g}")
-    st.latex(rf"\Delta z = \Delta x + \Delta y = {dx:.6g} + {dy:.6g} = {dz:.6g}")
+    st.latex(rf"u(z) = \sqrt{{(\Delta x)^2 + (\Delta y)^2}} = \sqrt{{{dx:.4g}^2 + {dy:.4g}^2}} = {dz_rss:.4g}")
+    st.caption(f"Worst case (absolut sum): Δz = {dx:.4g} + {dy:.4g} = {dz_abs:.4g}")
 
 elif formel == "Fejlpropagation – multiplikation/division":
-    st.latex(r"z = x \cdot y \text{ eller } z = \frac{x}{y} \implies \frac{\Delta z}{|z|} = \frac{\Delta x}{|x|} + \frac{\Delta y}{|y|}")
-    st.info("Relative usikkerheder adderes ved multiplikation og division.")
+    st.latex(r"z = x \cdot y \text{ eller } \frac{x}{y} \implies \frac{u(z)}{|z|} = \sqrt{\left(\frac{\Delta x}{|x|}\right)^2 + \left(\frac{\Delta y}{|y|}\right)^2} \quad \text{(RSS)}")
+    st.info("For uafhængige målinger bruges RSS (kvadratisk sum). Absolut sum gælder kun for maksimalt korrelerede fejl.")
     st.divider()
 
     c1, c2 = st.columns(2)
     with c1:
-        x  = st.number_input("x", value=10.0, format="%.6g")
-        dx = st.number_input("Δx", value=0.1, min_value=0.0, format="%.6g")
+        x  = st.number_input("x", value=10.0, format="%.6g", key="mul_x")
+        dx = st.number_input("Δx", value=0.1, min_value=0.0, format="%.6g", key="mul_dx")
     with c2:
-        y  = st.number_input("y", value=5.0, format="%.6g")
-        dy = st.number_input("Δy", value=0.1, min_value=0.0, format="%.6g")
+        y  = st.number_input("y", value=5.0, format="%.6g", key="mul_y")
+        dy = st.number_input("Δy", value=0.1, min_value=0.0, format="%.6g", key="mul_dy")
 
     op = st.radio("Operation:", ["x · y", "x / y"], horizontal=True)
     if op == "x · y":
@@ -169,14 +175,17 @@ elif formel == "Fejlpropagation – multiplikation/division":
             st.stop()
         z = x / y
 
-    rel_x = dx / abs(x) if x != 0 else 0
-    rel_y = dy / abs(y) if y != 0 else 0
-    rel_z = rel_x + rel_y
-    dz = rel_z * abs(z)
+    rel_x = dx / abs(x) if abs(x) > 1e-12 else 0
+    rel_y = dy / abs(y) if abs(y) > 1e-12 else 0
+    rel_z_rss = np.sqrt(rel_x**2 + rel_y**2)
+    rel_z_abs = rel_x + rel_y
+    dz_rss = rel_z_rss * abs(z)
+    dz_abs = rel_z_abs * abs(z)
 
-    st.success(f"**z = {z:.6g} ± {dz:.6g}**   (relativ: {rel_z*100:.3g}%)")
-    st.latex(rf"\frac{{\Delta z}}{{|z|}} = \frac{{\Delta x}}{{|x|}} + \frac{{\Delta y}}{{|y|}} = \frac{{{dx:.6g}}}{{{abs(x):.6g}}} + \frac{{{dy:.6g}}}{{{abs(y):.6g}}} = {rel_z:.4g}")
-    st.latex(rf"\Delta z = {rel_z:.4g} \cdot |z| = {rel_z:.4g} \cdot {abs(z):.6g} = {dz:.4g}")
+    st.success(f"**z = {z:.6g} ± {dz_rss:.4g}** (RSS)   (relativ: {rel_z_rss*100:.3g}%)")
+    st.latex(rf"\frac{{u(z)}}{{|z|}} = \sqrt{{\left(\frac{{\Delta x}}{{|x|}}\right)^2 + \left(\frac{{\Delta y}}{{|y|}}\right)^2}} = \sqrt{{{rel_x:.4g}^2 + {rel_y:.4g}^2}} = {rel_z_rss:.4g}")
+    st.latex(rf"u(z) = {rel_z_rss:.4g} \cdot {abs(z):.6g} = {dz_rss:.4g}")
+    st.caption(f"Worst case (absolut sum): Δz = {dz_abs:.4g}  (relativ: {rel_z_abs*100:.3g}%)")
 
 elif formel == "Fejlpropagation – potens:  z = xⁿ":
     st.latex(r"z = x^n \implies \frac{\Delta z}{|z|} = |n| \cdot \frac{\Delta x}{|x|}")
@@ -222,10 +231,11 @@ elif formel == "Fejlpropagation – generel (numerisk)":
         z = f(m, v)
         dz_dm = abs(f(m+eps, v) - f(m-eps, v)) / (2*eps)
         dz_dv = abs(f(m, v+eps) - f(m, v-eps)) / (2*eps)
-        dz = dz_dm * dm + dz_dv * dv
-        st.success(f"**E_k = {z:.6g} J ± {dz:.4g} J**   ({dz/z*100:.3g}%)")
+        dz = np.sqrt((dz_dm * dm)**2 + (dz_dv * dv)**2)
+        pct = f"{dz/z*100:.3g}%" if abs(z) > 1e-12 else "–"
+        st.success(f"**E_k = {z:.6g} J ± {dz:.4g} J** (RSS)   ({pct})")
         st.latex(rf"\frac{{\partial z}}{{\partial m}} = \tfrac{{1}}{{2}}v^2 = {dz_dm:.6g},\quad \frac{{\partial z}}{{\partial v}} = mv = {dz_dv:.6g}")
-        st.latex(rf"\Delta E_k = {dz_dm:.6g}\cdot{dm:.4g} + {dz_dv:.6g}\cdot{dv:.4g} = {dz:.4g}\ \text{{J}}")
+        st.latex(rf"u(E_k) = \sqrt{{({dz_dm:.4g}\cdot{dm:.4g})^2 + ({dz_dv:.4g}\cdot{dv:.4g})^2}} = {dz:.4g}\ \text{{J}}")
 
     elif valg == "t = (v₀ + √(v₀²+2gh)) / g  (2024 eksamen Q1)":
         st.markdown("**2024 eksamensopgave 1:** sten kastet op fra højde h med starthastighed v₀.")
@@ -288,8 +298,9 @@ elif formel == "Fejlpropagation – generel (numerisk)":
         dF_dm = abs(f4(m+eps, v, r) - f4(m-eps, v, r)) / (2*eps)
         dF_dv = abs(f4(m, v+eps, r) - f4(m, v-eps, r)) / (2*eps)
         dF_dr = abs(f4(m, v, r+eps) - f4(m, v, r-eps)) / (2*eps)
-        dz = dF_dm*dm + dF_dv*dv + dF_dr*dr
-        st.success(f"**Fc = {z:.4g} N ± {dz:.4g} N**   ({dz/z*100:.3g}%)")
+        dz = np.sqrt((dF_dm*dm)**2 + (dF_dv*dv)**2 + (dF_dr*dr)**2)
+        pct = f"{dz/z*100:.3g}%" if abs(z) > 1e-12 else "–"
+        st.success(f"**Fc = {z:.4g} N ± {dz:.4g} N** (RSS)   ({pct})")
 
     else:
         h_planck = 6.626e-34

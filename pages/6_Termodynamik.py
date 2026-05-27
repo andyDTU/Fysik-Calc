@@ -191,7 +191,8 @@ elif formel == "Faseovergang:  Q = m · L":
         st.success(f"**L = {L:.6g} J/kg**")
 
 elif formel == "Arbejde af gas:  W = p · ΔV":
-    st.latex(r"W = p \cdot \Delta V")
+    st.latex(r"W = p \cdot \Delta V \quad \text{(isobar – konstant tryk)}")
+    st.info("⚠️ Gælder kun for isobar proces (konstant tryk). Isoterm: W = nRT·ln(V₂/V₁). Adiabatisk: W = ΔU = nCᵥΔT.")
     beregn = st.radio("Beregn:", ["W – arbejde (J)", "p – tryk (Pa)", "ΔV – volumensændring (m³)"], horizontal=True)
     st.divider()
 

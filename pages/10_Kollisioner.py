@@ -65,7 +65,8 @@ elif formel == "Fuldstændig uelastisk kollision (objekter hænger sammen)":
         col1, col2, col3 = st.columns(3)
         col1.metric("KE før", f"{KE_before:.4g} J")
         col2.metric("KE efter", f"{KE_after:.4g} J")
-        col3.metric("ΔKE (tab)", f"{KE_loss:.4g} J  ({KE_loss/KE_before*100:.2f}%)")
+        pct = f"  ({KE_loss/KE_before*100:.2f}%)" if KE_before > 1e-12 else ""
+        col3.metric("ΔKE (tab)", f"{KE_loss:.4g} J{pct}")
         st.latex(rf"v' = \frac{{m_1 v_1 + m_2 v_2}}{{m_1 + m_2}} = \frac{{{m1:.6g} \cdot {v1:.6g} + {m2:.6g} \cdot {v2:.6g}}}{{{m1+m2:.6g}}} = {v_after:.6g}\ \text{{m/s}}")
 
     elif beregn == "m₁ – masse 1 (kg)":
@@ -274,7 +275,8 @@ elif formel == "Koefficient for restitution:  e = Δv_efter / Δv_før":
         col1, col2 = st.columns(2)
         col1.success(f"**v₁' = {v1_aft:.6g} m/s**")
         col2.success(f"**v₂' = {v2_aft:.6g} m/s**")
-        st.metric("KE-tab", f"{KE_before - KE_after:.4g} J  ({(1 - KE_after/KE_before)*100:.2f}%)")
+        KE_pct = f"  ({(1 - KE_after/KE_before)*100:.2f}%)" if KE_before > 1e-12 else ""
+        st.metric("KE-tab", f"{KE_before - KE_after:.4g} J{KE_pct}")
 
 elif formel == "Eksplosion / udskydning":
     st.latex(r"0 = m_1 v_1' + m_2 v_2' \quad \text{(system i ro før)}")
