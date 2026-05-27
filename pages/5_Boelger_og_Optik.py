@@ -14,7 +14,10 @@ formel = st.selectbox("Vælg formel", [
     "Forstørring:  M = -di / do",
     "Doppler-effekt",
     "Dobbeltspalte (Young):  d·sin(θ) = n·λ",
+    "Diffraktionsgitter:  d·sin(θ) = m·λ",
     "Enkelt­spalte diffraktion",
+    "Tyndfilm interferens",
+    "Malus' lov:  I = I₀·cos²(θ)",
     "Stående bølger – streng/rør",
     "Lysets brydningsindeks:  n = c / v",
 ])
@@ -231,6 +234,145 @@ elif formel == "Dobbeltspalte (Young):  d·sin(θ) = n·λ":
         L = n_order * lam * d / (d * y / (n_order * lam))
         L2 = d * y / (n_order * lam)
         st.success(f"**L = {L2:.6g} m**")
+
+elif formel == "Diffraktionsgitter:  d·sin(θ) = m·λ":
+    st.latex(r"d \cdot \sin\theta = m \cdot \lambda")
+    st.markdown("**d** = gitterafstand (m) = 1/N hvor N = antal linjer pr. meter.  Skarpe maksima i modsætning til dobbeltspalte.")
+    beregn = st.radio("Beregn:", ["θ – diffrakt.vinkel (°)", "λ – bølgelængde (m)", "d – gitterafstand (m)"], horizontal=True)
+    st.divider()
+
+    m_order = st.number_input("m – orden (heltal, m ≥ 1)", value=1, min_value=1, step=1)
+
+    if beregn == "θ – diffrakt.vinkel (°)":
+        c1, c2 = st.columns(2)
+        lam = c1.number_input("λ – bølgelængde (m)", value=550e-9, format="%.6g")
+        d   = c2.number_input("d – gitterafstand (m)  [= 1/linjer·m⁻¹]", value=1/600e3, format="%.6g")
+        sin_val = m_order * lam / d
+        if abs(sin_val) > 1:
+            st.error(f"Ingen maksimum: sin(θ) = {sin_val:.4f} > 1 (orden m={m_order} eksisterer ikke).")
+        else:
+            theta = np.degrees(np.arcsin(sin_val))
+            st.success(f"**θ = {theta:.4g}°**  for orden m = {m_order}")
+            st.latex(rf"\theta = \arcsin\!\left(\frac{{m\lambda}}{{d}}\right) = \arcsin\!\left(\frac{{{m_order}\cdot{lam:.4g}}}{{{d:.4g}}}\right) = {theta:.4g}°")
+            st.caption(f"Gitter med {1/d:.4g} linjer/m → d = {d:.4g} m")
+
+    elif beregn == "λ – bølgelængde (m)":
+        c1, c2 = st.columns(2)
+        d     = c1.number_input("d – gitterafstand (m)", value=1/600e3, format="%.6g")
+        theta = c2.number_input("θ – diffrakt.vinkel (°)", value=19.3, min_value=0.0, max_value=89.9, format="%.6g")
+        lam = d * np.sin(np.radians(theta)) / m_order
+        st.success(f"**λ = {lam:.6g} m  =  {lam*1e9:.4g} nm**")
+        st.latex(rf"\lambda = \frac{{d\sin\theta}}{{m}} = \frac{{{d:.4g}\cdot\sin({theta:.4g}°)}}{{{m_order}}} = {lam:.6g}\ \text{{m}}")
+
+    else:
+        c1, c2 = st.columns(2)
+        lam   = c1.number_input("λ – bølgelængde (m)", value=550e-9, format="%.6g")
+        theta = c2.number_input("θ – diffrakt.vinkel (°)", value=19.3, min_value=0.1, max_value=89.9, format="%.6g")
+        d = m_order * lam / np.sin(np.radians(theta))
+        N_lines = 1 / d
+        st.success(f"**d = {d:.6g} m**   ({N_lines:.4g} linjer/m)")
+        st.latex(rf"d = \frac{{m\lambda}}{{\sin\theta}} = \frac{{{m_order}\cdot{lam:.4g}}}{{\sin({theta:.4g}°)}} = {d:.6g}\ \text{{m}}")
+
+elif formel == "Tyndfilm interferens":
+    st.latex(r"2nt = m\lambda \quad \text{(konstruktiv, en fasevending)}")
+    st.latex(r"2nt = \left(m+\tfrac{1}{2}\right)\lambda \quad \text{(destruktiv, en fasevending)}")
+    st.markdown("""
+**Fase­vendinger:** lys der reflekteres fra et optisk tættere medium (n_høj) får en fasevending (½λ).
+
+| Situation | Konstruktiv | Destruktiv |
+|-----------|-------------|------------|
+| Én fasevending (fx sæbefilm i luft) | 2nt = mλ | 2nt = (m+½)λ |
+| Ingen el. to fasvend. | 2nt = (m+½)λ | 2nt = mλ |
+""")
+    st.divider()
+
+    fasvend = st.radio("Antal fase­vendinger:", ["1 (fx sæbefilm i luft eller olie på vand)", "0 eller 2"], horizontal=True)
+    beregn  = st.radio("Beregn:", ["λ – bølgelængde (m)", "t – filmtykkelse (m)", "m – orden"], horizontal=True)
+    st.divider()
+
+    if fasvend == "1 (fx sæbefilm i luft eller olie på vand)":
+        konstruktiv = r"2nt = m\lambda"
+        destruktiv  = r"2nt = \left(m+\tfrac{1}{2}\right)\lambda"
+        konstruktiv_fn = lambda n, t, m: 2*n*t / m if m > 0 else 0
+        t_konstruktiv  = lambda n, lam, m: m * lam / (2 * n)
+        t_destruktiv   = lambda n, lam, m: (m + 0.5) * lam / (2 * n)
+    else:
+        konstruktiv = r"2nt = \left(m+\tfrac{1}{2}\right)\lambda"
+        destruktiv  = r"2nt = m\lambda"
+        t_konstruktiv  = lambda n, lam, m: (m + 0.5) * lam / (2 * n)
+        t_destruktiv   = lambda n, lam, m: m * lam / (2 * n)
+
+    mode = st.radio("Betingelse:", ["Konstruktiv (max)", "Destruktiv (min)"], horizontal=True)
+    m_ord = st.number_input("m – orden (heltal ≥ 1)", value=1, min_value=1, step=1)
+
+    c1, c2 = st.columns(2)
+    n_film = c1.number_input("n – brydningsindeks for filmen", value=1.33, min_value=1.0, format="%.6g")
+
+    if beregn == "λ – bølgelængde (m)":
+        t = c2.number_input("t – filmtykkelse (m)", value=200e-9, min_value=1e-12, format="%.6g")
+        if mode == "Konstruktiv (max)":
+            lam = t_konstruktiv(n_film, 1.0, m_ord)  # dummy; solve for lam
+            lam = 2 * n_film * t / m_ord if fasvend == "1 (fx sæbefilm i luft eller olie på vand)" else 2 * n_film * t / (m_ord + 0.5)
+        else:
+            lam = 2 * n_film * t / (m_ord + 0.5) if fasvend == "1 (fx sæbefilm i luft eller olie på vand)" else 2 * n_film * t / m_ord
+        st.success(f"**λ = {lam:.6g} m  =  {lam*1e9:.4g} nm**")
+        st.caption("Synligt lys: 380–700 nm")
+
+    elif beregn == "t – filmtykkelse (m)":
+        lam = c2.number_input("λ – bølgelængde i luft (m)", value=550e-9, format="%.6g")
+        if mode == "Konstruktiv (max)":
+            t = 2 * n_film * 1.0 / m_ord  # wrong, fix:
+            t = (m_ord * lam / (2 * n_film)) if fasvend == "1 (fx sæbefilm i luft eller olie på vand)" else ((m_ord + 0.5) * lam / (2 * n_film))
+        else:
+            t = ((m_ord + 0.5) * lam / (2 * n_film)) if fasvend == "1 (fx sæbefilm i luft eller olie på vand)" else (m_ord * lam / (2 * n_film))
+        st.success(f"**t = {t:.6g} m  =  {t*1e9:.4g} nm**")
+
+    else:
+        lam = c2.number_input("λ – bølgelængde i luft (m)", value=550e-9, format="%.6g")
+        t   = st.number_input("t – filmtykkelse (m)", value=200e-9, format="%.6g")
+        if mode == "Konstruktiv (max)":
+            m_float = (2 * n_film * t / lam) if fasvend == "1 (fx sæbefilm i luft eller olie på vand)" else (2 * n_film * t / lam - 0.5)
+        else:
+            m_float = (2 * n_film * t / lam - 0.5) if fasvend == "1 (fx sæbefilm i luft eller olie på vand)" else (2 * n_film * t / lam)
+        m_nearest = round(m_float)
+        st.success(f"**m ≈ {m_float:.3f}** → nærmeste heltal: **m = {m_nearest}**")
+
+elif formel == "Malus' lov:  I = I₀·cos²(θ)":
+    st.latex(r"I = I_0 \cdot \cos^2\!\theta")
+    st.markdown("Intensiteten af lineært polariseret lys efter en polarisator med vinkel θ til polariseringsplanet.")
+    beregn = st.radio("Beregn:", ["I – transmitteret intensitet", "θ – vinkel (°)", "I₀ – indfaldsintensitet"], horizontal=True)
+    st.divider()
+
+    if beregn == "I – transmitteret intensitet":
+        c1, c2 = st.columns(2)
+        I0    = c1.number_input("I₀ – indfaldsintensitet (W/m²)", value=100.0, min_value=0.0, format="%.6g")
+        theta = c2.number_input("θ – vinkel (grader)", value=45.0, min_value=0.0, max_value=90.0, format="%.6g")
+        I = I0 * np.cos(np.radians(theta))**2
+        st.success(f"**I = {I:.6g} W/m²**   ({I/I0*100:.2f}% af I₀)" if I0 > 1e-12 else f"**I = {I:.6g} W/m²**")
+        st.latex(rf"I = I_0\cos^2\theta = {I0:.4g}\cdot\cos^2({theta:.4g}°) = {I:.6g}\ \text{{W/m}}^2")
+
+    elif beregn == "θ – vinkel (°)":
+        c1, c2 = st.columns(2)
+        I0 = c1.number_input("I₀ – indfaldsintensitet (W/m²)", value=100.0, min_value=1e-12, format="%.6g")
+        I  = c2.number_input("I – transmitteret intensitet (W/m²)", value=50.0, min_value=0.0, format="%.6g")
+        if I > I0:
+            st.error("I kan ikke være større end I₀.")
+        else:
+            theta = np.degrees(np.arccos(np.sqrt(I / I0)))
+            st.success(f"**θ = {theta:.4g}°**")
+            st.latex(rf"\theta = \arccos\!\sqrt{{\frac{{I}}{{I_0}}}} = \arccos\!\sqrt{{\frac{{{I:.4g}}}{{{I0:.4g}}}}} = {theta:.4g}°")
+
+    else:
+        c1, c2 = st.columns(2)
+        I     = c1.number_input("I – transmitteret intensitet (W/m²)", value=50.0, min_value=0.0, format="%.6g")
+        theta = c2.number_input("θ – vinkel (grader)", value=45.0, min_value=0.0, max_value=89.9, format="%.6g")
+        cos2 = np.cos(np.radians(theta))**2
+        if cos2 < 1e-12:
+            st.error("θ = 90° giver cos²(θ) = 0 – ingen løsning.")
+        else:
+            I0 = I / cos2
+            st.success(f"**I₀ = {I0:.6g} W/m²**")
+            st.latex(rf"I_0 = \frac{{I}}{{\cos^2\theta}} = \frac{{{I:.4g}}}{{\cos^2({theta:.4g}°)}} = {I0:.6g}\ \text{{W/m}}^2")
 
 elif formel == "Enkelt­spalte diffraktion":
     st.latex(r"a \cdot \sin\theta = n \cdot \lambda \quad \text{(minima)}")

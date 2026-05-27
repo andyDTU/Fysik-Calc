@@ -20,6 +20,7 @@ formel = st.selectbox("Vælg formel", [
     "Tyngdekraft:  G = m · g",
     "Friktion:  f = μ · N",
     "Centripetalkraft:  Fc = m · v² / r",
+    "Normalkraft i sløjfe (top/bund)",
     "Impuls:  p = m · v",
     "Impulsmomentloven:  F · Δt = Δp",
     "Kraftmoment:  τ = F · l",
@@ -148,6 +149,44 @@ elif formel == "Centripetalkraft:  Fc = m · v² / r":
         r = m * v**2 / Fc
         st.success(f"**r = {r:.6g} m**")
         st.latex(rf"r = \frac{{m v^2}}{{F_c}} = {r:.6g}\ \text{{m}}")
+
+elif formel == "Normalkraft i sløjfe (top/bund)":
+    st.latex(r"\text{Bund:}\ N_{bund} = mg + \frac{mv^2}{r} \qquad \text{Top:}\ N_{top} = \frac{mv^2}{r} - mg")
+    st.markdown("""
+Legeme i cirkulær bevægelse i lodret plan. Centripetalkraft = netto radialkraft.
+
+- **Bund**: N og tyngdekraft peger i modsatte retninger → N = mg + mv²/r
+- **Top**: N og tyngdekraft peger begge mod centrum → N = mv²/r − mg
+- **Minimum hastighed i top**: N ≥ 0 kræver v ≥ √(g·r)
+""")
+    st.divider()
+
+    c1, c2, c3 = st.columns(3)
+    m = c1.number_input("m – masse (kg)", value=1.0, min_value=1e-12, format="%.6g")
+    v = c2.number_input("v – fart i det givne punkt (m/s)", value=10.0, min_value=0.0, format="%.6g")
+    r = c3.number_input("r – sløjferadius (m)", value=2.0, min_value=1e-12, format="%.6g")
+
+    Fc = m * v**2 / r
+    N_bund = m * G + Fc
+    N_top  = Fc - m * G
+    v_min  = np.sqrt(G * r)
+
+    st.divider()
+    col1, col2, col3 = st.columns(3)
+    col1.metric("N (bund)", f"{N_bund:.4g} N")
+    col2.metric("N (top)", f"{N_top:.4g} N")
+    col3.metric("v_min (top)", f"{v_min:.4g} m/s")
+
+    if N_top < 0:
+        st.warning(f"⚠️ N_top = {N_top:.4g} N < 0: legemet mister kontakten i toppen! Minimum: v ≥ {v_min:.4g} m/s.")
+    else:
+        st.success("Legemet holder kontakten i toppen.")
+
+    with st.expander("Vis udregning"):
+        st.latex(rf"F_c = \frac{{mv^2}}{{r}} = \frac{{{m:.4g}\cdot{v:.4g}^2}}{{{r:.4g}}} = {Fc:.4g}\ \text{{N}}")
+        st.latex(rf"N_{{bund}} = mg + F_c = {m:.4g}\cdot{G} + {Fc:.4g} = {N_bund:.4g}\ \text{{N}}")
+        st.latex(rf"N_{{top}} = F_c - mg = {Fc:.4g} - {m:.4g}\cdot{G} = {N_top:.4g}\ \text{{N}}")
+        st.latex(rf"v_{{min}} = \sqrt{{gr}} = \sqrt{{{G}\cdot{r:.4g}}} = {v_min:.4g}\ \text{{m/s}}")
 
 elif formel == "Impuls:  p = m · v":
     st.latex(r"p = m \cdot v")

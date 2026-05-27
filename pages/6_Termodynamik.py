@@ -14,7 +14,9 @@ formel = st.selectbox("Vælg formel", [
     "Kombineret gaslov:  p₁V₁/T₁ = p₂V₂/T₂",
     "Varmekapacitet:  Q = m · c · ΔT",
     "Faseovergang:  Q = m · L",
-    "Arbejde af gas:  W = p · ΔV",
+    "Arbejde af gas – isobar:  W = p · ΔV",
+    "Arbejde af gas – isoterm:  W = nRT·ln(V₂/V₁)",
+    "Adiabatisk proces:  pV^γ = konst",
     "1. termodynamikslov:  ΔU = Q − W",
     "Carnot-virkningsgrad:  η = 1 − Tk/Tv",
     "Termisk udvidelse",
@@ -190,9 +192,9 @@ elif formel == "Faseovergang:  Q = m · L":
         L = Q / m
         st.success(f"**L = {L:.6g} J/kg**")
 
-elif formel == "Arbejde af gas:  W = p · ΔV":
+elif formel == "Arbejde af gas – isobar:  W = p · ΔV":
     st.latex(r"W = p \cdot \Delta V \quad \text{(isobar – konstant tryk)}")
-    st.info("⚠️ Gælder kun for isobar proces (konstant tryk). Isoterm: W = nRT·ln(V₂/V₁). Adiabatisk: W = ΔU = nCᵥΔT.")
+    st.info("Gælder for isobar proces (konstant tryk). For isoterm brug: W = nRT·ln(V₂/V₁).")
     beregn = st.radio("Beregn:", ["W – arbejde (J)", "p – tryk (Pa)", "ΔV – volumensændring (m³)"], horizontal=True)
     st.divider()
 
@@ -217,6 +219,103 @@ elif formel == "Arbejde af gas:  W = p · ΔV":
         p = c2.number_input("p – tryk (Pa)", value=101325.0, min_value=1e-12, format="%.6g")
         dV = W / p
         st.success(f"**ΔV = {dV:.6g} m³**")
+
+elif formel == "Arbejde af gas – isoterm:  W = nRT·ln(V₂/V₁)":
+    st.latex(r"W = nRT\ln\!\frac{V_2}{V_1} = p_1 V_1 \ln\!\frac{V_2}{V_1}")
+    st.info("Gælder for isoterm proces (konstant temperatur): ΔT = 0, ΔU = 0, Q = W.")
+    st.info(f"R = {R} J/(mol·K)")
+    beregn = st.radio("Beregn:", ["W – arbejde (J)", "V₂ – slutvolumen (m³)", "T – temperatur (K)"], horizontal=True)
+    st.divider()
+
+    if beregn == "W – arbejde (J)":
+        c1, c2, c3, c4 = st.columns(4)
+        n  = c1.number_input("n – stofmængde (mol)", value=1.0, min_value=1e-12, format="%.6g")
+        T  = c2.number_input("T – temperatur (K)", value=300.0, min_value=0.01, format="%.6g")
+        V1 = c3.number_input("V₁ – startvolumen (m³)", value=0.001, min_value=1e-12, format="%.6g")
+        V2 = c4.number_input("V₂ – slutvolumen (m³)", value=0.002, min_value=1e-12, format="%.6g")
+        if V2 <= 0 or V1 <= 0:
+            st.error("Volumen skal være positiv.")
+        else:
+            W = n * R * T * np.log(V2 / V1)
+            st.success(f"**W = {W:.6g} J**")
+            st.latex(rf"W = nRT\ln\frac{{V_2}}{{V_1}} = {n:.4g}\cdot{R}\cdot{T:.4g}\cdot\ln\!\left(\frac{{{V2:.4g}}}{{{V1:.4g}}}\right) = {W:.6g}\ \text{{J}}")
+            if W > 0:
+                st.caption("W > 0: gassen udvider sig og udfører arbejde.")
+            else:
+                st.caption("W < 0: gassen komprimeres, omgivelserne udfører arbejde.")
+
+    elif beregn == "V₂ – slutvolumen (m³)":
+        c1, c2, c3, c4 = st.columns(4)
+        n  = c1.number_input("n – stofmængde (mol)", value=1.0, min_value=1e-12, format="%.6g")
+        T  = c2.number_input("T – temperatur (K)", value=300.0, min_value=0.01, format="%.6g")
+        V1 = c3.number_input("V₁ – startvolumen (m³)", value=0.001, min_value=1e-12, format="%.6g")
+        W  = c4.number_input("W – arbejde (J)", value=1000.0, format="%.6g")
+        V2 = V1 * np.exp(W / (n * R * T))
+        st.success(f"**V₂ = {V2:.6g} m³**")
+        st.latex(rf"V_2 = V_1 \cdot e^{{W/(nRT)}} = {V1:.4g} \cdot e^{{{W:.4g}/({n:.4g}\cdot{R}\cdot{T:.4g})}} = {V2:.6g}\ \text{{m}}^3")
+
+    else:
+        c1, c2, c3, c4 = st.columns(4)
+        n  = c1.number_input("n – stofmængde (mol)", value=1.0, min_value=1e-12, format="%.6g")
+        W  = c2.number_input("W – arbejde (J)", value=1729.0, format="%.6g")
+        V1 = c3.number_input("V₁ (m³)", value=0.001, min_value=1e-12, format="%.6g")
+        V2 = c4.number_input("V₂ (m³)", value=0.002, min_value=1e-12, format="%.6g")
+        if abs(np.log(V2 / V1)) < 1e-12:
+            st.error("V₁ = V₂ – ingen isoterm proces.")
+        else:
+            T = W / (n * R * np.log(V2 / V1))
+            st.success(f"**T = {T:.6g} K  =  {T-273.15:.4g} °C**")
+
+elif formel == "Adiabatisk proces:  pV^γ = konst":
+    st.latex(r"p V^\gamma = \text{konst} \qquad T V^{\gamma-1} = \text{konst}")
+    st.latex(r"W = \frac{p_1 V_1 - p_2 V_2}{\gamma - 1} = \frac{nR(T_1 - T_2)}{\gamma - 1}")
+    st.info("Adiabatisk: ingen varmeudveksling (Q = 0). ΔU = −W.")
+    st.divider()
+
+    gamma_map = {
+        "Monoatomisk ideal gas (He, Ar) – γ = 5/3 ≈ 1.667": 5/3,
+        "Diatomisk ideal gas (N₂, O₂, luft) – γ = 7/5 = 1.4": 7/5,
+        "Triatomisk (CO₂) – γ ≈ 1.3": 1.3,
+    }
+    gamma_choice = st.selectbox("Gastype:", list(gamma_map.keys()))
+    gamma = gamma_map[gamma_choice]
+    st.caption(f"γ = {gamma:.4g}")
+
+    beregn = st.radio("Beregn:", ["p₂ og T₂ (given V₁, V₂, p₁, T₁)", "W – adiabatisk arbejde (J)"], horizontal=True)
+    st.divider()
+
+    if beregn == "p₂ og T₂ (given V₁, V₂, p₁, T₁)":
+        c1, c2 = st.columns(2)
+        with c1:
+            st.markdown("**Tilstand 1**")
+            p1 = st.number_input("p₁ (Pa)", value=101325.0, min_value=1e-12, format="%.6g")
+            V1 = st.number_input("V₁ (m³)", value=0.001, min_value=1e-12, format="%.6g")
+            T1 = st.number_input("T₁ (K)", value=300.0, min_value=0.01, format="%.6g")
+        with c2:
+            st.markdown("**Tilstand 2**")
+            V2 = st.number_input("V₂ (m³)", value=0.0002, min_value=1e-12, format="%.6g")
+
+        p2 = p1 * (V1 / V2)**gamma
+        T2 = T1 * (V1 / V2)**(gamma - 1)
+        W  = (p1 * V1 - p2 * V2) / (gamma - 1)
+
+        col1, col2, col3 = st.columns(3)
+        col1.metric("p₂ (Pa)", f"{p2:.6g}")
+        col2.metric("T₂ (K)", f"{T2:.6g}  ({T2-273.15:.4g} °C)")
+        col3.metric("W – arbejde (J)", f"{W:.6g}")
+
+        st.latex(rf"p_2 = p_1\!\left(\frac{{V_1}}{{V_2}}\right)^\gamma = {p1:.4g}\cdot\left(\frac{{{V1:.4g}}}{{{V2:.4g}}}\right)^{{{gamma:.4g}}} = {p2:.6g}\ \text{{Pa}}")
+        st.latex(rf"T_2 = T_1\!\left(\frac{{V_1}}{{V_2}}\right)^{{\gamma-1}} = {T1:.4g}\cdot\left(\frac{{{V1:.4g}}}{{{V2:.4g}}}\right)^{{{gamma-1:.4g}}} = {T2:.6g}\ \text{{K}}")
+
+    else:
+        c1, c2 = st.columns(2)
+        n  = c1.number_input("n – stofmængde (mol)", value=1.0, min_value=1e-12, format="%.6g")
+        T1 = c1.number_input("T₁ – starttemperatur (K)", value=300.0, min_value=0.01, format="%.6g")
+        T2 = c2.number_input("T₂ – sluttemperatur (K)", value=500.0, min_value=0.01, format="%.6g")
+        W = n * R * (T1 - T2) / (gamma - 1)
+        st.success(f"**W = {W:.6g} J**")
+        st.latex(rf"W = \frac{{nR(T_1 - T_2)}}{{\gamma - 1}} = \frac{{{n:.4g}\cdot{R}\cdot({T1:.4g}-{T2:.4g})}}{{{gamma:.4g}-1}} = {W:.6g}\ \text{{J}}")
+        st.caption("W > 0: gas udfører arbejde (afkøler). W < 0: gas komprimeres (opvarmes).")
 
 elif formel == "1. termodynamikslov:  ΔU = Q − W":
     st.latex(r"\Delta U = Q - W")

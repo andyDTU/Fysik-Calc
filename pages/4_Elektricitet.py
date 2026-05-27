@@ -361,24 +361,36 @@ elif formel == "Lorentzkraft:  F = q · v · B":
         F = c1.number_input("F (N)", value=1.6e-14, format="%.6g")
         v = c2.number_input("v (m/s)", value=1e6, format="%.6g")
         B = c3.number_input("B (T)", value=0.1, min_value=1e-12, format="%.6g")
-        q = F / (v * B * np.sin(np.radians(theta)))
-        st.success(f"**q = {q:.6g} C**")
+        sin_t = np.sin(np.radians(theta))
+        if abs(sin_t) < 1e-12:
+            st.error("θ = 0° eller 180°: sin(θ) = 0 → ingen Lorentzkraft, kan ikke beregne q.")
+        else:
+            q = F / (v * B * sin_t)
+            st.success(f"**q = {q:.6g} C**")
 
     elif beregn == "v – hastighed (m/s)":
         c1, c2, c3 = st.columns(3)
         F = c1.number_input("F (N)", value=1.6e-14, format="%.6g")
         q = c2.number_input("q (C)", value=1.6e-19, min_value=1e-12, format="%.6g")
         B = c3.number_input("B (T)", value=0.1, min_value=1e-12, format="%.6g")
-        v = F / (abs(q) * B * np.sin(np.radians(theta)))
-        st.success(f"**v = {v:.6g} m/s**")
+        sin_t = np.sin(np.radians(theta))
+        if abs(sin_t) < 1e-12:
+            st.error("θ = 0° eller 180°: sin(θ) = 0 → ingen Lorentzkraft, kan ikke beregne v.")
+        else:
+            v = F / (abs(q) * B * sin_t)
+            st.success(f"**v = {v:.6g} m/s**")
 
     else:
         c1, c2, c3 = st.columns(3)
         F = c1.number_input("F (N)", value=1.6e-14, format="%.6g")
         q = c2.number_input("q (C)", value=1.6e-19, min_value=1e-12, format="%.6g")
         v = c3.number_input("v (m/s)", value=1e6, min_value=1e-12, format="%.6g")
-        B = F / (abs(q) * v * np.sin(np.radians(theta)))
-        st.success(f"**B = {B:.6g} T**")
+        sin_t = np.sin(np.radians(theta))
+        if abs(sin_t) < 1e-12:
+            st.error("θ = 0° eller 180°: sin(θ) = 0 → ingen Lorentzkraft, kan ikke beregne B.")
+        else:
+            B = F / (abs(q) * v * sin_t)
+            st.success(f"**B = {B:.6g} T**")
 
 elif formel == "Lorentzkraft på ledning:  F = B · I · L":
     st.latex(r"F = B \cdot I \cdot L \cdot \sin\theta")
@@ -400,22 +412,34 @@ elif formel == "Lorentzkraft på ledning:  F = B · I · L":
         F = c1.number_input("F (N)", value=1.0, format="%.6g")
         I = c2.number_input("I (A)", value=10.0, min_value=1e-12, format="%.6g")
         L = c3.number_input("L (m)", value=0.2, min_value=1e-12, format="%.6g")
-        B = F / (I * L * np.sin(np.radians(theta)))
-        st.success(f"**B = {B:.6g} T**")
+        sin_t = np.sin(np.radians(theta))
+        if abs(sin_t) < 1e-12:
+            st.error("θ = 0°/180°: ingen kraft på ledningen, kan ikke beregne B.")
+        else:
+            B = F / (I * L * sin_t)
+            st.success(f"**B = {B:.6g} T**")
     elif beregn == "I (A)":
         c1, c2, c3 = st.columns(3)
         F = c1.number_input("F (N)", value=1.0, format="%.6g")
         B = c2.number_input("B (T)", value=0.5, min_value=1e-12, format="%.6g")
         L = c3.number_input("L (m)", value=0.2, min_value=1e-12, format="%.6g")
-        I = F / (B * L * np.sin(np.radians(theta)))
-        st.success(f"**I = {I:.6g} A**")
+        sin_t = np.sin(np.radians(theta))
+        if abs(sin_t) < 1e-12:
+            st.error("θ = 0°/180°: ingen kraft på ledningen, kan ikke beregne I.")
+        else:
+            I = F / (B * L * sin_t)
+            st.success(f"**I = {I:.6g} A**")
     else:
         c1, c2, c3 = st.columns(3)
         F = c1.number_input("F (N)", value=1.0, format="%.6g")
         B = c2.number_input("B (T)", value=0.5, min_value=1e-12, format="%.6g")
         I = c3.number_input("I (A)", value=10.0, min_value=1e-12, format="%.6g")
-        L = F / (B * I * np.sin(np.radians(theta)))
-        st.success(f"**L = {L:.6g} m**")
+        sin_t = np.sin(np.radians(theta))
+        if abs(sin_t) < 1e-12:
+            st.error("θ = 0°/180°: ingen kraft på ledningen, kan ikke beregne L.")
+        else:
+            L = F / (B * I * sin_t)
+            st.success(f"**L = {L:.6g} m**")
 
 elif formel == "Induceret EMF:  ε = B · L · v":
     st.latex(r"\varepsilon = B \cdot L \cdot v")
