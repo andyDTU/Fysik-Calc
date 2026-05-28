@@ -27,7 +27,8 @@ SIDER = [
     ("📏", "Usikkerhed",    "pages/8_Usikkerhed.py",        "usk_formel"),
     ("🔄", "Rotation",      "pages/9_Rotation.py",          "rot_formel"),
     ("💥", "Kollisioner",   "pages/10_Kollisioner.py",      "kol_formel"),
-    ("〰️", "Svingninger",   "pages/11_Svingninger.py",      "sving_formel"),
+    ("〰️", "Svingninger",        "pages/11_Svingninger.py",        "sving_formel"),
+    ("🚀", "Relativitetsteori", "pages/12_Relativitetsteori.py",  "rel_formel"),
 ]
 
 søg_lc = søg.strip().lower()

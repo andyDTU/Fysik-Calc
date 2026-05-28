@@ -84,6 +84,7 @@ FORMLER = [
     {"navn": "Friktion:  f = μ · N",                           "side": "Dynamik",      "fil": "pages/2_Dynamik.py",          "key": "dyn_formel",   "kw": "friktion friktionskraft normalkraft mu koefficient statisk kinetisk"},
     {"navn": "Centripetalkraft:  Fc = m · v² / r",             "side": "Dynamik",      "fil": "pages/2_Dynamik.py",          "key": "dyn_formel",   "kw": "centripetal kraft cirkel radius hastighed Fc mv2 r"},
     {"navn": "Normalkraft i sløjfe (top/bund)",                 "side": "Dynamik",      "fil": "pages/2_Dynamik.py",          "key": "dyn_formel",   "kw": "normalkraft sløjfe loop top bund minimum hastighed N vmin"},
+    {"navn": "Gravitationsloven:  F = G·m₁·m₂ / r²",            "side": "Dynamik",      "fil": "pages/2_Dynamik.py",          "key": "dyn_formel",   "kw": "gravitation Newton G masse afstand planet orbital F r"},
     {"navn": "Impuls:  p = m · v",                             "side": "Dynamik",      "fil": "pages/2_Dynamik.py",          "key": "dyn_formel",   "kw": "impuls masse hastighed p m v kg m/s"},
     {"navn": "Impulsmomentloven:  F · Δt = Δp",                "side": "Dynamik",      "fil": "pages/2_Dynamik.py",          "key": "dyn_formel",   "kw": "impulsmomentlov F delta t p kraft tid"},
     {"navn": "Kraftmoment:  τ = F · l",                        "side": "Dynamik",      "fil": "pages/2_Dynamik.py",          "key": "dyn_formel",   "kw": "kraftmoment tau torque F l arm vinkel"},
@@ -161,6 +162,7 @@ FORMLER = [
     {"navn": "Fejlpropagation – generel (numerisk)",            "side": "Usikkerhed",   "fil": "pages/8_Usikkerhed.py",       "key": "usk_formel",   "kw": "fejlpropagation numerisk generel partiel afledt RSS"},
     {"navn": "Samlet usikkerhed (type A + B)",                  "side": "Usikkerhed",   "fil": "pages/8_Usikkerhed.py",       "key": "usk_formel",   "kw": "samlet usikkerhed type A B kombination kvadrat"},
     {"navn": "Potenslov-fitting:  y = A · xᵅ  (log-log regression)", "side": "Usikkerhed", "fil": "pages/8_Usikkerhed.py",   "key": "usk_formel",   "kw": "potenslov fitting regression log alpha A R2 sigma"},
+    {"navn": "Lineær regression:  y = a · x + b",              "side": "Usikkerhed",   "fil": "pages/8_Usikkerhed.py",       "key": "usk_formel",   "kw": "lineær regression hældning a b R2 mindste kvadrater"},
     # ── Rotation ──
     {"navn": "Vinkelkinematik (analog til lineær kinematik)",   "side": "Rotation",     "fil": "pages/9_Rotation.py",         "key": "rot_formel",   "kw": "vinkelkinematik alpha omega theta t acceleration rotation"},
     {"navn": "Sammenhæng lineær ↔ vinkelbevægelse",            "side": "Rotation",     "fil": "pages/9_Rotation.py",         "key": "rot_formel",   "kw": "lineær vinkel hastighed acceleration v omega r s theta"},
@@ -188,4 +190,12 @@ FORMLER = [
     {"navn": "Bevægelsesligning:  x(t) = A·cos(ωt + φ)",       "side": "Svingninger",  "fil": "pages/11_Svingninger.py",     "key": "sving_formel", "kw": "bevægelsesligning x t A cos omega phi position hastighed"},
     {"navn": "Energi i svingning:  E = ½·k·A²",                "side": "Svingninger",  "fil": "pages/11_Svingninger.py",     "key": "sving_formel", "kw": "energi fjeder amplitude E k A SHM svingning"},
     {"navn": "Dæmpet svingning:  x(t) = A·e^(−γt)·cos(ω't + φ)", "side": "Svingninger", "fil": "pages/11_Svingninger.py",  "key": "sving_formel", "kw": "dæmpet svingning gamma omega prime underdæmpet overdæmpet"},
+    # ── Relativitetsteori ──
+    {"navn": "Lorentz-faktor:  γ = 1 / √(1 − v²/c²)",          "side": "Relativitetsteori", "fil": "pages/12_Relativitetsteori.py", "key": "rel_formel", "kw": "Lorentz gamma beta v c relativitet faktor"},
+    {"navn": "Tidsudvidelse:  Δt = γ · Δt₀",                   "side": "Relativitetsteori", "fil": "pages/12_Relativitetsteori.py", "key": "rel_formel", "kw": "tidsudvidelse egentid delta t gamma ur bevæger"},
+    {"navn": "Længdeforkortning:  L = L₀ / γ",                 "side": "Relativitetsteori", "fil": "pages/12_Relativitetsteori.py", "key": "rel_formel", "kw": "længdeforkortning L L0 gamma kontraktion"},
+    {"navn": "Relativistisk kinetisk energi:  Ek = (γ − 1) · m₀c²", "side": "Relativitetsteori", "fil": "pages/12_Relativitetsteori.py", "key": "rel_formel", "kw": "relativistisk kinetisk energi Ek gamma m0 c2"},
+    {"navn": "Relativistisk totalenergi:  E = γ · m₀c²",       "side": "Relativitetsteori", "fil": "pages/12_Relativitetsteori.py", "key": "rel_formel", "kw": "totalenergi E gamma m0 c2 hvileenergi"},
+    {"navn": "Relativistisk impuls:  p = γ · m₀ · v",          "side": "Relativitetsteori", "fil": "pages/12_Relativitetsteori.py", "key": "rel_formel", "kw": "relativistisk impuls p gamma m0 v"},
+    {"navn": "Energi–impuls relation:  E² = (pc)² + (m₀c²)²", "side": "Relativitetsteori", "fil": "pages/12_Relativitetsteori.py", "key": "rel_formel", "kw": "energi impuls relation E p c m0 foton"},
 ]

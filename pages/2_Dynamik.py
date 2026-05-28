@@ -24,6 +24,7 @@ formel = st.selectbox("Vælg formel", [
     "Friktion:  f = μ · N",
     "Centripetalkraft:  Fc = m · v² / r",
     "Normalkraft i sløjfe (top/bund)",
+    "Gravitationsloven:  F = G·m₁·m₂ / r²",
     "Impuls:  p = m · v",
     "Impulsmomentloven:  F · Δt = Δp",
     "Kraftmoment:  τ = F · l",
@@ -38,6 +39,7 @@ DYN_TIPS = {
     "Friktion:  f = μ · N": "Statisk friktion (μs) er større end kinetisk (μk). Friktionskraft modvirker bevægelse.",
     "Centripetalkraft:  Fc = m · v² / r": "Centripetalkraft peger mod centrum. Den er en nettokraft, ikke en ekstra kraft.",
     "Normalkraft i sløjfe (top/bund)": "Top: N = mv²/r − mg (mindst). Bund: N = mv²/r + mg (størst). Minimum v ved top: √(gr).",
+    "Gravitationsloven:  F = G·m₁·m₂ / r²": "G = 6.674×10⁻¹¹ N·m²/kg². r er centrumsafstanden. Orbital­hastighed: v = √(GM/r).",
     "Impuls:  p = m · v": "Impuls bevares i isolerede systemer. p er en vektor (retning vigtig).",
     "Impulsmomentloven:  F · Δt = Δp": "Bruges ved støde/slag: stor kraft i kort tid giver stor impulsændring.",
     "Kraftmoment:  τ = F · l": "Kraftarm l er den vinkelrette afstand fra rotationsaksen til kraftlinjen.",
@@ -190,6 +192,64 @@ elif formel == "Centripetalkraft:  Fc = m · v² / r":
         st.latex(rf"r = \frac{{m v^2}}{{F_c}} = {r:.6g}\ \text{{m}}")
         if st.button("📋 Gem r", key="gem_dyn_cent_r"):
             gem_resultat(r, "m", "r")
+
+elif formel == "Gravitationsloven:  F = G·m₁·m₂ / r²":
+    G_grav = 6.674e-11   # N·m²/kg²
+    st.latex(r"F = \frac{G \cdot m_1 \cdot m_2}{r^2} \qquad G = 6.674 \times 10^{-11}\ \text{N·m}^2/\text{kg}^2")
+    beregn = st.radio("Beregn:", [
+        "F – gravitationskraft (N)",
+        "r – afstand (m)",
+        "m – masse (given F, den anden masse og r)",
+        "v_orbital – orbital­hastighed (m/s)",
+    ], horizontal=True)
+    st.divider()
+
+    if beregn == "F – gravitationskraft (N)":
+        c1, c2, c3 = st.columns(3)
+        m1 = c1.number_input("m₁ (kg)", value=5.972e24, format="%.6g", help="Jordens masse: 5.972e24 kg")
+        m2 = c2.number_input("m₂ (kg)", value=7.346e22, format="%.6g", help="Månens masse: 7.346e22 kg")
+        r  = c3.number_input("r – centrumsafstand (m)", value=3.844e8, min_value=1e-3, format="%.6g")
+        F = G_grav * m1 * m2 / r**2
+        st.success(f"**F = {F:.6g} N**")
+        st.latex(rf"F = \frac{{G m_1 m_2}}{{r^2}} = \frac{{{G_grav:.4g} \cdot {m1:.4g} \cdot {m2:.4g}}}{{{r:.4g}^2}} = {F:.4g}\ \text{{N}}")
+        if st.button("📋 Gem F", key="gem_dyn_grav_F"):
+            gem_resultat(F, "N", "F_grav")
+
+    elif beregn == "r – afstand (m)":
+        c1, c2, c3 = st.columns(3)
+        m1 = c1.number_input("m₁ (kg)", value=5.972e24, format="%.6g")
+        m2 = c2.number_input("m₂ (kg)", value=7.346e22, format="%.6g")
+        F  = c3.number_input("F – kraft (N)", value=1.98e20, min_value=1e-20, format="%.6g")
+        r = np.sqrt(G_grav * m1 * m2 / F)
+        st.success(f"**r = {r:.6g} m**")
+        st.latex(rf"r = \sqrt{{\frac{{G m_1 m_2}}{{F}}}} = {r:.4g}\ \text{{m}}")
+        if st.button("📋 Gem r", key="gem_dyn_grav_r"):
+            gem_resultat(r, "m", "r")
+
+    elif beregn == "m – masse (given F, den anden masse og r)":
+        c1, c2, c3 = st.columns(3)
+        F  = c1.number_input("F – kraft (N)", value=1.98e20, format="%.6g")
+        m2 = c2.number_input("m₂ – den kendte masse (kg)", value=7.346e22, format="%.6g")
+        r  = c3.number_input("r – centrumsafstand (m)", value=3.844e8, min_value=1e-3, format="%.6g")
+        m1 = F * r**2 / (G_grav * m2)
+        st.success(f"**m₁ = {m1:.6g} kg**")
+        st.latex(rf"m_1 = \frac{{F r^2}}{{G m_2}} = {m1:.4g}\ \text{{kg}}")
+        if st.button("📋 Gem m₁", key="gem_dyn_grav_m"):
+            gem_resultat(m1, "kg", "m₁")
+
+    else:
+        st.markdown("Orbital­hastighed for cirkulær bane: **v = √(GM/r)**")
+        st.latex(r"v = \sqrt{\frac{G M}{r}}")
+        c1, c2 = st.columns(2)
+        M = c1.number_input("M – central­masse (kg)", value=5.972e24, format="%.6g", help="Jordens masse: 5.972e24 kg")
+        r = c2.number_input("r – orbital­radius (m)", value=6.371e6 + 400e3, min_value=1e3, format="%.6g",
+                             help="Jordens radius + 400 km = ISS-bane: ~6.77e6 m")
+        v = np.sqrt(G_grav * M / r)
+        T = 2 * np.pi * r / v
+        st.success(f"**v = {v:.6g} m/s**   (T = {T:.4g} s = {T/3600:.4g} timer)")
+        st.latex(rf"v = \sqrt{{\frac{{G M}}{{r}}}} = \sqrt{{\frac{{{G_grav:.4g} \cdot {M:.4g}}}{{{r:.4g}}}}} = {v:.4g}\ \text{{m/s}}")
+        if st.button("📋 Gem v", key="gem_dyn_grav_v"):
+            gem_resultat(v, "m/s", "v_orbital")
 
 elif formel == "Normalkraft i sløjfe (top/bund)":
     st.latex(r"\text{Bund:}\ N_{bund} = mg + \frac{mv^2}{r} \qquad \text{Top:}\ N_{top} = \frac{mv^2}{r} - mg")

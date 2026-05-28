@@ -28,6 +28,7 @@ formel = st.selectbox("Vælg beregning", [
     "Fejlpropagation – generel (numerisk)",
     "Samlet usikkerhed (type A + B)",
     "Potenslov-fitting:  y = A · xᵅ  (log-log regression)",
+    "Lineær regression:  y = a · x + b",
 ], key="usk_formel")
 
 USK_TIPS = {
@@ -41,6 +42,7 @@ USK_TIPS = {
     "Fejlpropagation – generel (numerisk)": "Numerisk partiel differentiering: variér én variabel ad gangen med ±Δ og se effekten.",
     "Samlet usikkerhed (type A + B)": "u_total = √(u_A² + u_B²). Type B er f.eks. instrument­usikkerhed fra specifikationer.",
     "Potenslov-fitting:  y = A · xᵅ  (log-log regression)": "ln(y) = ln(A) + α·ln(x). Hældningen på log-log-plot er α. R² tæt på 1 = godt fit.",
+    "Lineær regression:  y = a · x + b": "Mindste kvadraters metode. Hældning a = Σ(xᵢ−x̄)(yᵢ−ȳ) / Σ(xᵢ−x̄)². R² = 1: perfekt fit.",
 }
 show_tips(formel, USK_TIPS)
 st.divider()
@@ -430,5 +432,78 @@ elif formel == "Potenslov-fitting:  y = A · xᵅ  (log-log regression)":
             with st.expander("Vis udregning"):
                 st.latex(r"\alpha = \frac{\sum \ln x_i \cdot \ln y_i - n\overline{\ln x}\,\overline{\ln y}}{\sum (\ln x_i)^2 - n(\overline{\ln x})^2}")
                 st.latex(rf"\alpha = {alpha:.6g},\quad \ln A = {lnA:.6g},\quad A = e^{{{lnA:.6g}}} = {A:.6g}")
+    except ValueError:
+        st.error("Ugyldig input – brug kommaseparerede tal.")
+
+elif formel == "Lineær regression:  y = a · x + b":
+    st.latex(r"y = a \cdot x + b \qquad a = \frac{\sum(x_i-\bar{x})(y_i-\bar{y})}{\sum(x_i-\bar{x})^2} \qquad b = \bar{y} - a\bar{x}")
+    st.markdown("Mindste kvadraters metode – lineær sammenhæng. Brug **Potenslov-fitting** til T ∝ k^α.")
+    st.divider()
+
+    col_x, col_y = st.columns(2)
+    x_label = col_x.text_input("Navn på x", value="x")
+    y_label = col_y.text_input("Navn på y", value="y")
+
+    raw_x = st.text_input("x-værdier (kommasepareret):", value="1.0, 2.0, 3.0, 4.0, 5.0")
+    raw_y = st.text_input("y-værdier (kommasepareret):", value="2.1, 3.9, 6.2, 7.8, 10.1")
+
+    try:
+        x_vals = np.array([float(v.strip()) for v in raw_x.split(",") if v.strip()])
+        y_vals = np.array([float(v.strip()) for v in raw_y.split(",") if v.strip()])
+
+        if len(x_vals) != len(y_vals):
+            st.error(f"Antal x-værdier ({len(x_vals)}) ≠ antal y-værdier ({len(y_vals)})")
+        elif len(x_vals) < 2:
+            st.error("Minimum 2 datapunkter kræves.")
+        else:
+            n = len(x_vals)
+            x_mean = np.mean(x_vals)
+            y_mean = np.mean(y_vals)
+            Sxx = np.sum((x_vals - x_mean)**2)
+            Sxy = np.sum((x_vals - x_mean) * (y_vals - y_mean))
+            a_coef = Sxy / Sxx
+            b_coef = y_mean - a_coef * x_mean
+
+            y_fit = a_coef * x_vals + b_coef
+            ss_res = np.sum((y_vals - y_fit)**2)
+            ss_tot = np.sum((y_vals - y_mean)**2)
+            R2 = 1 - ss_res / ss_tot if ss_tot > 0 else 1.0
+
+            if n > 2:
+                s2 = ss_res / (n - 2)
+                sigma_a = np.sqrt(s2 / Sxx)
+                sigma_b = np.sqrt(s2 * (1/n + x_mean**2/Sxx))
+            else:
+                sigma_a = sigma_b = float("nan")
+
+            st.success(f"**a = {a_coef:.4g} ± {sigma_a:.4g}**   |   **b = {b_coef:.4g} ± {sigma_b:.4g}**   |   **R² = {R2:.4f}**")
+            st.latex(rf"{y_label} = {a_coef:.4g} \cdot {x_label} + ({b_coef:.4g})")
+
+            col1, col2, col3, col4 = st.columns(4)
+            col1.metric("Hældning a", f"{a_coef:.4g}")
+            col2.metric("σ_a", f"{sigma_a:.4g}")
+            col3.metric("Skæring b", f"{b_coef:.4g}")
+            col4.metric("R²", f"{R2:.4f}")
+
+            if R2 > 0.99:
+                st.info("R² > 0.99 – meget godt lineært fit.")
+            elif R2 < 0.90:
+                st.warning("R² < 0.90 – overvej om sammenhængen er lineær, eller prøv Potenslov-fitting.")
+
+            with st.expander("Vis data og residualer"):
+                rows = []
+                for xi, yi in zip(x_vals, y_vals):
+                    yi_fit_val = a_coef * xi + b_coef
+                    rows.append({x_label: xi, y_label: yi,
+                                  f"{y_label}_fit": f"{yi_fit_val:.4g}",
+                                  "residual": f"{yi - yi_fit_val:.4g}"})
+                st.table(rows)
+
+            with st.expander("Forudsig y for en given x"):
+                x_pred = st.number_input("x-værdi:", value=float(np.mean(x_vals)), format="%.6g",
+                                          key="linreg_pred_x")
+                y_pred = a_coef * x_pred + b_coef
+                st.success(f"**{y_label}({x_pred:.4g}) = {y_pred:.6g}**")
+
     except ValueError:
         st.error("Ugyldig input – brug kommaseparerede tal.")
