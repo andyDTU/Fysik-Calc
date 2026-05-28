@@ -1,68 +1,173 @@
 # ⚡ Fysik-Calc
 
-Streamlit-baseret formelberegner til DTU kursus **10060 – Fysik og Kemi**.  
-108+ formler fordelt på 12 emner med direkte navigation, søgning, formeltips og resultatbuffer.
+Formelberegner til DTU kursus **10060 – Fysik og Kemi**.  
+117 formler fordelt på 12 emner med søgning, formeltips og resultatbuffer.
 
-## Kom i gang
+---
 
-### Krav
-- Python 3.8+
-- Git
+## Første gang – sådan installerer du alt fra bunden
 
-### Installation
+### Trin 1 – Installer Python
+
+1. Gå til **[python.org/downloads](https://www.python.org/downloads/)**
+2. Klik på den store gule knap "Download Python 3.x.x"
+3. Åbn den downloadede fil og følg installationen
+   - **Windows:** Sæt flueben ved **"Add Python to PATH"** inden du klikker Install
+   - **Mac:** Klik bare Next → Install
+
+Tjek at det virkede: åbn Terminal (Mac) eller Kommandoprompt (Windows) og skriv:
+```
+python3 --version
+```
+Du bør se noget som `Python 3.11.4`. Hvis det virker, fortsæt til Trin 2.
+
+---
+
+### Trin 2 – Installer Git
+
+1. Gå til **[git-scm.com/downloads](https://git-scm.com/downloads)**
+2. Download og installer for dit styresystem
+3. Tjek at det virkede:
+```
+git --version
+```
+Du bør se noget som `git version 2.39.0`.
+
+---
+
+### Trin 3 – Download Fysik-Calc
+
+Åbn Terminal (Mac) eller Kommandoprompt (Windows) og kør disse kommandoer én ad gangen:
 
 ```bash
-# Klon repositoriet
 git clone https://github.com/andyDTU/Fysik-Calc.git
+```
+*(Dette downloader alle filer til en mappe der hedder `Fysik-Calc`)*
+
+```bash
 cd Fysik-Calc
+```
+*(Dette "går ind i" mappen)*
 
-# Skift til development-branch
+```bash
 git checkout claude/wizardly-newton-ReRbT
+```
+*(Dette skifter til den nyeste version af appen)*
 
-# Installer afhængigheder
+---
+
+### Trin 4 – Installer afhængigheder
+
+```bash
 pip3 install streamlit numpy
+```
+*(Installerer de Python-pakker appen bruger — gøres kun én gang)*
 
-# Start appen
+Hvis `pip3` ikke virker, prøv:
+```bash
+python3 -m pip install streamlit numpy
+```
+
+---
+
+### Trin 5 – Start appen
+
+```bash
 python3 -m streamlit run app.py
 ```
 
-Appen åbner automatisk i din browser på `http://localhost:8501`.
+Appen åbner automatisk i din browser. Ellers gå til **[http://localhost:8501](http://localhost:8501)**
+
+---
+
+## Næste gang du vil bruge appen
+
+Du behøver ikke installere noget igen. Bare:
+
+1. Åbn Terminal / Kommandoprompt
+2. Gå til mappen:
+```bash
+cd Fysik-Calc
+```
+3. Start appen:
+```bash
+python3 -m streamlit run app.py
+```
+
+---
+
+## Opdatering – hent de nyeste formler
+
+Når der er tilføjet nye formler eller rettelser, henter du dem sådan:
+
+**Trin 1 – Stop appen** hvis den kører (tryk `Ctrl + C` i terminalen)
+
+**Trin 2 – Gå til mappen** (hvis du ikke allerede er der):
+```bash
+cd Fysik-Calc
+```
+
+**Trin 3 – Hent opdateringen:**
+```bash
+git pull origin claude/wizardly-newton-ReRbT
+```
+
+**Trin 4 – Start appen igen:**
+```bash
+python3 -m streamlit run app.py
+```
+
+Det er det! Appen kører nu med de nyeste formler.
+
+---
+
+### Fejlfinding
+
+**"cd: no such file or directory"**  
+Du er ikke det rigtige sted. Prøv at skrive `cd ~/Fysik-Calc` eller find mappen i Finder/Stifinder og åbn en terminal derfra.
+
+**"command not found: python3"**  
+Python er ikke installeret korrekt. Gå tilbage til Trin 1 og sørg for at sætte flueben ved "Add to PATH".
+
+**"command not found: git"**  
+Git er ikke installeret. Gå tilbage til Trin 2.
+
+**Siden viser en fejl i browseren**  
+Kig i terminalen – der står hvad der gik galt. Skriv til Anders hvis du sidder fast.
 
 ---
 
 ## Funktioner
 
-### 🔍 Global søgning (`00_Søg`)
-- Søg på tværs af alle 108 formler med ét søgeord (fx `centripetal`, `v²`, `kondensator`)
-- Radioknapper til direkte navigation til en beregner-side
-
-### 📐 Konstantpanel (sidebar)
-Altid tilgængeligt i sidebjælken: g, c, h, k_B, R, N_A, e, k_e, μ₀, ε₀, m_e, m_p, u
-
-### 📋 Resultatbuffer
-- Klik **📋 Gem** efter en beregning for at gemme resultatet
-- Det gemte resultat vises i sidebjælken — brug det som input i næste beregning
+### 🔍 Søg efter formel
+Skriv fx `centripetal`, `usikkerhed` eller `gaslov` – find formlen uden at vide hvilken side den er på.
 
 ### 💡 Formel-tips
-Hver formel viser en `💡`-vejledning med eksamens-hints (fortegn, enheder, faldgruber)
+Hver formel viser en blå boks med eksamens-hints (hvad må man ikke glemme, hvilke fortegn, hvilke enheder).
 
-### 🎯 Eksamensopgaver (`00_Eksamensopgaver`)
-Opgaver fra 2024 og 2025 eksamenssæt med løsninger og direkte link til den relevante beregner
+### 📋 Resultatbuffer
+Klik **📋 Gem** efter en beregning → resultatet gemmes i sidebjælken → brug det direkte som input i næste beregning.
+
+### 📐 Konstantpanel
+Alle fysiske konstanter (g, c, h, R, ...) altid tilgængeligt i sidebjælken.
+
+### 🎯 Eksamensopgaver
+Opgaver fra 2024 og 2025 med facit og direkte link til den rigtige beregner.
 
 ---
 
-## Emner og formler
+## Emner (117 formler)
 
-| Side | Emner |
-|------|-------|
-| 🏃 Kinematik | Uniform, jævnt acc. (1-3), vandret/skråt kast, cirkulær, RPM |
-| 💪 Dynamik | F=ma, friktion, centripetal, impuls, hældende plan, Atwood, spænding/tøjning, gravitation |
-| 🔋 Energi | Ek, Ep, fjeder, arbejde, effekt, energibevarelse, virkningsgrad |
-| ⚡ Elektricitet | Ohm, serie/parallel, kondensator, RC/RL, Coulomb, E-felt, Lorentz, Faraday |
-| 🌊 Bølger & Optik | Bølgehastighed, Snell, linser, Doppler, Young, diffraktion, stående bølger |
+| Side | Indhold |
+|------|---------|
+| 🏃 Kinematik | Uniform, jævnt acc., kast, cirkulær, RPM |
+| 💪 Dynamik | F=ma, friktion, centripetal, gravitation, hældende plan, Atwood, spænding |
+| 🔋 Energi | Ek, Ep, fjeder, arbejde, effekt, energibevarelse |
+| ⚡ Elektricitet | Ohm, serie/parallel, kondensator, RC/RL, Coulomb, Lorentz, Faraday |
+| 🌊 Bølger & Optik | Bølgehastighed, Snell, linser, Doppler, Young, diffraktion |
 | 🌡️ Termodynamik | Ideel gas, varmekapacitet, faseovergang, isobar/isoterm/adiabat, Carnot |
-| ☢️ Atomfysik | Henfald, halvvejstid, E=mc², fotoner, de Broglie, Bohr, fotoelektrisk |
-| 📏 Usikkerhed | Gennemsnit, stdafv, fejlpropagation, potenslov-fitting, lineær regression |
+| ☢️ Atomfysik | Henfald, halvvejstid, E=mc², fotoner, de Broglie, Bohr |
+| 📏 Usikkerhed | Gennemsnit, fejlpropagation, potenslov-fitting, lineær regression |
 | 🔄 Rotation | Vinkelkin., inertimoment, Steiner, τ=Iα, rulning, impulsmoment |
 | 💥 Kollisioner | Elastisk/uelastisk, restitution, eksplosion, massemidtpunkt |
 | 〰️ Svingninger | Fjedermasse, pendul, SHM, dæmpet svingning |
@@ -70,39 +175,4 @@ Opgaver fra 2024 og 2025 eksamenssæt med løsninger og direkte link til den rel
 
 ---
 
-## Projektstruktur
-
-```
-Fysik-Calc/
-├── app.py                    # Forside
-├── utils.py                  # Delte funktioner + 108-formlers indeks
-├── pages/
-│   ├── 00_Søg.py             # Global formel-søgning
-│   ├── 0_Eksamensopgaver.py  # Eksamensguide 2024-2025
-│   ├── 1_Kinematik.py
-│   ├── 2_Dynamik.py
-│   ├── 3_Energi.py
-│   ├── 4_Elektricitet.py
-│   ├── 5_Boelger_og_Optik.py
-│   ├── 6_Termodynamik.py
-│   ├── 7_Atomfysik.py
-│   ├── 8_Usikkerhed.py
-│   ├── 9_Rotation.py
-│   ├── 10_Kollisioner.py
-│   ├── 11_Svingninger.py
-│   └── 12_Relativitetsteori.py
-└── requirements.txt
-```
-
----
-
-## Opdatering
-
-```bash
-git pull origin claude/wizardly-newton-ReRbT
-```
-
----
-
-## Lavet til
-DTU kursus 10060 – Fysik og Kemi, eksamensperiode 2025
+Lavet til DTU kursus 10060 – Fysik og Kemi, eksamensperiode 2025
