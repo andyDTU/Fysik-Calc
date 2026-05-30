@@ -82,14 +82,36 @@ Appen åbner automatisk i din browser. Ellers gå til **[http://localhost:8501](
 
 ## Næste gang du vil bruge appen
 
-Du behøver ikke installere noget igen. Bare:
+Du behøver ikke installere noget igen.
+
+### Den nemme måde – dobbeltklik på start-scriptet
+
+- **Mac:** Dobbeltklik på filen **`start_mac.command`** i Fysik-Calc-mappen  
+  *(Første gang skal du måske godkende den: højreklik → Åbn → Åbn)*
+- **Windows:** Dobbeltklik på filen **`start_windows.bat`** i Fysik-Calc-mappen
+
+Appen åbner automatisk i din browser.
+
+---
+
+### Den manuelle måde – via terminalen
+
+> ⚠️ **Vigtigt:** Du SKAL være inde i `Fysik-Calc`-mappen – ikke i en anden projektmappe.  
+> Tjek at det er rigtigt: skriv `ls` og se om `app.py` er i listen.  
+> Hvis du ser filer fra et andet projekt, er du i den forkerte mappe!
 
 1. Åbn Terminal / Kommandoprompt
-2. Gå til mappen:
+2. Gå til mappen — skriv **præcist** dette (med stort F):
 ```bash
-cd Fysik-Calc
+cd ~/Fysik-Calc
 ```
-3. Start appen:
+3. Tjek at du er det rigtige sted:
+```bash
+ls
+```
+Du skal se `app.py`, `utils.py`, `pages/` osv. i listen.
+
+4. Start appen:
 ```bash
 python3 -m streamlit run app.py
 ```
@@ -100,17 +122,29 @@ python3 -m streamlit run app.py
 
 Når der er tilføjet nye formler eller rettelser, henter du dem sådan:
 
-**Trin 1 – Stop appen** hvis den kører (tryk `Ctrl + C` i terminalen)
+**Trin 1 – Stop appen** hvis den kører  
+Klik i terminalen og tryk **`Ctrl + C`** (hold Ctrl nede og tryk C)
 
-**Trin 2 – Gå til mappen** (hvis du ikke allerede er der):
+**Trin 2 – Gå til den rigtige mappe**
+
+> ⚠️ Dette trin er vigtigt – du skal være i `Fysik-Calc`-mappen, ikke en anden mappe
+
+Skriv præcist dette:
 ```bash
-cd Fysik-Calc
+cd ~/Fysik-Calc
 ```
+
+Tjek at du er det rigtige sted med:
+```bash
+ls
+```
+Du skal se `app.py` i listen. Ser du noget andet, er du i den forkerte mappe.
 
 **Trin 3 – Hent opdateringen:**
 ```bash
 git pull origin claude/wizardly-newton-ReRbT
 ```
+Du bør se noget tekst der slutter med "Already up to date." eller en liste af opdaterede filer.
 
 **Trin 4 – Start appen igen:**
 ```bash
@@ -118,6 +152,28 @@ python3 -m streamlit run app.py
 ```
 
 Det er det! Appen kører nu med de nyeste formler.
+
+---
+
+### Fejlfinding – "det åbner et andet projekt"
+
+Hvis appen åbner noget der **ikke** er Fysik-Calc (fx en kemi-regner):
+
+1. Stop appen med `Ctrl + C`
+2. Tjek hvilken mappe du er i:
+```bash
+pwd
+```
+Stien skal slutte med `/Fysik-Calc`. Hvis den ikke gør det, er du det forkerte sted.
+
+3. Gå til den rigtige mappe med **fuld sti**:
+```bash
+cd ~/Fysik-Calc
+```
+4. Start igen:
+```bash
+python3 -m streamlit run app.py
+```
 
 ---
 
