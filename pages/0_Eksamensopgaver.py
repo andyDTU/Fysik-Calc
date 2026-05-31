@@ -4,6 +4,21 @@ from utils import show_sidebar_constants
 
 st.set_page_config(page_title="Eksamensopgaver", page_icon="🎯", layout="wide")
 show_sidebar_constants()
+
+PAGE_MAP = {
+    "kinematik":   "pages/1_Kinematik.py",
+    "dynamik":     "pages/2_Dynamik.py",
+    "energi":      "pages/3_Energi.py",
+    "elektricitet":"pages/4_Elektricitet.py",
+    "bolger":      "pages/5_Boelger_og_Optik.py",
+    "termodynamik":"pages/6_Termodynamik.py",
+    "atomfysik":   "pages/7_Atomfysik.py",
+    "usikkerhed":  "pages/8_Usikkerhed.py",
+    "rotation":    "pages/9_Rotation.py",
+    "kollisioner": "pages/10_Kollisioner.py",
+    "svingninger": "pages/11_Svingninger.py",
+}
+
 st.title("🎯 Eksamensopgaver – Guide & Hurtig Adgang")
 st.markdown("Find hurtigt den rigtige beregner til din eksamensopgave. Klik på et eksempel for at indlæse værdier direkte.")
 st.divider()
@@ -158,7 +173,10 @@ for opgave in filtrerede:
             if opgave.get("page_key"):
                 if st.button(f"📋 Indlæs i beregner", key=f"btn_{opgave['page_key']}"):
                     st.session_state[f"example_{opgave['page_key']}"] = True
-                    st.info("Gå til den angivne side – eksempel­værdier er nu klar under '📋 Prøv eksempel'.")
+                    emne = opgave["page_key"].split("_")[0]
+                    fil = PAGE_MAP.get(emne)
+                    if fil:
+                        st.switch_page(fil)
         st.markdown(" ".join([f"`{t}`" for t in opgave["tags"]]))
 
 st.divider()
