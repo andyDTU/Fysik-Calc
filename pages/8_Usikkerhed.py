@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar, show_tips, formula_card_grid, breadcrumb
+from utils import show_sidebar_constants, show_resultat_sidebar, show_tips, formula_card_grid, breadcrumb, parse_numpy_array
 
 st.set_page_config(page_title="Usikkerhed", page_icon="📏", layout="wide")
 show_sidebar_constants()
@@ -54,9 +54,10 @@ if formel == "Gennemsnit og standardafvigelse":
     st.markdown("Indtast måleværdier kommasepareret, f.eks. `9.81, 9.79, 9.83, 9.80`")
     st.divider()
 
-    raw = st.text_input("Måleværdier:", value="9.81, 9.79, 9.83, 9.80, 9.82")
+    raw = st.text_input("Måleværdier:", value="9.81, 9.79, 9.83, 9.80, 9.82",
+                        help="Paste direkte fra eksamen: np.array([9.81, 9.79, ...]) eller plain 9.81, 9.79, ...")
     try:
-        vals = np.array([float(x.strip()) for x in raw.split(",") if x.strip()])
+        vals = parse_numpy_array(raw)
         n = len(vals)
         if n < 2:
             st.error("Mindst 2 måleværdier kræves for at beregne standardafvigelse.")
@@ -102,11 +103,12 @@ elif formel == "Forenelighedstest – er ny måling OK?":
     st.markdown("Tjek om en ny enkeltmåling er forenelig med et eksisterende datasæt (sammenlign med ±2σ).")
     st.divider()
 
-    raw = st.text_input("Eksisterende måleværdier (kommasepareret):", value="20.1, 20.2, 20.5, 19.8")
+    raw = st.text_input("Eksisterende måleværdier:", value="20.1, 20.2, 20.5, 19.8",
+                        help="Accepts np.array([...]) syntax direkte fra eksamen")
     x_ny = st.number_input("Ny måleværdi:", value=20.6, format="%.6g")
 
     try:
-        vals = np.array([float(x.strip()) for x in raw.split(",") if x.strip()])
+        vals = parse_numpy_array(raw)
         n = len(vals)
         mean = np.mean(vals)
         s = np.std(vals, ddof=1)
@@ -384,14 +386,17 @@ elif formel == "Potenslov-fitting:  y = A · xᵅ  (log-log regression)":
     st.markdown("**Eksempel (2025 Q3):** T ∝ k^α  →  lav log-log fit af T vs k")
     st.divider()
 
-    raw_x = st.text_input("x-værdier (kommasepareret):", value="1.2, 1.5, 2.2, 2.4, 3.4")
-    raw_y = st.text_input("y-værdier (kommasepareret):", value="2.56, 2.29, 1.89, 1.81, 1.52")
+    st.info("💡 Paste direkte fra eksamens kode: `np.array([1.2,1.5,2.2,2.4,3.4])` — wrapperen fjernes automatisk")
+    raw_x = st.text_input("x-værdier:", value="1.2, 1.5, 2.2, 2.4, 3.4",
+                          help="Fx: np.array([1.2,1.5,2.2,2.4,3.4])  eller  1.2, 1.5, 2.2, 2.4, 3.4")
+    raw_y = st.text_input("y-værdier:", value="2.56, 2.29, 1.89, 1.81, 1.52",
+                          help="Fx: np.array([2.56,2.29,1.89,1.81,1.52])  eller  2.56, 2.29, 1.89, 1.81, 1.52")
     x_label = st.text_input("x-navn (til visning):", value="k")
     y_label = st.text_input("y-navn (til visning):", value="T")
 
     try:
-        x_vals = np.array([float(v.strip()) for v in raw_x.split(",") if v.strip()])
-        y_vals = np.array([float(v.strip()) for v in raw_y.split(",") if v.strip()])
+        x_vals = parse_numpy_array(raw_x)
+        y_vals = parse_numpy_array(raw_y)
 
         if len(x_vals) != len(y_vals):
             st.error("Antal x- og y-værdier er ikke ens.")
@@ -446,12 +451,14 @@ elif formel == "Lineær regression:  y = a · x + b":
     x_label = col_x.text_input("Navn på x", value="x")
     y_label = col_y.text_input("Navn på y", value="y")
 
-    raw_x = st.text_input("x-værdier (kommasepareret):", value="1.0, 2.0, 3.0, 4.0, 5.0")
-    raw_y = st.text_input("y-værdier (kommasepareret):", value="2.1, 3.9, 6.2, 7.8, 10.1")
+    raw_x = st.text_input("x-værdier:", value="1.0, 2.0, 3.0, 4.0, 5.0",
+                          help="Fx: np.array([1.0,2.0,3.0])  eller  1.0, 2.0, 3.0")
+    raw_y = st.text_input("y-værdier:", value="2.1, 3.9, 6.2, 7.8, 10.1",
+                          help="Fx: np.array([2.1,3.9,6.2])  eller  2.1, 3.9, 6.2")
 
     try:
-        x_vals = np.array([float(v.strip()) for v in raw_x.split(",") if v.strip()])
-        y_vals = np.array([float(v.strip()) for v in raw_y.split(",") if v.strip()])
+        x_vals = parse_numpy_array(raw_x)
+        y_vals = parse_numpy_array(raw_y)
 
         if len(x_vals) != len(y_vals):
             st.error(f"Antal x-værdier ({len(x_vals)}) ≠ antal y-værdier ({len(y_vals)})")

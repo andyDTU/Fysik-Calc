@@ -1,4 +1,22 @@
 import streamlit as st
+import re as _re
+
+# ── np.array-parser (bruges i Usikkerhed og andre arrayfelt-inputs) ──────────
+
+def parse_numpy_array(text: str):
+    """Parse both plain CSV and np.array([...]) syntax into a list of floats.
+
+    Accepts:
+      "1.2, 1.5, 2.2"
+      "np.array([1.2, 1.5, 2.2])"
+      "np.array([1.2,1.5,2.2])"
+    """
+    import numpy as np
+    text = text.strip()
+    m = _re.search(r'np\.array\s*\(\s*\[(.*?)\]\s*\)', text, _re.DOTALL)
+    if m:
+        text = m.group(1)
+    return np.array([float(v.strip()) for v in text.split(",") if v.strip()])
 
 # ── Konstantpanel (sidebar) ─────────────────────────────────────────────────
 
