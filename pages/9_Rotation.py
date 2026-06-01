@@ -357,7 +357,7 @@ elif formel == "Rulning uden glidning":
         c_I = 2/3
 
     st.divider()
-    beregn = st.radio("Beregn:", ["K_total fra v og m", "v fra K_total og m", "v fra faldshøjde h (energibevarelse)", "Acceleration ned ad hældning", "Identificér rullende legeme fra v og h"], horizontal=True)
+    beregn = st.radio("Beregn:", ["K_total fra v og m", "v fra K_total og m", "v fra faldshøjde h (energibevarelse)", "Acceleration ned ad hældning", "Identificér rullende legeme fra v og h"], horizontal=True, key="rot_rulning_mode")
 
     if beregn == "K_total fra v og m":
         c1, c2 = st.columns(2)

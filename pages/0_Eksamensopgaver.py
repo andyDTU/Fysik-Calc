@@ -205,5 +205,8 @@ with st.expander("📚 Hurtig formeloversigt – hvad beregner hvilken side?"):
 | Fejlpropagation specifik formel | 📏 Usikkerhed | Fejlpropagation – generel (numerisk) |
 | Potenslov-fitting (log-log) | 📏 Usikkerhed | Potenslov-fitting y=A·xᵅ |
 | Impulsmoment / rotationsbevarelse | 🔄 Rotation | Bevarelse af impulsmoment |
+| Partikel/kugle rammer legeme → ω | 🔄 Rotation | Bevarelse af impulsmoment → Partikel rammer legeme |
+| Ruller ned fra højde h → v | 🔄 Rotation | Rulning uden glidning → v fra faldshøjde h |
+| Identificér rullende legeme fra v og h | 🔄 Rotation | Rulning uden glidning → Identificér rullende legeme |
 | Trisse + ophængt masse | 🔄 Rotation | Trisse + ophængt masse |
 """)

@@ -160,10 +160,16 @@ else:
     with tab_rot:
         _g("**Drejer sig** — kraftmoment τ = I·α, vinkelacceleration α",
            "g_tau", "rot_formel", "Newtons 2. lov for rotation:  τ = I·α", "pages/9_Rotation.py")
-        _g("**Ruller ned** af skråplan uden at glide — hastighed i bunden",
+        _g("**Ruller ned** af skråplan — acceleration eller K_total",
            "g_rul", "rot_formel", "Rulning uden glidning", "pages/9_Rotation.py")
+        _g("**Ruller ned fra højde h** — hvad er v i bunden?  (energibevarelse)",
+           "g_rulh", "rot_formel", "Rulning uden glidning", "pages/9_Rotation.py")
+        _g("**Hvad ruller?** Identificér form (kugle/cylinder/ring) fra målt v og h",
+           "g_rulid", "rot_formel", "Rulning uden glidning", "pages/9_Rotation.py")
         _g("**Figurdrejer / skøjteløber** — bevarelse af impulsmoment L",
            "g_L", "rot_formel", "Bevarelse af impulsmoment", "pages/9_Rotation.py")
+        _g("**Partikel/kugle rammer legeme** og klistrer fast — ω efter stød  (L = mvr)",
+           "g_part", "rot_formel", "Bevarelse af impulsmoment", "pages/9_Rotation.py")
         _g("**Inertimoment** I for kugle, cylinder, ring, skive  (tabel)",
            "g_I", "rot_formel", "Inertimoment – standardlegemer", "pages/9_Rotation.py")
         _g("**Støder og hænger fast** — fuldstændig uelastisk kollision",
