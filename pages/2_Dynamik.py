@@ -32,6 +32,8 @@ _DYN_FORMULAS = [
     ("Hældende plan",        "N=mg·cosθ,  f≤μN",            "Hældende plan"),
     ("Atwood-maskine",       "a=(m₂−m₁)g/(m₁+m₂)",        "Atwood-maskine:  to masser over trisse"),
     ("Spænding og tøjning",  "σ=F/A,  d=√(4F/πσ)",         "Spænding og tøjning:  σ = F / A"),
+    ("Konisk pendul",        "tanθ=ω²r/g,  T=2π√(Lcosθ/g)", "Konisk pendul"),
+    ("Bernoulli-ligning",    "p+½ρv²+ρgh = konst",           "Bernoulli-ligning"),
 ]
 formel = formula_card_grid(_DYN_FORMULAS, "dyn_formel")
 
@@ -48,6 +50,8 @@ DYN_TIPS = {
     "Hældende plan": "Opsæt koordinater langs planen. Normal­kraft N = mg·cos(θ). Friktionsgrænse: f ≤ μN.",
     "Atwood-maskine:  to masser over trisse": "Acceleration a = (m₂−m₁)g/(m₁+m₂). Snorkraft T = 2m₁m₂g/(m₁+m₂).",
     "Spænding og tøjning:  σ = F / A": "σ = F/A. Cirkulært tværsnit: A = πd²/4 → d = √(4F/πσ). Youngs modul E = σ/ε.",
+    "Konisk pendul": "Pendullod drejer i vandret cirkel. tanθ = ω²r/g. Periode T = 2π√(L·cosθ/g) — afhænger ikke af massen!",
+    "Bernoulli-ligning": "Gælder for ideel (ikke-viskøs, inkompressibel) strømning. Torricelli: v = √(2gh) for hul i beholder.",
 }
 show_tips(formel, DYN_TIPS)
 st.divider()
@@ -550,3 +554,157 @@ elif formel == "Spænding og tøjning:  σ = F / A":
 | Beton | ~30 |
 | Gummi | ~0.01–0.1 |
 """)
+
+elif formel == "Konisk pendul":
+    st.latex(r"T\cos\theta = mg \qquad T\sin\theta = \frac{mv^2}{r} = m\omega^2 r")
+    st.latex(r"\tan\theta = \frac{\omega^2 r}{g} \qquad T_{periode} = \frac{2\pi}{\omega} = 2\pi\sqrt{\frac{L\cos\theta}{g}}")
+    st.markdown("Loddet drejer i vandret cirkel. **L** = snorlængde, **r = L·sinθ**, θ = halvtopvinkel.")
+    st.divider()
+
+    mode = st.radio("Givet:", ["L og θ (snorlængde + vinkel)", "L og ω (snorlængde + vinkelhastighed)", "r og v (radius + hastighed)"], horizontal=True)
+    st.divider()
+
+    if mode == "L og θ (snorlængde + vinkel)":
+        c1, c2, c3 = st.columns(3)
+        L_pend = c1.number_input("L – snorlængde (m)", value=0.5, min_value=1e-6, format="%.6g")
+        theta  = c2.number_input("θ – halvtopvinkel (°)", value=30.0, min_value=0.01, max_value=89.9, format="%.6g")
+        m      = c3.number_input("m – masse (kg)", value=0.1, min_value=1e-12, format="%.6g")
+        th_r   = np.radians(theta)
+        r_k    = L_pend * np.sin(th_r)
+        omega_k = np.sqrt(G * np.tan(th_r) / r_k)
+        v_k    = omega_k * r_k
+        T_k    = m * G / np.cos(th_r)
+        period = 2 * np.pi / omega_k
+
+        col1, col2, col3, col4 = st.columns(4)
+        col1.metric("ω (rad/s)", f"{omega_k:.4g}")
+        col2.metric("v (m/s)", f"{v_k:.4g}")
+        col3.metric("T_snor (N)", f"{T_k:.4g}")
+        col4.metric("Periode (s)", f"{period:.4g}")
+
+        with st.expander("Vis udregning"):
+            st.latex(rf"r = L\sin\theta = {L_pend:.4g}\cdot\sin({theta:.4g}°) = {r_k:.4g}\ \text{{m}}")
+            st.latex(rf"\omega = \sqrt{{\frac{{g\tan\theta}}{{r}}}} = \sqrt{{\frac{{{G}\cdot\tan({theta:.4g}°)}}{{{r_k:.4g}}}}} = {omega_k:.4g}\ \text{{rad/s}}")
+            st.latex(rf"T_{{snor}} = \frac{{mg}}{{\cos\theta}} = \frac{{{m:.4g}\cdot{G}}}{{\cos({theta:.4g}°)}} = {T_k:.4g}\ \text{{N}}")
+            st.latex(rf"T_{{periode}} = \frac{{2\pi}}{{\omega}} = {period:.4g}\ \text{{s}}")
+
+    elif mode == "L og ω (snorlængde + vinkelhastighed)":
+        c1, c2, c3 = st.columns(3)
+        L_pend = c1.number_input("L – snorlængde (m)", value=0.5, min_value=1e-6, format="%.6g")
+        omega_k = c2.number_input("ω – vinkelhastighed (rad/s)", value=5.0, min_value=1e-6, format="%.6g")
+        m      = c3.number_input("m – masse (kg)", value=0.1, min_value=1e-12, format="%.6g")
+        cos_th = G / (omega_k**2 * L_pend)
+        if cos_th > 1.0:
+            st.error(f"ω = {omega_k:.4g} rad/s er for lav til at holde pendlet i luften. Minimum ω = {np.sqrt(G/L_pend):.4g} rad/s.")
+        else:
+            th_r   = np.arccos(cos_th)
+            theta  = np.degrees(th_r)
+            r_k    = L_pend * np.sin(th_r)
+            v_k    = omega_k * r_k
+            T_k    = m * G / cos_th
+            period = 2 * np.pi / omega_k
+
+            col1, col2, col3, col4 = st.columns(4)
+            col1.metric("θ (°)", f"{theta:.4g}")
+            col2.metric("v (m/s)", f"{v_k:.4g}")
+            col3.metric("T_snor (N)", f"{T_k:.4g}")
+            col4.metric("Periode (s)", f"{period:.4g}")
+
+            with st.expander("Vis udregning"):
+                st.latex(rf"\cos\theta = \frac{{g}}{{\omega^2 L}} = \frac{{{G}}}{{{omega_k:.4g}^2 \cdot {L_pend:.4g}}} = {cos_th:.4g}\ \Rightarrow\ \theta = {theta:.4g}°")
+                st.latex(rf"r = L\sin\theta = {r_k:.4g}\ \text{{m}},\quad v = \omega r = {v_k:.4g}\ \text{{m/s}}")
+                st.latex(rf"T_{{snor}} = \frac{{mg}}{{\cos\theta}} = {T_k:.4g}\ \text{{N}}")
+
+    else:
+        c1, c2, c3 = st.columns(3)
+        r_k = c1.number_input("r – cirkelradius (m)", value=0.25, min_value=1e-6, format="%.6g")
+        v_k = c2.number_input("v – hastighed (m/s)", value=2.0, min_value=1e-6, format="%.6g")
+        m   = c3.number_input("m – masse (kg)", value=0.1, min_value=1e-12, format="%.6g")
+        omega_k = v_k / r_k
+        theta   = np.degrees(np.arctan(v_k**2 / (r_k * G)))
+        T_k     = m * np.sqrt(G**2 + (v_k**2 / r_k)**2)
+        period  = 2 * np.pi / omega_k
+
+        col1, col2, col3, col4 = st.columns(4)
+        col1.metric("ω (rad/s)", f"{omega_k:.4g}")
+        col2.metric("θ (°)", f"{theta:.4g}")
+        col3.metric("T_snor (N)", f"{T_k:.4g}")
+        col4.metric("Periode (s)", f"{period:.4g}")
+
+        with st.expander("Vis udregning"):
+            st.latex(rf"\omega = v/r = {v_k:.4g}/{r_k:.4g} = {omega_k:.4g}\ \text{{rad/s}}")
+            st.latex(rf"\tan\theta = \frac{{v^2}}{{rg}} = \frac{{{v_k:.4g}^2}}{{{r_k:.4g}\cdot{G}}} = {v_k**2/(r_k*G):.4g}\ \Rightarrow\ \theta = {theta:.4g}°")
+            st.latex(rf"T_{{snor}} = m\sqrt{{g^2 + (v^2/r)^2}} = {T_k:.4g}\ \text{{N}}")
+
+elif formel == "Bernoulli-ligning":
+    st.latex(r"p_1 + \tfrac{1}{2}\rho v_1^2 + \rho g h_1 = p_2 + \tfrac{1}{2}\rho v_2^2 + \rho g h_2")
+    st.markdown("Ideel (ikke-viskøs, inkompressibel) strømning. Kontinuitetsligning: **A₁v₁ = A₂v₂**.")
+    st.divider()
+
+    mode = st.radio("Beregn:", [
+        "Hastighed v₂ (given p₁, p₂, v₁, h₁, h₂, ρ)",
+        "Torricelli – udstrømningshastighed (hul i beholder)",
+        "Differenstryk Δp (given v₁, v₂, h₁, h₂, ρ)",
+    ], horizontal=True)
+    st.divider()
+
+    if mode == "Hastighed v₂ (given p₁, p₂, v₁, h₁, h₂, ρ)":
+        c1, c2 = st.columns(2)
+        with c1:
+            st.markdown("**Punkt 1**")
+            p1   = st.number_input("p₁ – tryk (Pa)", value=101325.0, format="%.6g")
+            v1   = st.number_input("v₁ – hastighed (m/s)", value=1.0, min_value=0.0, format="%.6g")
+            h1   = st.number_input("h₁ – højde (m)", value=5.0, format="%.6g")
+        with c2:
+            st.markdown("**Punkt 2**")
+            p2   = st.number_input("p₂ – tryk (Pa)", value=101325.0, format="%.6g")
+            h2   = st.number_input("h₂ – højde (m)", value=0.0, format="%.6g")
+        rho  = st.number_input("ρ – densitet (kg/m³)", value=1000.0, min_value=1e-6, format="%.6g",
+                                help="Vand ≈ 1000, Luft ≈ 1.2 kg/m³")
+
+        # p1 + ½ρv1² + ρgh1 = p2 + ½ρv2² + ρgh2
+        lhs = p1 + 0.5*rho*v1**2 + rho*G*h1
+        rhs_without_v2 = p2 + rho*G*h2
+        v2_sq = 2*(lhs - rhs_without_v2)/rho
+        if v2_sq < 0:
+            st.error(f"Ingen reel løsning: højre side > venstre side. Tjek inputs.")
+        else:
+            v2 = np.sqrt(v2_sq)
+            st.success(f"**v₂ = {v2:.4g} m/s**")
+            st.latex(rf"v_2 = \sqrt{{v_1^2 + \frac{{2(p_1-p_2)}}{{\rho}} + 2g(h_1-h_2)}} = {v2:.4g}\ \text{{m/s}}")
+            if st.button("📋 Gem v₂", key="gem_dyn_bern_v2"):
+                gem_resultat(v2, "m/s", "v₂")
+
+    elif mode == "Torricelli – udstrømningshastighed (hul i beholder)":
+        st.latex(r"v = \sqrt{2 g h}")
+        st.info("Hul i siden af en åben beholder. h = højde fra hullet til vandoverfladen. p ved overfladen = p ved hullet = atmosfæretryk.")
+        c1, c2 = st.columns(2)
+        h_tor  = c1.number_input("h – vandhøjde over hullet (m)", value=1.0, min_value=0.0, format="%.6g")
+        d_hul  = c2.number_input("d – huldiameter (m, 0 = ignorer)", value=0.0, min_value=0.0, format="%.6g")
+
+        v_tor = np.sqrt(2 * G * h_tor)
+        st.success(f"**v = {v_tor:.4g} m/s**")
+        st.latex(rf"v = \sqrt{{2gh}} = \sqrt{{2 \cdot {G} \cdot {h_tor:.4g}}} = {v_tor:.4g}\ \text{{m/s}}")
+        if d_hul > 0:
+            A_hul = np.pi * (d_hul/2)**2
+            Q_flow = A_hul * v_tor
+            st.info(f"Volumenstrøm: Q = A·v = {A_hul:.4g} m² · {v_tor:.4g} m/s = **{Q_flow:.4g} m³/s** = {Q_flow*1000:.4g} L/s")
+        if st.button("📋 Gem v", key="gem_dyn_torr_v"):
+            gem_resultat(v_tor, "m/s", "v_Torricelli")
+
+    else:
+        st.latex(r"\Delta p = p_1 - p_2 = \tfrac{1}{2}\rho(v_2^2 - v_1^2) + \rho g(h_2 - h_1)")
+        c1, c2 = st.columns(2)
+        with c1:
+            st.markdown("**Punkt 1**")
+            v1 = st.number_input("v₁ (m/s)", value=1.0, min_value=0.0, format="%.6g")
+            h1 = st.number_input("h₁ (m)", value=0.0, format="%.6g")
+        with c2:
+            st.markdown("**Punkt 2**")
+            v2 = st.number_input("v₂ (m/s)", value=5.0, min_value=0.0, format="%.6g")
+            h2 = st.number_input("h₂ (m)", value=0.0, format="%.6g")
+        rho = st.number_input("ρ – densitet (kg/m³)", value=1000.0, min_value=1e-6, format="%.6g")
+
+        dp = 0.5*rho*(v2**2 - v1**2) + rho*G*(h2 - h1)
+        st.success(f"**Δp = p₁ − p₂ = {dp:.4g} Pa  =  {dp/1e5:.4g} bar**")
+        st.latex(rf"\Delta p = \tfrac{{1}}{{2}}\rho(v_2^2-v_1^2) + \rho g(h_2-h_1) = \tfrac{{1}}{{2}}\cdot{rho:.4g}\cdot({v2:.4g}^2-{v1:.4g}^2)+{rho:.4g}\cdot{G}\cdot({h2:.4g}-{h1:.4g}) = {dp:.4g}\ \text{{Pa}}")

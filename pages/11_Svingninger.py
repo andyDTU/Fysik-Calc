@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar, show_tips, formula_card_grid, breadcrumb
+from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips, formula_card_grid, breadcrumb
 
 st.set_page_config(page_title="Svingninger", page_icon="〰️", layout="wide")
 show_sidebar_constants()
@@ -19,6 +19,7 @@ _SVING_FORMULAS = [
     ("Bevægelsesligning",    "x(t) = A·cos(ωt+φ)",            "Bevægelsesligning:  x(t) = A·cos(ωt + φ)"),
     ("Energi i svingning",   "E = ½·k·A²",                   "Energi i svingning:  E = ½·k·A²"),
     ("Dæmpet svingning",     "x(t) = A·e^(−γt)·cos(ω't+φ)", "Dæmpet svingning:  x(t) = A·e^(−γt)·cos(ω't + φ)"),
+    ("Fysisk pendul",        "T = 2π√(I/(mgd))",             "Fysisk pendul:  T = 2π√(I/(mgd))"),
 ]
 formel = formula_card_grid(_SVING_FORMULAS, "sving_formel")
 
@@ -29,6 +30,7 @@ SVING_TIPS = {
     "Bevægelsesligning:  x(t) = A·cos(ωt + φ)": "v(t) = −Aω·sin(ωt+φ), a(t) = −Aω²·cos(ωt+φ). Max fart ved x=0, max acc. ved x=±A.",
     "Energi i svingning:  E = ½·k·A²": "E = ½kA² = konstant. Ved x=0: alt er kinetisk. Ved x=±A: alt er potentielt.",
     "Dæmpet svingning:  x(t) = A·e^(−γt)·cos(ω't + φ)": "γ = b/(2m). Underdæmpet: γ < ω₀. Kritisk: γ = ω₀. Overdæmpet: γ > ω₀.",
+    "Fysisk pendul:  T = 2π√(I/(mgd))": "I = inertimoment om drejningspunktet (Steiner: I = Icm + md²). d = afstand fra drejningspunkt til massemidtpunkt.",
 }
 show_tips(formel, SVING_TIPS)
 st.divider()
@@ -208,3 +210,51 @@ elif formel == "Dæmpet svingning:  x(t) = A·e^(−γt)·cos(ω't + φ)":
     else:
         col3.metric("ω' – dæmpet (rad/s)", "imaginær")
         st.error("**Overdæmpet** – systemet vender langsomt tilbage, ingen svingning")
+
+elif formel == "Fysisk pendul:  T = 2π√(I/(mgd))":
+    st.latex(r"T = 2\pi\sqrt{\frac{I}{mgd}}")
+    st.markdown("""
+**I** = inertimoment om drejningspunktet (brug Steiners sætning: I = Icm + md²)
+**d** = afstand fra drejningspunkt til massemidtpunkt
+**Gælder for små udsving (θ < ~15°)**
+""")
+    st.divider()
+
+    beregn = st.radio("Beregn:", ["T – periode (s)", "I – inertimoment (kg·m²)", "d – afstand cm → pivot (m)"], horizontal=True)
+    st.divider()
+
+    if beregn == "T – periode (s)":
+        c1, c2, c3 = st.columns(3)
+        I_fys = c1.number_input("I – inertimoment om pivot (kg·m²)", value=0.5, min_value=1e-12, format="%.6g")
+        m_fys = c2.number_input("m – masse (kg)", value=1.0, min_value=1e-12, format="%.6g")
+        d_fys = c3.number_input("d – afstand cm → pivot (m)", value=0.5, min_value=1e-6, format="%.6g")
+
+        T_fys = 2 * np.pi * np.sqrt(I_fys / (m_fys * G * d_fys))
+        omega_fys = np.sqrt(m_fys * G * d_fys / I_fys)
+        L_eff = I_fys / (m_fys * d_fys)
+
+        st.success(f"**T = {T_fys:.4g} s**   (f = {1/T_fys:.4g} Hz,  ω = {omega_fys:.4g} rad/s)")
+        st.latex(rf"T = 2\pi\sqrt{{\frac{{I}}{{mgd}}}} = 2\pi\sqrt{{\frac{{{I_fys:.4g}}}{{{m_fys:.4g}\cdot{G}\cdot{d_fys:.4g}}}}} = {T_fys:.4g}\ \text{{s}}")
+        st.caption(f"Ækvivalent pendul­længde L_eff = I/(md) = {L_eff:.4g} m")
+        if st.button("📋 Gem T", key="gem_sving_fys_T"):
+            gem_resultat(T_fys, "s", "T_fysisk_pendul")
+
+    elif beregn == "I – inertimoment (kg·m²)":
+        c1, c2, c3 = st.columns(3)
+        T_fys = c1.number_input("T – periode (s)", value=1.0, min_value=1e-12, format="%.6g")
+        m_fys = c2.number_input("m – masse (kg)", value=1.0, min_value=1e-12, format="%.6g")
+        d_fys = c3.number_input("d – afstand cm → pivot (m)", value=0.5, min_value=1e-6, format="%.6g")
+
+        I_fys = m_fys * G * d_fys * (T_fys / (2 * np.pi))**2
+        st.success(f"**I = {I_fys:.4g} kg·m²**")
+        st.latex(rf"I = m g d \left(\frac{{T}}{{2\pi}}\right)^2 = {m_fys:.4g}\cdot{G}\cdot{d_fys:.4g}\cdot\left(\frac{{{T_fys:.4g}}}{{2\pi}}\right)^2 = {I_fys:.4g}\ \text{{kg·m}}^2")
+
+    else:
+        c1, c2, c3 = st.columns(3)
+        T_fys = c1.number_input("T – periode (s)", value=1.0, min_value=1e-12, format="%.6g")
+        m_fys = c2.number_input("m – masse (kg)", value=1.0, min_value=1e-12, format="%.6g")
+        I_fys = c3.number_input("I – inertimoment om pivot (kg·m²)", value=0.5, min_value=1e-12, format="%.6g")
+
+        d_fys = I_fys / (m_fys * G) * (2 * np.pi / T_fys)**2
+        st.success(f"**d = {d_fys:.4g} m**")
+        st.latex(rf"d = \frac{{I}}{{{m_fys:.4g}\cdot{G}}} \cdot \left(\frac{{2\pi}}{{{T_fys:.4g}}}\right)^2 = {d_fys:.4g}\ \text{{m}}")

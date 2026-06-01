@@ -24,6 +24,7 @@ _TERMO_FORMULAS = [
     ("1. termodynamikslov",  "ΔU = Q − W",                   "1. termodynamikslov:  ΔU = Q − W"),
     ("Carnot-virkningsgrad", "η = 1 − Tk/Tv",                "Carnot-virkningsgrad:  η = 1 − Tk/Tv"),
     ("Termisk udvidelse",    "ΔL = α·L₀·ΔT",                 "Termisk udvidelse"),
+    ("Varmledning",          "Q/t = k·A·ΔT/L",               "Varmledning:  Q/t = k·A·ΔT/L"),
 ]
 formel = formula_card_grid(_TERMO_FORMULAS, "termo_formel")
 
@@ -35,6 +36,7 @@ TERMO_TIPS = {
     "Adiabatisk proces:  pV^γ = konst": "Q = 0. γ = Cp/Cv ≈ 1.4 for diatomisk gas. Gælder for hurtige processer.",
     "1. termodynamikslov:  ΔU = Q − W": "ΔU = Q − W. Q > 0: varme TIL systemet. W > 0: arbejde AF systemet.",
     "Carnot-virkningsgrad:  η = 1 − Tk/Tv": "η = 1 − Tk/Tv. Absolut temperatur! Max. virkningsgrad for enhver varmemaskine.",
+    "Varmledning:  Q/t = k·A·ΔT/L": "k = varmeledningsevne (W/(m·K)). Fouriers lov. Stationær tilstand: samme Q/t hele vejen igennem.",
 }
 show_tips(formel, TERMO_TIPS)
 st.divider()
@@ -395,6 +397,81 @@ elif formel == "Carnot-virkningsgrad:  η = 1 − Tk/Tv":
         Tk  = c2.number_input("Tk – kold temperatur (K)", value=300.0, min_value=0.01, format="%.6g")
         Tv = Tk / (1 - eta)
         st.success(f"**Tv = {Tv:.4g} K  =  {Tv-273.15:.4g} °C**")
+
+elif formel == "Varmledning:  Q/t = k·A·ΔT/L":
+    st.latex(r"\frac{Q}{t} = \frac{k \cdot A \cdot \Delta T}{L}")
+    st.markdown("""
+**Fouriers lov** – varmestrøm gennem en stav/plade i stationær tilstand.
+
+- **k** = varmeledningsevne (W/(m·K))
+- **A** = tværsnitsareal (m²)
+- **ΔT** = temperaturforskel (K)
+- **L** = tykkelse/længde af staven (m)
+- **Q/t** = varmestrøm (W)
+""")
+    st.markdown("""
+| Materiale | k (W/(m·K)) |
+|-----------|------------|
+| Kobber | 385 |
+| Aluminium | 205 |
+| Jern / Stål | 50 |
+| Beton | 1.0 |
+| Glas | 1.0 |
+| Træ | 0.1–0.2 |
+| Luft | 0.025 |
+""")
+    beregn = st.radio("Beregn:", ["Q/t – varmestrøm (W)", "ΔT – temperaturforskel (K)", "L – tykkelse (m)", "A – areal (m²)", "k – varmeledningsevne (W/(m·K))"], horizontal=True)
+    st.divider()
+
+    if beregn == "Q/t – varmestrøm (W)":
+        c1, c2, c3, c4 = st.columns(4)
+        k_vl  = c1.number_input("k (W/(m·K))", value=385.0, min_value=1e-12, format="%.6g")
+        A_vl  = c2.number_input("A – areal (m²)", value=1e-4, min_value=1e-12, format="%.6g")
+        dT_vl = c3.number_input("ΔT (K)", value=100.0, format="%.6g")
+        L_vl  = c4.number_input("L – tykkelse (m)", value=0.01, min_value=1e-12, format="%.6g")
+        P_vl = k_vl * A_vl * dT_vl / L_vl
+        st.success(f"**Q/t = {P_vl:.4g} W**")
+        st.latex(rf"\frac{{Q}}{{t}} = \frac{{k A \Delta T}}{{L}} = \frac{{{k_vl:.4g}\cdot{A_vl:.4g}\cdot{dT_vl:.4g}}}{{{L_vl:.4g}}} = {P_vl:.4g}\ \text{{W}}")
+
+    elif beregn == "ΔT – temperaturforskel (K)":
+        c1, c2, c3, c4 = st.columns(4)
+        P_vl  = c1.number_input("Q/t – varmestrøm (W)", value=385.0, format="%.6g")
+        k_vl  = c2.number_input("k (W/(m·K))", value=385.0, min_value=1e-12, format="%.6g")
+        A_vl  = c3.number_input("A – areal (m²)", value=1e-4, min_value=1e-12, format="%.6g")
+        L_vl  = c4.number_input("L – tykkelse (m)", value=0.01, min_value=1e-12, format="%.6g")
+        dT_vl = P_vl * L_vl / (k_vl * A_vl)
+        st.success(f"**ΔT = {dT_vl:.4g} K**")
+        st.latex(rf"\Delta T = \frac{{(Q/t)\cdot L}}{{k A}} = {dT_vl:.4g}\ \text{{K}}")
+
+    elif beregn == "L – tykkelse (m)":
+        c1, c2, c3, c4 = st.columns(4)
+        P_vl  = c1.number_input("Q/t – varmestrøm (W)", value=3.85, format="%.6g")
+        k_vl  = c2.number_input("k (W/(m·K))", value=385.0, min_value=1e-12, format="%.6g")
+        A_vl  = c3.number_input("A – areal (m²)", value=1e-4, min_value=1e-12, format="%.6g")
+        dT_vl = c4.number_input("ΔT (K)", value=100.0, min_value=1e-12, format="%.6g")
+        L_vl = k_vl * A_vl * dT_vl / P_vl
+        st.success(f"**L = {L_vl:.4g} m  =  {L_vl*100:.4g} cm**")
+        st.latex(rf"L = \frac{{k A \Delta T}}{{Q/t}} = {L_vl:.4g}\ \text{{m}}")
+
+    elif beregn == "A – areal (m²)":
+        c1, c2, c3, c4 = st.columns(4)
+        P_vl  = c1.number_input("Q/t – varmestrøm (W)", value=3.85, format="%.6g")
+        k_vl  = c2.number_input("k (W/(m·K))", value=385.0, min_value=1e-12, format="%.6g")
+        L_vl  = c3.number_input("L – tykkelse (m)", value=0.01, min_value=1e-12, format="%.6g")
+        dT_vl = c4.number_input("ΔT (K)", value=100.0, min_value=1e-12, format="%.6g")
+        A_vl = P_vl * L_vl / (k_vl * dT_vl)
+        st.success(f"**A = {A_vl:.4g} m²**")
+        st.latex(rf"A = \frac{{(Q/t)\cdot L}}{{k\cdot\Delta T}} = {A_vl:.4g}\ \text{{m}}^2")
+
+    else:
+        c1, c2, c3, c4 = st.columns(4)
+        P_vl  = c1.number_input("Q/t – varmestrøm (W)", value=3.85, format="%.6g")
+        A_vl  = c2.number_input("A – areal (m²)", value=1e-4, min_value=1e-12, format="%.6g")
+        L_vl  = c3.number_input("L – tykkelse (m)", value=0.01, min_value=1e-12, format="%.6g")
+        dT_vl = c4.number_input("ΔT (K)", value=100.0, min_value=1e-12, format="%.6g")
+        k_vl = P_vl * L_vl / (A_vl * dT_vl)
+        st.success(f"**k = {k_vl:.4g} W/(m·K)**")
+        st.latex(rf"k = \frac{{(Q/t)\cdot L}}{{A\cdot\Delta T}} = {k_vl:.4g}\ \text{{W/(m·K)}}")
 
 elif formel == "Termisk udvidelse":
     st.latex(r"\Delta L = \alpha \cdot L_0 \cdot \Delta T \qquad \Delta V = \beta \cdot V_0 \cdot \Delta T")
