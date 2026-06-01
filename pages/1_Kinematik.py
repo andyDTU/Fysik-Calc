@@ -353,6 +353,12 @@ elif formel == "Vertikalt kast":
             f" |  **v_land = {v_land:.4g} ± {dv:.2g} m/s**"
         )
 
+        # ── Bidragsrangering (til eksamensspørgsmål som "hvem dominerer?") ──
+        contrib = {"δt(v₀)": abs(dt_dv0 * dv0), "δt(h₀)": abs(dt_dh0 * dh0), "δt(g)": abs(dt_dg * dg)}
+        ranked = sorted(contrib.items(), key=lambda x: x[1], reverse=True)
+        rank_str = " > ".join(f"**{k}** ({v:.4g} s)" for k, v in ranked)
+        st.info(f"Bidragsrangering: {rank_str}")
+
         with st.expander("Vis fejlpropagation – landingstid t"):
             st.latex(r"D = \sqrt{v_0^2 + 2g h_0}, \quad t = \frac{v_0 + D}{g}")
             st.latex(
