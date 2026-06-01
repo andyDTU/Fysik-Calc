@@ -1,10 +1,11 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar, show_tips, formula_card_grid
+from utils import show_sidebar_constants, show_resultat_sidebar, show_tips, formula_card_grid, breadcrumb
 
 st.set_page_config(page_title="Atomfysik & Kvantemekanik", page_icon="☢️", layout="wide")
 show_sidebar_constants()
 show_resultat_sidebar()
+breadcrumb("☢️", "Atomfysik")
 st.title("☢️ Atomfysik & Kvantemekanik")
 st.markdown("Radioaktivitet, energi-masse-ækvivalens, fotoner og Bohrs model")
 st.divider()

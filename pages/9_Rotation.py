@@ -1,10 +1,11 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips, formula_card_grid
+from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips, formula_card_grid, breadcrumb
 
 st.set_page_config(page_title="Rotation", page_icon="🔄", layout="wide")
 show_sidebar_constants()
 show_resultat_sidebar()
+breadcrumb("🔄", "Rotation")
 st.title("🔄 Rotation")
 st.markdown("Vinkelkinematik, inertimoment, drejningsmoment, rulning og impulsmoment — Lectures 11-12 (10060)")
 st.divider()

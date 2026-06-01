@@ -1,25 +1,57 @@
 import streamlit as st
 from utils import show_sidebar_constants, FORMLER
 
-st.set_page_config(
-    page_title="Fysik-Calc",
-    page_icon="⚡",
-    layout="wide",
-)
-
+st.set_page_config(page_title="Fysik-Calc", page_icon="⚡", layout="wide")
 show_sidebar_constants()
 
 st.title("⚡ Fysik-Calc")
 st.markdown("**Det ultimative regneværktøj til DTU 10060 – Fysik og Kemi**")
 
-søg = st.text_input(
-    "søg",
-    placeholder="🔍 Søg efter formel – fx 'centripetal', 'gaslov', 'kollision', 'v²'...",
-    label_visibility="collapsed",
-)
+# ── Variable-filter ELLER tekst-søgning ───────────────────────────────────────
+# Flade labels: "symbol – beskrivelse"  (matcher på symbolet til venstre for " – ")
+_VAR_OPTS = [
+    "s – strækning/position",   "v – hastighed",          "v₀ – starthastighed",
+    "a – acceleration",          "t – tid",                "h – højde",
+    "θ – vinkel",                "r – radius",
+    "ω – vinkelhastighed",       "α – vinkelacceleration", "τ – kraftmoment",
+    "I – inertimoment / strøm",  "L – impulsmoment / induktans",
+    "T – periode / temperatur",  "RPM – omdrejninger/min",
+    "F – kraft",                 "m – masse",              "g – tyngdeacceleration",
+    "μ – friktionskoefficient",  "N – normalkraft",        "σ – spænding (stress)",
+    "p – impuls / tryk",         "Ek – kinetisk energi",  "Ep – potentiel energi",
+    "E – energi (generel)",      "W – arbejde",            "P – effekt",
+    "k – fjederkonstant",        "η – virkningsgrad",
+    "U – elektrisk spænding",    "R – modstand (Ω)",       "C – kapacitans",
+    "B – magnetfelt",            "q – ladning",            "ε – EMF",
+    "V – volumen",               "Q – varme",              "n – stofmængde / brydningsindeks",
+    "λ – bølgelængde",           "f – frekvens",           "c – lyshastighed",
+    "γ – Lorentz-faktor",        "T½ – halvvejstid",       "Δ – usikkerhed",
+    "x – koordinat / måling",    "d – afstand / spalte",   "φ – faseforskel / arbejdsfunktion",
+]
+
+# Symbol-map: trunc label til symbol  ("s – strækning" → "s")
+_SYM = {opt: opt.split(" – ")[0].strip() for opt in _VAR_OPTS}
+
+tab_var, tab_søg = st.tabs(["🔢 Hvad kender du?", "🔍 Søg på tekst"])
+
+with tab_søg:
+    søg_tekst = st.text_input(
+        "søg",
+        placeholder="fx 'centripetal', 'gaslov', 'kollision', 'v²'...",
+        label_visibility="collapsed",
+    )
+
+with tab_var:
+    valgte_labels = st.multiselect(
+        "Vælg de størrelser du kender fra opgaven:",
+        options=_VAR_OPTS,
+        placeholder="Klik og skriv, fx 'v₀', 'acceleration', 'tid'...",
+    )
+    valgte_syms = [_SYM[lbl] for lbl in valgte_labels]
 
 st.divider()
 
+# ── Afgør hvad der vises ─────────────────────────────────────────────────────
 TILES = [
     ("🏃", "Kinematik",        "pages/1_Kinematik.py",
      "s=vt · v=v₀+at · kast · cirkulær · RPM"),
@@ -46,24 +78,22 @@ TILES = [
     ("🚀", "Relativitetsteori","pages/12_Relativitetsteori.py",
      "γ=1/√(1−v²/c²) · tidsudvidelse · E=γm₀c²"),
 ]
-
 _SIDE_META = {t[1]: (t[0], t[2]) for t in TILES}
+_SIDE_ORDER = [t[1] for t in TILES]
 
-søg_lc = søg.strip().lower()
-
-if søg_lc:
-    # ── Søgeresultater ────────────────────────────────────────────────────────
+if valgte_syms:
+    # ── Variabel-filter resultater ────────────────────────────────────────────
     hits = [f for f in FORMLER
-            if søg_lc in f["navn"].lower() or søg_lc in f["kw"].lower()]
+            if all(sym in f.get("vars", []) for sym in valgte_syms)]
 
     if not hits:
-        st.warning(f"Ingen formler fandt for **'{søg}'** – prøv et andet ord.")
+        st.warning(
+            f"Ingen formel bruger **alle** de valgte størrelser samtidigt. "
+            f"Prøv at fjerne én – måske bruger formlen kun to af dem."
+        )
     else:
-        st.markdown(f"**{len(hits)} formel(er) fundet for '{søg}'**")
-
-        # Grupper efter side i original rækkefølge
-        sider_orden = [t[1] for t in TILES]
-        for side_navn in sider_orden:
+        st.markdown(f"**{len(hits)} formel(er) bruger: {', '.join(valgte_syms)}**")
+        for side_navn in _SIDE_ORDER:
             gruppe = [f for f in hits if f["side"] == side_navn]
             if not gruppe:
                 continue
@@ -72,13 +102,37 @@ if søg_lc:
             for f in gruppe:
                 col1, col2 = st.columns([5, 1])
                 col1.markdown(f"**{f['navn']}**")
-                if col2.button("→ Åbn", key=f"srch_{f['navn']}", use_container_width=True):
+                if col2.button("→ Åbn", key=f"vf_{f['navn']}", use_container_width=True):
+                    st.session_state[f["key"]] = f["navn"]
+                    st.switch_page(f["fil"])
+            st.markdown("")
+
+elif søg_tekst.strip():
+    # ── Tekst-søgning resultater ──────────────────────────────────────────────
+    lc = søg_tekst.strip().lower()
+    hits = [f for f in FORMLER
+            if lc in f["navn"].lower() or lc in f["kw"].lower()]
+
+    if not hits:
+        st.warning(f"Ingen formler fundet for **'{søg_tekst}'** – prøv et andet ord.")
+    else:
+        st.markdown(f"**{len(hits)} formel(er) fundet for '{søg_tekst}'**")
+        for side_navn in _SIDE_ORDER:
+            gruppe = [f for f in hits if f["side"] == side_navn]
+            if not gruppe:
+                continue
+            emoji = _SIDE_META[side_navn][0]
+            st.markdown(f"#### {emoji} {side_navn}")
+            for f in gruppe:
+                col1, col2 = st.columns([5, 1])
+                col1.markdown(f"**{f['navn']}**")
+                if col2.button("→ Åbn", key=f"ts_{f['navn']}", use_container_width=True):
                     st.session_state[f["key"]] = f["navn"]
                     st.switch_page(f["fil"])
             st.markdown("")
 
 else:
-    # ── Emne-fliser ───────────────────────────────────────────────────────────
+    # ── Emne-fliser (default) ─────────────────────────────────────────────────
     cols_per_row = 3
     rows = [TILES[i:i+cols_per_row] for i in range(0, len(TILES), cols_per_row)]
     for row in rows:
@@ -89,3 +143,5 @@ else:
                 st.caption(formler)
                 if st.button(f"Åbn {navn}", key=f"tile_{navn}", use_container_width=True):
                     st.switch_page(fil)
+    st.markdown("")
+    st.info("💡 Brug fanerne øverst: vælg de størrelser du kender, eller søg på tekst.")

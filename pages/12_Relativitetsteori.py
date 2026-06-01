@@ -1,10 +1,11 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips, formula_card_grid
+from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips, formula_card_grid, breadcrumb
 
 st.set_page_config(page_title="Relativitetsteori", page_icon="🚀", layout="wide")
 show_sidebar_constants()
 show_resultat_sidebar()
+breadcrumb("🚀", "Relativitetsteori")
 st.title("🚀 Speciel Relativitetsteori")
 st.markdown("Lorentz-faktor, tidsudvidelse, længdeforkortning og relativistisk energi")
 st.divider()

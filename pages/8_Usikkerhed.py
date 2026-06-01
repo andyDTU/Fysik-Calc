@@ -1,10 +1,11 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar, show_tips, formula_card_grid
+from utils import show_sidebar_constants, show_resultat_sidebar, show_tips, formula_card_grid, breadcrumb
 
 st.set_page_config(page_title="Usikkerhed", page_icon="📏", layout="wide")
 show_sidebar_constants()
 show_resultat_sidebar()
+breadcrumb("📏", "Usikkerhed")
 st.title("📏 Usikkerhed & Fejlanalyse")
 st.markdown("Måleusikkerhed, fejlpropagation og statistik — Lecture 3 (10060)")
 st.divider()

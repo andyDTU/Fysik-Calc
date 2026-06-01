@@ -1,10 +1,11 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips, formula_card_grid
+from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips, formula_card_grid, breadcrumb
 
 st.set_page_config(page_title="Kinematik", page_icon="🏃", layout="wide")
 show_sidebar_constants()
 show_resultat_sidebar()
+breadcrumb("🏃", "Kinematik")
 st.title("🏃 Kinematik")
 st.markdown("Beregn størrelser inden for bevægelse og kinematik")
 st.divider()

@@ -1,10 +1,11 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar, show_tips, formula_card_grid
+from utils import show_sidebar_constants, show_resultat_sidebar, show_tips, formula_card_grid, breadcrumb
 
 st.set_page_config(page_title="Kollisioner", page_icon="💥", layout="wide")
 show_sidebar_constants()
 show_resultat_sidebar()
+breadcrumb("💥", "Kollisioner")
 st.title("💥 Kollisioner & Impulsbevarelse")
 st.markdown("Elastiske, uelastiske kollisioner og bevarelse af impuls — Lecture 10 (10060)")
 st.divider()
