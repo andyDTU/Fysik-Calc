@@ -357,7 +357,7 @@ elif formel == "Rulning uden glidning":
         c_I = 2/3
 
     st.divider()
-    beregn = st.radio("Beregn:", ["K_total fra v og m", "v fra K_total og m", "Acceleration ned ad hældning"], horizontal=True)
+    beregn = st.radio("Beregn:", ["K_total fra v og m", "v fra K_total og m", "v fra faldshøjde h (energibevarelse)", "Acceleration ned ad hældning", "Identificér rullende legeme fra v og h"], horizontal=True)
 
     if beregn == "K_total fra v og m":
         c1, c2 = st.columns(2)
@@ -379,6 +379,46 @@ elif formel == "Rulning uden glidning":
         v = np.sqrt(2 * K / (m * (1 + c_I)))
         st.success(f"**v_cm = {v:.6g} m/s**")
         st.latex(rf"v = \sqrt{{\frac{{2K}}{{m(1+c_I)}}}} = {v:.6g}\ \text{{m/s}}")
+
+    elif beregn == "v fra faldshøjde h (energibevarelse)":
+        st.markdown("Energibevarelse: $mgh = \\frac{1}{2}mv^2(1+c_I)$ → $v = \\sqrt{\\frac{2gh}{1+c_I}}$")
+        st.latex(rf"v = \sqrt{{\frac{{2gh}}{{1 + c_I}}}} \quad (c_I = {c_I})")
+        c1, c2 = st.columns(2)
+        h = c1.number_input("h – faldshøjde (m)", value=1.8, min_value=1e-6, format="%.6g")
+        g_val = c2.number_input("g (m/s²)", value=G, format="%.6g")
+        v = np.sqrt(2 * g_val * h / (1 + c_I))
+        st.success(f"**v_cm = {v:.6g} m/s**")
+        st.latex(rf"v = \sqrt{{\frac{{2 \cdot {g_val:.4g} \cdot {h:.4g}}}{{1 + {c_I}}}}} = {v:.6g}\ \text{{m/s}}")
+        gem_resultat(v, "m/s", "v_cm")
+
+    elif beregn == "Identificér rullende legeme fra v og h":
+        st.markdown("Giv den målte hastighed og faldshøjden — appen finder hvilken form der passer.")
+        st.latex(r"v_{forventet} = \sqrt{\frac{2gh}{1+c_I}}")
+        c1, c2, c3 = st.columns(3)
+        v_malt = c1.number_input("v_målt (m/s)", value=4.43, min_value=1e-6, format="%.6g")
+        h      = c2.number_input("h – faldshøjde (m)", value=1.8, min_value=1e-6, format="%.6g")
+        g_val  = c3.number_input("g (m/s²)", value=G, format="%.6g")
+        st.divider()
+        former = [
+            ("Massiv kugle",        2/5,  r"I = \frac{2}{5}mR^2"),
+            ("Massiv cylinder/disk",1/2,  r"I = \frac{1}{2}mR^2"),
+            ("Hul kugle",           2/3,  r"I = \frac{2}{3}mR^2"),
+            ("Tynd ring/hoop",      1.0,  r"I = mR^2"),
+        ]
+        bedste, bedste_afv = None, 1e9
+        for navn, ci, _ in former:
+            v_exp = np.sqrt(2 * g_val * h / (1 + ci))
+            afv = abs(v_exp - v_malt)
+            if afv < bedste_afv:
+                bedste_afv, bedste = afv, navn
+        rows = []
+        for navn, ci, latex_I in former:
+            v_exp = np.sqrt(2 * g_val * h / (1 + ci))
+            marker = "✅" if navn == bedste else ""
+            rows.append({"Form": f"{marker} {navn}", "c_I": ci, "v_forventet (m/s)": round(v_exp, 4), "Afvigelse (m/s)": round(abs(v_exp - v_malt), 4)})
+        import pandas as pd
+        st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+        st.success(f"**Bedste match: {bedste}** (afvigelse {bedste_afv:.4g} m/s)")
 
     else:
         st.markdown("For rulning ned ad hældende plan (ingen glidning):")
@@ -421,10 +461,29 @@ elif formel == "Bevarelse af impulsmoment":
     st.markdown("Bevaret når nettodrejningsmoment = 0 (ingen ydre drejningsmomenter).")
     st.divider()
 
-    beregn = st.radio("Beregn:", ["ω₂ – slut­vinkelhastighed (rad/s)", "I₂ – slut­inertimoment (kg·m²)"], horizontal=True, key="rot_bev_mode")
+    beregn = st.radio("Beregn:", ["ω₂ – slut­vinkelhastighed (rad/s)", "I₂ – slut­inertimoment (kg·m²)", "Partikel rammer legeme (L=mvr)"], horizontal=True, key="rot_bev_mode")
     st.divider()
 
-    if beregn == "ω₂ – slut­vinkelhastighed (rad/s)":
+    if beregn == "Partikel rammer legeme (L=mvr)":
+        st.markdown("Partikel med masse **m** og hastighed **v** rammer legeme (I_legeme) i afstanden **r** fra rotationsaksen og klistrer fast.")
+        st.latex(r"L_i = m\,v\,r \qquad L_f = I_{total}\,\omega_f \qquad \omega_f = \frac{m\,v\,r}{I_{total}}")
+        st.markdown("*I_total = I_legeme + I_partikel_efter_stød = I_legeme + m·r²*")
+        c1, c2, c3, c4 = st.columns(4)
+        m_p  = c1.number_input("m – partikelens masse (kg)", value=0.002, min_value=1e-12, format="%.6g")
+        v_p  = c2.number_input("v – partikelens hastighed (m/s)", value=500.0, format="%.6g")
+        r_p  = c3.number_input("r – afstand fra akse til partikel (m)", value=0.5, min_value=1e-12, format="%.6g")
+        I_leg = c4.number_input("I_legeme (kg·m²) – legemets inertimoment FØR stød", value=0.3125, min_value=0.0, format="%.6g")
+        L_i = m_p * v_p * r_p
+        I_tot = I_leg + m_p * r_p**2
+        w_f = L_i / I_tot
+        K_i = 0.5 * m_p * v_p**2
+        K_f = 0.5 * I_tot * w_f**2
+        st.success(f"**ω_f = {w_f:.6g} rad/s**")
+        st.latex(rf"\omega_f = \frac{{m\,v\,r}}{{I_{{leg}} + m\,r^2}} = \frac{{{m_p:.4g} \cdot {v_p:.4g} \cdot {r_p:.4g}}}{{{I_leg:.4g} + {m_p:.4g} \cdot {r_p:.4g}^2}} = {w_f:.6g}\ \text{{rad/s}}")
+        st.markdown(f"L_i = {L_i:.4g} kg·m²/s | I_total = {I_tot:.4g} kg·m² | K_i = {K_i:.4g} J → K_f = {K_f:.4g} J (tab = {K_i-K_f:.4g} J)")
+        gem_resultat(w_f, "rad/s", "ω_f")
+
+    elif beregn == "ω₂ – slut­vinkelhastighed (rad/s)":
         c1, c2, c3 = st.columns(3)
         I1 = c1.number_input("I₁ – start­inertimoment (kg·m²)", value=3.0, min_value=1e-12, format="%.6g")
         w1 = c2.number_input("ω₁ – startvinkelhastighed (rad/s)", value=2.0, format="%.6g")
