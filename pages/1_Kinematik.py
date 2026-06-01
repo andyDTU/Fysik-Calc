@@ -32,6 +32,7 @@ _KIN_FORMULAS = [
     ("Jævnt acc. (2)",      "s = v₀·t + ½·a·t²",             "Jævnt accelereret (2):  s = v₀·t + ½·a·t²"),
     ("Jævnt acc. (3)",      "v² = v₀² + 2·a·s",              "Jævnt accelereret (3):  v² = v₀² + 2·a·s"),
     ("Vertikalt kast",      "t=(v₀+√(v₀²+2gh₀))/g  ±δ",     "Vertikalt kast"),
+    ("v-t-graf (stykvis)",  "x=x₀+Σ½(vᵢ+vᵢ₊₁)·Δtᵢ",        "Stykvis bevægelse (v-t-graf)"),
     ("Vandret kast",        "x = v₀·t,  y = ½·g·t²",         "Kastebevægelse (vandret kast)"),
     ("Skråt kast",          "x = v₀cosθ·t,  y = h₀+v₀sinθ·t−½gt²", "Kastebevægelse (skråt kast)"),
     ("Cirkulær bevægelse",  "v=ω·r,  aₐ=v²/r,  T=2π/ω",     "Cirkulær bevægelse"),
@@ -45,6 +46,7 @@ KIN_TIPS = {
     "Jævnt accelereret (2):  s = v₀·t + ½·a·t²": "Find strækning eller tid. Sæt v₀ = 0 ved start fra ro. Diskriminant < 0 → ingen reel løsning.",
     "Jævnt accelereret (3):  v² = v₀² + 2·a·s": "Bruges når tid er ukendt. Find v eller strækning direkte fra start- og sluttilstand.",
     "Vertikalt kast": "Kastes opad (v₀ > 0) eller falder fra ro (v₀ = 0). Aktivér usikkerhed (checkbox) for eksakt fejlpropagation – typisk eksamensspørgsmål.",
+    "Stykvis bevægelse (v-t-graf)": "Aflæs v_start, v_slut og Δt for hver fase direkte fra grafen. Arealet under kurven = trapez = ½(v_start+v_slut)·Δt. Konstant hastighed → rektangel (v_start=v_slut).",
     "Kastebevægelse (vandret kast)": "x-retning: uniform (v₀). y-retning: frit fald (v₀y = 0). Flyvetid t = √(2h/g).",
     "Kastebevægelse (skråt kast)": "Opdel i vₓ = v₀cos(θ) og vᵧ = v₀sin(θ). Maks. rækkevidde ved θ = 45° (uden luftmodstand).",
     "Cirkulær bevægelse": "Centripetal­acceleration peger mod centrum: ac = v²/r = ω²r. Perioden T = 2πr/v.",
@@ -409,6 +411,75 @@ elif formel == "Vertikalt kast":
         gem_resultat(h_max, "m", "h_max")
     if cc.button("📋 Gem v_land", key="gem_kin_vkast_vlnd"):
         gem_resultat(v_land, "m/s", "v_land")
+
+# ── Stykvis bevægelse (v-t-graf) ───────────────────────────────────────────────
+elif formel == "Stykvis bevægelse (v-t-graf)":
+    st.latex(r"x = x_0 + \sum_{i} \underbrace{\frac{v_{i,\text{start}} + v_{i,\text{slut}}}{2} \cdot \Delta t_i}_{\text{trapez-areal fase } i}")
+    st.markdown("Aflæs **v_start**, **v_slut** og **Δt** for hver fase direkte fra grafen. Konstant hastighed: sæt v_start = v_slut (rektangel). Op til 4 faser.")
+    st.divider()
+
+    c_x0, c_n = st.columns([2, 1])
+    x0 = c_x0.number_input("x₀ – startposition ved t=0 (m)", value=10.0, format="%.6g")
+    n_faser = c_n.radio("Antal faser:", [2, 3, 4], horizontal=False, key="kin_pw_n")
+    st.divider()
+
+    _DEFAULT_VS  = [4.0, 4.0,  0.0,  0.0]
+    _DEFAULT_VE  = [4.0, 10.0, 0.0,  0.0]
+    _DEFAULT_DT  = [4.0, 6.0,  0.0,  0.0]
+
+    phase_data = []
+    cols_header = st.columns([1, 2, 2, 2, 2])
+    cols_header[0].markdown("**Fase**")
+    cols_header[1].markdown("**v_start (m/s)**")
+    cols_header[2].markdown("**v_slut (m/s)**")
+    cols_header[3].markdown("**Δt (s)**")
+    cols_header[4].markdown("**Areal (m)**")
+
+    t_cumul = 0.0
+    for i in range(n_faser):
+        row = st.columns([1, 2, 2, 2, 2])
+        row[0].markdown(f"**{i+1}**")
+        vs = row[1].number_input("v_s", value=_DEFAULT_VS[i], format="%.6g",
+                                  label_visibility="collapsed", key=f"kin_pw_vs_{i}")
+        ve = row[2].number_input("v_e", value=_DEFAULT_VE[i], format="%.6g",
+                                  label_visibility="collapsed", key=f"kin_pw_ve_{i}")
+        dt = row[3].number_input("dt", value=_DEFAULT_DT[i], min_value=0.0, format="%.6g",
+                                  label_visibility="collapsed", key=f"kin_pw_dt_{i}")
+        area = 0.5 * (vs + ve) * dt
+        row[4].markdown(f"{area:.6g}")
+        phase_data.append((vs, ve, dt, area, t_cumul))
+        t_cumul += dt
+
+    total_area = sum(p[3] for p in phase_data)
+    x_final    = x0 + total_area
+
+    st.divider()
+    col_res = st.columns(3)
+    col_res[0].metric("Samlet strækning Δx", f"{total_area:.6g} m")
+    col_res[1].metric("Slutposition x", f"{x_final:.6g} m")
+    col_res[2].metric("Samlet tid", f"{t_cumul:.6g} s")
+
+    with st.expander("Vis fase-for-fase udregning"):
+        rows_md = "| Fase | Interval | v_start | v_slut | Δt | Areal |\n|------|----------|---------|--------|----|-------|\n"
+        x_run = x0
+        for i, (vs, ve, dt, area, t0) in enumerate(phase_data):
+            x_run += area
+            shape = "rektangel" if abs(vs - ve) < 1e-9 else "trapez"
+            rows_md += f"| {i+1} | {t0:.4g}→{t0+dt:.4g} s | {vs:.6g} m/s | {ve:.6g} m/s | {dt:.6g} s | {area:.6g} m ({shape}) |\n"
+        rows_md += f"| **Total** | | | | {t_cumul:.6g} s | **{total_area:.6g} m** |"
+        st.markdown(rows_md)
+        st.latex(rf"x = {x0:.6g} + {total_area:.6g} = {x_final:.6g}\ \text{{m}}")
+
+    # Genkend eksamenseksemplet (Spg. 3)
+    if (abs(x0 - 10.0) < 0.01 and n_faser == 2
+            and abs(phase_data[0][0] - 4) < 0.1 and abs(phase_data[0][1] - 4) < 0.1
+            and abs(phase_data[0][2] - 4) < 0.1
+            and abs(phase_data[1][0] - 4) < 0.1 and abs(phase_data[1][1] - 10) < 0.1
+            and abs(phase_data[1][2] - 6) < 0.1):
+        st.info("📋 **Eksempel (Spg. 3)** – svar I: x = 68.0 m ✓")
+
+    if st.button("📋 Gem x", key="gem_kin_pw_x"):
+        gem_resultat(x_final, "m", "x")
 
 # ── Vandret kast ───────────────────────────────────────────────────────────────
 elif formel == "Kastebevægelse (vandret kast)":
