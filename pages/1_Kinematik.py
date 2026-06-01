@@ -35,6 +35,7 @@ _KIN_FORMULAS = [
     ("v-t-graf (stykvis)",  "x=x₀+Σ½(vᵢ+vᵢ₊₁)·Δtᵢ",        "Stykvis bevægelse (v-t-graf)"),
     ("Vandret kast",        "x = v₀·t,  y = ½·g·t²",         "Kastebevægelse (vandret kast)"),
     ("Skråt kast",          "x = v₀cosθ·t,  y = h₀+v₀sinθ·t−½gt²", "Kastebevægelse (skråt kast)"),
+    ("Skråt kast – matrix", "alle v₀×θ kombinationer",        "Skråt kast – kombinationsmatrix"),
     ("Cirkulær bevægelse",  "v=ω·r,  aₐ=v²/r,  T=2π/ω",     "Cirkulær bevægelse"),
     ("Cirkulær (RPM)",      "ω = 2π·RPM/60,  r = aₐ/ω²",    "Cirkulær bevægelse – RPM-omregner og centripetal"),
 ]
@@ -47,6 +48,7 @@ KIN_TIPS = {
     "Jævnt accelereret (3):  v² = v₀² + 2·a·s": "Bruges når tid er ukendt. Find v eller strækning direkte fra start- og sluttilstand.",
     "Vertikalt kast": "Kastes opad (v₀ > 0) eller falder fra ro (v₀ = 0). Aktivér usikkerhed (checkbox) for eksakt fejlpropagation – typisk eksamensspørgsmål.",
     "Stykvis bevægelse (v-t-graf)": "Aflæs v_start, v_slut og Δt for hver fase direkte fra grafen. Arealet under kurven = trapez = ½(v_start+v_slut)·Δt. Konstant hastighed → rektangel (v_start=v_slut).",
+    "Skråt kast – kombinationsmatrix": "Identificér hurtigt hvilket kast der passer til et givet landingspunkt. Skriv flere v₀- og θ-værdier, og angiv mål-x. Husk: sin(2·40°)=sin(2·50°) → samme rækkevidde, forskellig højde.",
     "Kastebevægelse (vandret kast)": "x-retning: uniform (v₀). y-retning: frit fald (v₀y = 0). Flyvetid t = √(2h/g).",
     "Kastebevægelse (skråt kast)": "Opdel i vₓ = v₀cos(θ) og vᵧ = v₀sin(θ). Maks. rækkevidde ved θ = 45° (uden luftmodstand).",
     "Cirkulær bevægelse": "Centripetal­acceleration peger mod centrum: ac = v²/r = ω²r. Perioden T = 2πr/v.",
@@ -568,6 +570,69 @@ elif formel == "Kastebevægelse (skråt kast)":
         gem_resultat(h_max, "m", "h_max")
     if cc.button("📋 Gem t_land", key="gem_kin_skrat_t"):
         gem_resultat(t_land, "s", "t_land")
+
+# ── Skråt kast – kombinationsmatrix ────────────────────────────────────────────
+elif formel == "Skråt kast – kombinationsmatrix":
+    st.latex(r"x = \frac{v_0^2\sin(2\theta)}{g} \qquad h_{max} = \frac{v_0^2\sin^2\!\theta}{2g} \qquad t = \frac{2v_0\sin\theta}{g}")
+    st.markdown("Generer en tabel over **alle kombinationer** af v₀ og θ. Angiv et mål-x for at markere hvilke kast der rammer det punkt.")
+    st.divider()
+
+    c1, c2, c3 = st.columns(3)
+    v0_str    = c1.text_input("v₀-værdier (m/s), komma-adskilt", value="10, 11, 12", key="kin_mat_v0")
+    theta_str = c2.text_input("θ-værdier (grader), komma-adskilt", value="40, 50, 60", key="kin_mat_th")
+    g_mat     = c3.number_input("g (m/s²)", value=9.82, min_value=0.001, format="%.6g", key="kin_mat_g")
+
+    c4, c5 = st.columns(2)
+    target_x = c4.number_input("Mål-landingspunkt x (m)  (0 = ingen markering)", value=10.0, min_value=0.0, format="%.4g", key="kin_mat_tx")
+    tol      = c5.number_input("Tolerance ± (m)", value=0.2, min_value=0.0, format="%.4g", key="kin_mat_tol")
+
+    try:
+        v0_list    = [float(v.strip()) for v in v0_str.split(",") if v.strip()]
+        theta_list = [float(t.strip()) for t in theta_str.split(",") if t.strip()]
+    except ValueError:
+        st.error("Tjek at v₀ og θ kun indeholder tal adskilt af kommaer.")
+        st.stop()
+
+    if not v0_list or not theta_list:
+        st.warning("Angiv mindst én v₀- og én θ-værdi.")
+        st.stop()
+
+    # ── Byg tabel ──
+    rows = []
+    matches = []
+    for v0v in v0_list:
+        for thv in theta_list:
+            th_r  = np.radians(thv)
+            x_r   = v0v**2 * np.sin(2 * th_r) / g_mat
+            h_r   = v0v**2 * np.sin(th_r)**2  / (2 * g_mat)
+            t_r   = 2 * v0v * np.sin(th_r)    / g_mat
+            hit   = target_x > 0 and abs(x_r - target_x) <= tol
+            rows.append((v0v, thv, x_r, h_r, t_r, hit))
+            if hit:
+                matches.append((v0v, thv, x_r, h_r))
+
+    # Markdown-tabel med fremhævning via ✓
+    header = "| v₀ (m/s) | θ (°) | x_max (m) | h_max (m) | t_land (s) | Match |"
+    sep    = "|----------|-------|-----------|-----------|------------|-------|"
+    lines  = [header, sep]
+    for v0v, thv, x_r, h_r, t_r, hit in rows:
+        mark = "**✓**" if hit else ""
+        row_str = f"| {'**'+str(v0v)+'**' if hit else v0v} | {'**'+str(thv)+'°**' if hit else str(thv)+'°'} | {'**'+f'{x_r:.3f}'+'**' if hit else f'{x_r:.3f}'} | {'**'+f'{h_r:.3f}'+'**' if hit else f'{h_r:.3f}'} | {t_r:.3f} | {mark} |"
+        lines.append(row_str)
+    st.markdown("\n".join(lines))
+
+    if matches:
+        st.success(
+            "Kast der rammer x ≈ {:.4g} m (±{:.4g}):  ".format(target_x, tol)
+            + "  |  ".join(f"**v₀={v0v} m/s, θ={thv}°** → x={x_r:.3f} m, h_max={h_r:.3f} m"
+                           for v0v, thv, x_r, h_r in matches)
+        )
+        if len(matches) > 1:
+            st.info("Flere kombinationer matcher. Brug h_max til at skelne: højere θ → højere bane trods samme rækkevidde.")
+    elif target_x > 0:
+        st.warning(f"Ingen kombinationer rammer x ≈ {target_x:.4g} m inden for ±{tol:.4g} m. Prøv at øge tolerancen.")
+
+    st.caption("Tip: sin(2·40°) = sin(2·50°) ≈ 0.985 → 40° og 50° giver altid samme rækkevidde med samme v₀, men forskellig højde.")
 
 # ── Cirkulær bevægelse ─────────────────────────────────────────────────────────
 elif formel == "Cirkulær bevægelse":
