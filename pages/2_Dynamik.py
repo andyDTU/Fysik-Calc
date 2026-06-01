@@ -34,6 +34,7 @@ _DYN_FORMULAS = [
     ("Spænding og tøjning",  "σ=F/A,  d=√(4F/πσ)",         "Spænding og tøjning:  σ = F / A"),
     ("Konisk pendul",        "tanθ=ω²r/g,  T=2π√(Lcosθ/g)", "Konisk pendul"),
     ("Bernoulli-ligning",    "p+½ρv²+ρgh = konst",           "Bernoulli-ligning"),
+    ("Snorpendel – snorkraft", "T=m(v₀²/R−2g+3gcosθ)",      "Snorpendel – snorkraft ved vilkårlig vinkel"),
 ]
 formel = formula_card_grid(_DYN_FORMULAS, "dyn_formel")
 
@@ -52,6 +53,7 @@ DYN_TIPS = {
     "Spænding og tøjning:  σ = F / A": "σ = F/A. Cirkulært tværsnit: A = πd²/4 → d = √(4F/πσ). Youngs modul E = σ/ε.",
     "Konisk pendul": "Pendullod drejer i vandret cirkel. tanθ = ω²r/g. Periode T = 2π√(L·cosθ/g) — afhænger ikke af massen!",
     "Bernoulli-ligning": "Gælder for ideel (ikke-viskøs, inkompressibel) strømning. Torricelli: v = √(2gh) for hul i beholder.",
+    "Snorpendel – snorkraft ved vilkårlig vinkel": "Snoren starter lodret, loddet har vandret hastighed v₀. T = m(v₀²/R − 2g + 3g·cosθ). Ved θ=90° (vandret snor): T = m(v₀²/R − 2g).",
 }
 show_tips(formel, DYN_TIPS)
 st.divider()
@@ -708,3 +710,49 @@ elif formel == "Bernoulli-ligning":
         dp = 0.5*rho*(v2**2 - v1**2) + rho*G*(h2 - h1)
         st.success(f"**Δp = p₁ − p₂ = {dp:.4g} Pa  =  {dp/1e5:.4g} bar**")
         st.latex(rf"\Delta p = \tfrac{{1}}{{2}}\rho(v_2^2-v_1^2) + \rho g(h_2-h_1) = \tfrac{{1}}{{2}}\cdot{rho:.4g}\cdot({v2:.4g}^2-{v1:.4g}^2)+{rho:.4g}\cdot{G}\cdot({h2:.4g}-{h1:.4g}) = {dp:.4g}\ \text{{Pa}}")
+
+elif formel == "Snorpendel – snorkraft ved vilkårlig vinkel":
+    st.latex(r"T = m\!\left(\frac{v_0^2}{R} - 2g + 3g\cos\theta\right)")
+    st.markdown("""
+Snoren starter **lodret** (θ = 0°), loddet har **vandret** starthastighed v₀.
+θ måles fra den lodrette position (ned). Energibevarelse + centripetal giver:
+
+- v²(θ) = v₀² − 2gR(1 − cosθ)
+- T − mg·cosθ = mv²/R  →  **T = m(v₀²/R − 2g + 3g·cosθ)**
+
+Snoren er vandret ved **θ = 90°**: T = m(v₀²/R − 2g)
+""")
+    st.divider()
+
+    c1, c2, c3, c4 = st.columns(4)
+    m_sp  = c1.number_input("m – masse (kg)", value=1.0, min_value=1e-12, format="%.6g")
+    v0_sp = c2.number_input("v₀ – starthastighed nede (m/s)", value=10.0, min_value=0.0, format="%.6g")
+    R_sp  = c3.number_input("R – snorlængde (m)", value=1.0, min_value=1e-6, format="%.6g")
+    theta_sp = c4.number_input("θ – vinkel fra lodret (°)", value=90.0, min_value=0.0, max_value=180.0, format="%.6g")
+
+    th_r_sp = np.radians(theta_sp)
+    v2_sp   = v0_sp**2 - 2*G*R_sp*(1 - np.cos(th_r_sp))
+    T_sp    = m_sp * (v0_sp**2/R_sp - 2*G + 3*G*np.cos(th_r_sp))
+
+    col1, col2, col3 = st.columns(3)
+    col1.metric("v(θ) – hastighed (m/s)", f"{np.sqrt(max(v2_sp,0)):.4g}" if v2_sp >= 0 else "—")
+    col2.metric("T – snorkraft (N)", f"{T_sp:.4g}")
+    col3.metric("mg – tyngde (N)", f"{m_sp*G:.4g}")
+
+    if v2_sp < 0:
+        v_min = np.sqrt(2*G*R_sp*(1 - np.cos(th_r_sp)))
+        st.error(f"Loddet når ikke til θ = {theta_sp:.4g}°. Minimum v₀ for at nå dette punkt: {v_min:.4g} m/s.")
+    elif T_sp < 0:
+        st.warning(f"T = {T_sp:.4g} N < 0: snoren slapper (loddet er i frit fald). Kræver v₀ ≥ {np.sqrt(R_sp*(2*G - 3*G*np.cos(th_r_sp))):.4g} m/s for stram snor ved θ.")
+    else:
+        st.success(f"**T = {T_sp:.4g} N** ved θ = {theta_sp:.4g}°")
+
+    with st.expander("Vis udregning"):
+        st.latex(rf"v^2(\theta) = v_0^2 - 2gR(1-\cos\theta) = {v0_sp:.4g}^2 - 2\cdot{G}\cdot{R_sp:.4g}\cdot(1-\cos{theta_sp:.4g}°) = {v2_sp:.4g}\ \text{{m}}^2/\text{{s}}^2")
+        st.latex(rf"T = m\!\left(\frac{{v_0^2}}{{R}} - 2g + 3g\cos\theta\right) = {m_sp:.4g}\!\left(\frac{{{v0_sp:.4g}^2}}{{{R_sp:.4g}}} - 2\cdot{G} + 3\cdot{G}\cdot\cos{theta_sp:.4g}°\right) = {T_sp:.4g}\ \text{{N}}")
+
+    if abs(m_sp - 1.0) < 0.01 and abs(v0_sp - 10.0) < 0.1 and abs(R_sp - 1.0) < 0.01 and abs(theta_sp - 90.0) < 0.1:
+        st.success(f"📋 **2025 Q10** – m=1 kg, v₀=10 m/s, R=1 m, θ=90° → T = {T_sp:.4g} N ✓ (svar F: 80.4 N)")
+
+    if st.button("📋 Gem T", key="gem_dyn_snor_T"):
+        gem_resultat(T_sp, "N", "T_snor")

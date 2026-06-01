@@ -38,6 +38,7 @@ _KIN_FORMULAS = [
     ("Skråt kast – matrix", "alle v₀×θ kombinationer",        "Skråt kast – kombinationsmatrix"),
     ("Cirkulær bevægelse",  "v=ω·r,  aₐ=v²/r,  T=2π/ω",     "Cirkulær bevægelse"),
     ("Cirkulær (RPM)",      "ω = 2π·RPM/60,  r = aₐ/ω²",    "Cirkulær bevægelse – RPM-omregner og centripetal"),
+    ("To kugler mødes",    "t=H/v₀,  h=v₀t−½gt²",           "To kugler mødes – lodret kast"),
 ]
 formel = formula_card_grid(_KIN_FORMULAS, "kin_formel")
 
@@ -53,6 +54,7 @@ KIN_TIPS = {
     "Kastebevægelse (skråt kast)": "Opdel i vₓ = v₀cos(θ) og vᵧ = v₀sin(θ). Maks. rækkevidde ved θ = 45° (uden luftmodstand).",
     "Cirkulær bevægelse": "Centripetal­acceleration peger mod centrum: ac = v²/r = ω²r. Perioden T = 2πr/v.",
     "Cirkulær bevægelse – RPM-omregner og centripetal": "RPM → ω: gang med 2π/60. Centrifuge: r = ac/ω².",
+    "To kugler mødes – lodret kast": "Kugle 1 kastes opad med v₀ fra h=0; kugle 2 slippes fra H. ½gt²-leddene udligner hinanden → t_møde = H/v₀. Uafhængigt af g!",
 }
 show_tips(formel, KIN_TIPS)
 st.divider()
@@ -763,3 +765,43 @@ elif formel == "Cirkulær bevægelse – RPM-omregner og centripetal":
         st.latex(rf"\text{{RPM}} = \frac{{\omega \cdot 60}}{{2\pi}} = \frac{{{omega:.6g} \cdot 60}}{{2\pi}} = {rpm:.6g}")
         if st.button("📋 Gem RPM", key="gem_kin_rpm_rpm"):
             gem_resultat(rpm, "RPM", "RPM")
+
+elif formel == "To kugler mødes – lodret kast":
+    st.latex(r"h_1(t) = v_0 t - \tfrac{1}{2}gt^2 \qquad h_2(t) = H - \tfrac{1}{2}gt^2")
+    st.latex(r"h_1 = h_2 \;\Rightarrow\; v_0 t = H \;\Rightarrow\; t_{m\varnothing de} = \frac{H}{v_0}")
+    st.info("Nøgleobservation: ½gt²-leddene udligner hinanden — mødetidspunktet er uafhængigt af g!")
+    st.markdown("""
+**Kugle 1** kastes lodret opad fra h = 0 med starthastighed v₀.
+**Kugle 2** slippes fra hvile fra højden H **på samme tidspunkt**.
+""")
+    st.divider()
+
+    c1, c2, c3 = st.columns(3)
+    v0_m = c1.number_input("v₀ – starthastighed opad (m/s)", value=50.0, min_value=1e-6, format="%.6g")
+    H_m  = c2.number_input("H – startshøjde for kugle 2 (m)", value=100.0, min_value=0.0, format="%.6g")
+    g_m  = c3.number_input("g – tyngdeacceleration (m/s²)", value=G, format="%.6g")
+
+    t_meet = H_m / v0_m
+    h_meet = v0_m * t_meet - 0.5 * g_m * t_meet**2
+
+    col1, col2 = st.columns(2)
+    col1.metric("Mødetidspunkt t", f"{t_meet:.4g} s")
+    col2.metric("Mødehøjde h", f"{h_meet:.4g} m")
+
+    if h_meet < 0:
+        st.warning(f"⚠️ h = {h_meet:.4g} m < 0: kugle 1 når ikke op til kugle 2 inden den rammer jorden.")
+    elif h_meet > H_m:
+        st.warning(f"⚠️ h = {h_meet:.4g} m > H: beregn er ugyldig — kugle 1 er allerede forbi kugle 2s startposition.")
+    else:
+        st.success(f"Kuglerne mødes ved h = {h_meet:.4g} m efter t = {t_meet:.4g} s")
+
+    with st.expander("Vis udregning"):
+        st.latex(rf"t_{{m\varnothing de}} = \frac{{H}}{{v_0}} = \frac{{{H_m:.4g}}}{{{v0_m:.4g}}} = {t_meet:.4g}\ \text{{s}}")
+        st.latex(rf"h = v_0 t - \tfrac{{1}}{{2}}g t^2 = {v0_m:.4g}\cdot{t_meet:.4g} - \tfrac{{1}}{{2}}\cdot{g_m:.4g}\cdot{t_meet:.4g}^2 = {h_meet:.4g}\ \text{{m}}")
+        st.caption("Samme resultat fra kugle 2: h = H − ½g·t² = " + f"{H_m:.4g} − ½·{g_m:.4g}·{t_meet:.4g}² = {H_m - 0.5*g_m*t_meet**2:.4g} m ✓")
+
+    if abs(v0_m - 50.0) < 0.1 and abs(H_m - 100.0) < 0.1:
+        st.success(f"📋 **2025 Q4** – v₀=50 m/s, H=100 m → t=2.0 s, h={v0_m*H_m/v0_m - 0.5*g_m*(H_m/v0_m)**2:.4g} m ✓ (svar I: 80.4 m)")
+
+    if st.button("📋 Gem h_møde", key="gem_kin_meet_h"):
+        gem_resultat(h_meet, "m", "h_møde")
