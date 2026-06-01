@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar, show_tips, formula_card_grid, breadcrumb
+from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips, formula_card_grid, breadcrumb
 
 st.set_page_config(page_title="Bølger & Optik", page_icon="🌊", layout="wide")
 show_sidebar_constants()
@@ -24,6 +24,8 @@ _BOLGE_FORMULAS = [
     ("Malus' lov",          "I = I₀·cos²θ",                   "Malus' lov:  I = I₀·cos²(θ)"),
     ("Stående bølger",      "λₙ = 2L/n (streng)",             "Stående bølger – streng/rør"),
     ("Brydningsindeks",     "n = c/v",                         "Lysets brydningsindeks:  n = c / v"),
+    ("Lydintensitet / dB",  "β = 10·log₁₀(I/I₀)",            "Lydintensitet og dB:  β = 10·log₁₀(I/I₀)"),
+    ("Slagfrekvens",        "f_beat = |f₁ − f₂|",             "Slagfrekvens (beats):  f_beat = |f₁ − f₂|"),
 ]
 formel = formula_card_grid(_BOLGE_FORMULAS, "bolge_formel")
 
@@ -35,6 +37,8 @@ BOLGE_TIPS = {
     "Doppler-effekt": "Kilde nærmer sig → frekvens øges. Kilde fjerner sig → frekvens sænkes.",
     "Dobbeltspalte (Young):  d·sin(θ) = n·λ": "Konstruktiv interferens: d·sin(θ) = nλ, n = 0,±1,±2,… Destruktiv: n + ½.",
     "Stående bølger – streng/rør": "Streng (lukket-lukket): λ_n = 2L/n. Rør (åben-åben): samme. Åben-lukket: λ_n = 4L/(2n−1).",
+    "Lydintensitet og dB:  β = 10·log₁₀(I/I₀)": "I₀ = 10⁻¹² W/m² (høretærskel). +10 dB = 10× intensitet. +3 dB ≈ 2×. Intensitet falder med 1/r².",
+    "Slagfrekvens (beats):  f_beat = |f₁ − f₂|": "Når to nær-ens frekvenser mødes høres svingninger med f_beat = |f₁−f₂|. Bruges til at stemme instrumenter.",
 }
 show_tips(formel, BOLGE_TIPS)
 st.divider()
@@ -447,3 +451,91 @@ elif formel == "Lysets brydningsindeks:  n = c / v":
         v = c_light / n
         st.success(f"**v = {v:.6g} m/s**")
         st.latex(rf"v = \frac{{c}}{{n}} = \frac{{{c_light:.4g}}}{{{n:.6g}}} = {v:.6g}\ \text{{m/s}}")
+
+elif formel == "Lydintensitet og dB:  β = 10·log₁₀(I/I₀)":
+    I0_db = 1e-12
+    st.latex(r"\beta = 10\log_{10}\!\left(\frac{I}{I_0}\right) \qquad I_0 = 10^{-12}\ \text{W/m}^2")
+    st.info("Høregrænse I₀ = 10⁻¹² W/m². +10 dB = 10× intensitet. +3 dB ≈ 2×. Intensitet falder med 1/r².")
+    beregn = st.radio("Beregn:", [
+        "β – lydniveau (dB) fra I",
+        "I – intensitet (W/m²) fra β",
+        "Afstandsattenuation: β₂ fra r₁, r₂, β₁",
+    ], horizontal=True)
+    st.divider()
+
+    if beregn == "β – lydniveau (dB) fra I":
+        I_val = st.number_input("I – lydintensitet (W/m²)", value=1e-6, min_value=1e-20, format="%.6g")
+        beta = 10 * np.log10(I_val / I0_db)
+        st.success(f"**β = {beta:.4g} dB**")
+        st.latex(rf"\beta = 10\log_{{10}}\!\left(\frac{{{I_val:.4g}}}{{{I0_db:.4g}}}\right) = {beta:.4g}\ \text{{dB}}")
+        if beta < 30:
+            label = "Meget stille (hvisken, sovekammer)"
+        elif beta < 60:
+            label = "Stille til moderat (samtale)"
+        elif beta < 85:
+            label = "Moderat (trafikstøj)"
+        elif beta < 110:
+            label = "Høj (koncert, motorsav)"
+        else:
+            label = "Meget høj – risiko for høretab (smertegrænse ≈ 130 dB)"
+        st.info(f"Svarende til: {label}")
+        if st.button("📋 Gem β", key="gem_db_beta"):
+            gem_resultat(beta, "dB", "β")
+
+    elif beregn == "I – intensitet (W/m²) fra β":
+        beta_val = st.number_input("β – lydniveau (dB)", value=60.0, format="%.6g")
+        I_calc = I0_db * 10**(beta_val / 10)
+        st.success(f"**I = {I_calc:.4g} W/m²**")
+        st.latex(rf"I = I_0 \cdot 10^{{\beta/10}} = {I0_db:.4g} \cdot 10^{{{beta_val:.4g}/10}} = {I_calc:.4g}\ \text{{W/m}}^2")
+        if st.button("📋 Gem I", key="gem_db_I"):
+            gem_resultat(I_calc, "W/m²", "I")
+
+    else:
+        st.latex(r"\beta_2 = \beta_1 - 20\log_{10}\!\left(\frac{r_2}{r_1}\right)")
+        st.markdown("Punktkilde: intensitet falder med 1/r², lydniveau falder med 20·log₁₀(r₂/r₁).")
+        c1, c2, c3 = st.columns(3)
+        beta1 = c1.number_input("β₁ – lydniveau ved r₁ (dB)", value=80.0, format="%.6g")
+        r1_d  = c2.number_input("r₁ (m)", value=1.0, min_value=1e-6, format="%.6g")
+        r2_d  = c3.number_input("r₂ (m)", value=10.0, min_value=1e-6, format="%.6g")
+        beta2 = beta1 - 20 * np.log10(r2_d / r1_d)
+        st.success(f"**β₂ = {beta2:.4g} dB**  (Δβ = {beta2-beta1:.4g} dB)")
+        st.latex(rf"\beta_2 = {beta1:.4g} - 20\log_{{10}}\!\left(\frac{{{r2_d:.4g}}}{{{r1_d:.4g}}}\right) = {beta2:.4g}\ \text{{dB}}")
+        if st.button("📋 Gem β₂", key="gem_db_b2"):
+            gem_resultat(beta2, "dB", "β₂")
+
+elif formel == "Slagfrekvens (beats):  f_beat = |f₁ − f₂|":
+    st.latex(r"f_{\text{beat}} = |f_1 - f_2|")
+    st.markdown("Når to nær-ens frekvenser mødes opstår slagfrekvens (hørbare pulseringer). Bruges til at stemme instrumenter.")
+    beregn = st.radio("Beregn:", [
+        "f_beat – slagfrekvens (Hz)",
+        "f₂ – ukendt frekvens (given f₁ og f_beat)",
+    ], horizontal=True)
+    st.divider()
+
+    if beregn == "f_beat – slagfrekvens (Hz)":
+        c1, c2 = st.columns(2)
+        f1_b = c1.number_input("f₁ – frekvens 1 (Hz)", value=440.0, min_value=0.0, format="%.6g")
+        f2_b = c2.number_input("f₂ – frekvens 2 (Hz)", value=443.0, min_value=0.0, format="%.6g")
+        fbeat = abs(f1_b - f2_b)
+        if fbeat > 0:
+            st.success(f"**f_beat = {fbeat:.4g} Hz**   (slagperiode T = {1/fbeat:.4g} s)")
+        else:
+            st.success("**f_beat = 0 Hz** — ingen slag (identiske frekvenser)")
+        st.latex(rf"f_{{beat}} = |f_1 - f_2| = |{f1_b:.4g} - {f2_b:.4g}| = {fbeat:.4g}\ \text{{Hz}}")
+        if fbeat > 20:
+            st.warning(f"f_beat = {fbeat:.4g} Hz > 20 Hz — høres ikke som slag, men som et separat toneinterval.")
+        if st.button("📋 Gem f_beat", key="gem_beat_fb"):
+            gem_resultat(fbeat, "Hz", "f_beat")
+
+    else:
+        st.markdown("Givet f₁ og f_beat → to mulige ukendte frekvenser: f₂ = f₁ ± f_beat")
+        c1, c2 = st.columns(2)
+        f1_b    = c1.number_input("f₁ – referencefrekvens (Hz)", value=440.0, min_value=0.0, format="%.6g")
+        fbeat_b = c2.number_input("f_beat – slagfrekvens (Hz)", value=3.0, min_value=0.0, format="%.6g")
+        f2_high = f1_b + fbeat_b
+        f2_low  = f1_b - fbeat_b
+        st.success(f"**f₂ = {f2_high:.4g} Hz**  eller  **f₂ = {f2_low:.4g} Hz**")
+        st.latex(rf"f_2 = f_1 \pm f_{{beat}} = {f1_b:.4g} \pm {fbeat_b:.4g}\ \text{{Hz}}")
+        if f2_low < 0:
+            st.info(f"f₂ = {f2_low:.4g} Hz er negativ — kun f₂ = {f2_high:.4g} Hz er fysisk mulig.")
+        st.info("Instrumentstemning: Reducer f_beat → 0 ved at justere instrumentet. Når f_beat = 0 er instrumentet stemt.")

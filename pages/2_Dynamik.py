@@ -36,6 +36,10 @@ _DYN_FORMULAS = [
     ("Bernoulli-ligning",    "p+½ρv²+ρgh = konst",           "Bernoulli-ligning"),
     ("Snorpendel – snorkraft", "T=m(v₀²/R−2g+3gcosθ)",      "Snorpendel – snorkraft ved vilkårlig vinkel"),
     ("Kraft i vinkel på ru flade", "a=(Fcosθ−μ(mg−Fsinθ))/m", "Kraft i vinkel på ru flade"),
+    ("Arkimedes",             "F_b = ρ·V·g",                 "Arkimedes' princip:  F_b = ρ · V · g"),
+    ("Terminal hastighed",    "v_T = √(2mg/CρA)",            "Terminal hastighed:  v_T = √(2mg / CρA)"),
+    ("Satellit / Kepler",     "v=√(GM/r),  T²∝r³",           "Satellit og Keplers 3. lov"),
+    ("Statisk ligevægt",      "ΣF=0,  Στ=0",                 "Statisk ligevægt:  ΣF = 0 og Στ = 0"),
 ]
 formel = formula_card_grid(_DYN_FORMULAS, "dyn_formel")
 
@@ -56,6 +60,10 @@ DYN_TIPS = {
     "Bernoulli-ligning": "Gælder for ideel (ikke-viskøs, inkompressibel) strømning. Torricelli: v = √(2gh) for hul i beholder.",
     "Snorpendel – snorkraft ved vilkårlig vinkel": "Snoren starter lodret, loddet har vandret hastighed v₀. T = m(v₀²/R − 2g + 3g·cosθ). Ved θ=90° (vandret snor): T = m(v₀²/R − 2g).",
     "Kraft i vinkel på ru flade": "F trækker i vinkel θ opad. Normalkraft reduceres: N = mg − F·sinθ. Acceleration a = (F·cosθ − μk·N)/m. Optimal vinkel θ_min = arctan(μk) giver mindste F for konstant v.",
+    "Arkimedes' princip:  F_b = ρ · V · g": "Opdriftskraft F_b = ρ_fluid · V_nedsænket · g. Flyder når ρ_obj < ρ_fluid. Synker når ρ_obj > ρ_fluid.",
+    "Terminal hastighed:  v_T = √(2mg / CρA)": "Luftmodstand F_drag = ½CρAv². Terminalhastighed nås når F_drag = mg → v_T = √(2mg/CρA). C ≈ 0.47 for kugle.",
+    "Satellit og Keplers 3. lov": "Orbitalhastighed v = √(GM/r). T = 2πr/v. Keplers 3. lov: T² = (4π²/GM)·r³. Undvigelseshastighed v_e = √(2GM/r) = √2·v_orb.",
+    "Statisk ligevægt:  ΣF = 0 og Στ = 0": "Vælg omdrejningspunkt smart for at eliminere ukendte kræfter. Kraftmomenter: F·d_⊥. Sæt én retning positiv.",
 }
 show_tips(formel, DYN_TIPS)
 st.divider()
@@ -829,3 +837,264 @@ $\frac{dF}{d\theta} = 0 \implies -\sin\theta + \mu_k\cos\theta = 0 \implies \tan
 
 $\therefore\; \theta_{min} = \arctan(\mu_k)$
 """)
+
+elif formel == "Arkimedes' princip:  F_b = ρ · V · g":
+    st.latex(r"F_b = \rho_{\text{fluid}} \cdot V_{\text{nedsænket}} \cdot g")
+    beregn = st.radio("Beregn:", [
+        "F_b – opdriftskraft (N)",
+        "V – nedsænket volumen (m³)",
+        "ρ – fluiddensitet (kg/m³)",
+        "Flyder / synker?",
+    ], horizontal=True)
+    st.divider()
+
+    if beregn == "F_b – opdriftskraft (N)":
+        c1, c2, c3 = st.columns(3)
+        rho_f = c1.number_input("ρ_fluid (kg/m³)", value=1000.0, min_value=1e-6, format="%.6g",
+                                 help="Ferskvand=1000, Saltvand≈1025, Luft≈1.2")
+        V_ark = c2.number_input("V – nedsænket volumen (m³)", value=0.001, min_value=1e-20, format="%.6g")
+        g_ark = c3.number_input("g (m/s²)", value=G, format="%.6g")
+        Fb = rho_f * V_ark * g_ark
+        st.success(f"**F_b = {Fb:.6g} N**")
+        st.latex(rf"F_b = \rho \cdot V \cdot g = {rho_f:.4g} \cdot {V_ark:.4g} \cdot {g_ark:.4g} = {Fb:.4g}\ \text{{N}}")
+        if st.button("📋 Gem F_b", key="gem_ark_Fb"):
+            gem_resultat(Fb, "N", "F_b")
+
+    elif beregn == "V – nedsænket volumen (m³)":
+        c1, c2, c3 = st.columns(3)
+        Fb = c1.number_input("F_b – opdriftskraft (N)", value=9.82, format="%.6g")
+        rho_f = c2.number_input("ρ_fluid (kg/m³)", value=1000.0, min_value=1e-6, format="%.6g")
+        g_ark = c3.number_input("g (m/s²)", value=G, format="%.6g")
+        V_ark = Fb / (rho_f * g_ark)
+        st.success(f"**V = {V_ark:.6g} m³**")
+        st.latex(rf"V = \frac{{F_b}}{{\rho g}} = \frac{{{Fb:.4g}}}{{{rho_f:.4g} \cdot {g_ark:.4g}}} = {V_ark:.4g}\ \text{{m}}^3")
+        if st.button("📋 Gem V", key="gem_ark_V"):
+            gem_resultat(V_ark, "m³", "V")
+
+    elif beregn == "ρ – fluiddensitet (kg/m³)":
+        c1, c2, c3 = st.columns(3)
+        Fb = c1.number_input("F_b – opdriftskraft (N)", value=9.82, format="%.6g")
+        V_ark = c2.number_input("V – volumen (m³)", value=0.001, min_value=1e-20, format="%.6g")
+        g_ark = c3.number_input("g (m/s²)", value=G, format="%.6g")
+        rho_f = Fb / (V_ark * g_ark)
+        st.success(f"**ρ = {rho_f:.6g} kg/m³**")
+        st.latex(rf"\rho = \frac{{F_b}}{{V \cdot g}} = \frac{{{Fb:.4g}}}{{{V_ark:.4g} \cdot {g_ark:.4g}}} = {rho_f:.4g}\ \text{{kg/m}}^3")
+        if st.button("📋 Gem ρ", key="gem_ark_rho"):
+            gem_resultat(rho_f, "kg/m³", "ρ")
+
+    else:
+        st.markdown("**Flyder / synker?** — Sammenlign densiteter")
+        c1, c2, c3 = st.columns(3)
+        rho_obj = c1.number_input("ρ_objekt (kg/m³)", value=800.0, min_value=1e-6, format="%.6g",
+                                   help="Balsatræ≈120, Egetræ≈700, Is≈917, Aluminium≈2700, Stål≈7800")
+        rho_fl  = c2.number_input("ρ_fluid (kg/m³)", value=1000.0, min_value=1e-6, format="%.6g")
+        m_obj   = c3.number_input("m – masse (kg)", value=1.0, min_value=1e-12, format="%.6g")
+        V_tot = m_obj / rho_obj
+        if rho_obj < rho_fl:
+            frac = rho_obj / rho_fl
+            V_sub = frac * V_tot
+            st.success(f"**Flyder!** ρ_obj = {rho_obj:.4g} < ρ_fluid = {rho_fl:.4g}")
+            st.info(f"Nedsænket brøkdel: {frac*100:.2f}%  →  V_sub = {V_sub:.4g} m³")
+            st.latex(rf"\frac{{V_{{sub}}}}{{V_{{tot}}}} = \frac{{\rho_{{obj}}}}{{\rho_{{fluid}}}} = \frac{{{rho_obj:.4g}}}{{{rho_fl:.4g}}} = {frac:.4f}")
+        elif rho_obj > rho_fl:
+            st.error(f"**Synker!** ρ_obj = {rho_obj:.4g} > ρ_fluid = {rho_fl:.4g}")
+            Fb_val = rho_fl * V_tot * G
+            Fg_val = m_obj * G
+            st.info(f"F_b = {Fb_val:.4g} N  vs  F_g = {Fg_val:.4g} N  →  Nettokraft nedad = {Fg_val - Fb_val:.4g} N")
+        else:
+            st.info("ρ_obj = ρ_fluid → neutralt opdrift (svæver)")
+
+elif formel == "Terminal hastighed:  v_T = √(2mg / CρA)":
+    st.latex(r"v_T = \sqrt{\frac{2mg}{C \rho A}} \qquad F_{\text{drag}} = \tfrac{1}{2}C\rho A v^2")
+    st.info("C ≈ 0.47 for kugle, ≈ 1.0 for cylinder, ≈ 1.3 for flad plade")
+    beregn = st.radio("Beregn:", [
+        "v_T – terminalhastighed (m/s)",
+        "F_drag – luftmodstand ved given v",
+        "m – masse fra v_T",
+    ], horizontal=True)
+    st.divider()
+
+    c1, c2, c3, c4 = st.columns(4)
+    m_t   = c1.number_input("m – masse (kg)", value=0.01, min_value=1e-12, format="%.6g", key="term_m")
+    C_t   = c2.number_input("C – modstandskoefficient", value=0.47, min_value=1e-6, format="%.6g", key="term_C")
+    rho_t = c3.number_input("ρ_luft (kg/m³)", value=1.225, min_value=1e-6, format="%.6g", key="term_rho")
+    A_t   = c4.number_input("A – frontareal (m²)", value=float(np.pi * 0.02**2), min_value=1e-12, format="%.6g",
+                              help="Kugle r=2cm: πr²", key="term_A")
+
+    if beregn == "v_T – terminalhastighed (m/s)":
+        g_t = st.number_input("g (m/s²)", value=G, format="%.6g", key="term_g")
+        vT = np.sqrt(2 * m_t * g_t / (C_t * rho_t * A_t))
+        st.success(f"**v_T = {vT:.4g} m/s  =  {vT*3.6:.4g} km/h**")
+        st.latex(rf"v_T = \sqrt{{\frac{{2mg}}{{C\rho A}}}} = \sqrt{{\frac{{2\cdot{m_t:.4g}\cdot{g_t:.4g}}}{{{C_t:.4g}\cdot{rho_t:.4g}\cdot{A_t:.4g}}}}} = {vT:.4g}\ \text{{m/s}}")
+        if st.button("📋 Gem v_T", key="gem_term_vT"):
+            gem_resultat(vT, "m/s", "v_T")
+
+    elif beregn == "F_drag – luftmodstand ved given v":
+        v_given = st.number_input("v – aktuel hastighed (m/s)", value=10.0, min_value=0.0, format="%.6g", key="term_v")
+        Fdrag = 0.5 * C_t * rho_t * A_t * v_given**2
+        vT = np.sqrt(2 * m_t * G / (C_t * rho_t * A_t))
+        st.success(f"**F_drag = {Fdrag:.4g} N**")
+        st.latex(rf"F_{{drag}} = \tfrac{{1}}{{2}}C\rho A v^2 = \tfrac{{1}}{{2}}\cdot{C_t:.4g}\cdot{rho_t:.4g}\cdot{A_t:.4g}\cdot{v_given:.4g}^2 = {Fdrag:.4g}\ \text{{N}}")
+        st.info(f"Terminalhastighed: v_T = {vT:.4g} m/s = {vT*3.6:.4g} km/h")
+        if st.button("📋 Gem F_drag", key="gem_term_Fd"):
+            gem_resultat(Fdrag, "N", "F_drag")
+
+    else:
+        vT_given = st.number_input("v_T – terminalhastighed (m/s)", value=30.0, min_value=1e-6, format="%.6g", key="term_vT2")
+        g_t2 = st.number_input("g (m/s²)", value=G, format="%.6g", key="term_g2")
+        m_calc = 0.5 * C_t * rho_t * A_t * vT_given**2 / g_t2
+        st.success(f"**m = {m_calc:.4g} kg**")
+        st.latex(rf"m = \frac{{C\rho A v_T^2}}{{2g}} = \frac{{{C_t:.4g}\cdot{rho_t:.4g}\cdot{A_t:.4g}\cdot{vT_given:.4g}^2}}{{2\cdot{g_t2:.4g}}} = {m_calc:.4g}\ \text{{kg}}")
+        if st.button("📋 Gem m", key="gem_term_m2"):
+            gem_resultat(m_calc, "kg", "m")
+
+elif formel == "Satellit og Keplers 3. lov":
+    G_grav_s = 6.674e-11
+    M_earth_s = 5.97e24
+    R_earth_s = 6.371e6
+    st.latex(r"v = \sqrt{\frac{GM}{r}} \qquad T = \frac{2\pi r}{v} \qquad T^2 = \frac{4\pi^2}{GM}\,r^3")
+    st.info(f"G = {G_grav_s:.4g} N·m²/kg²   M_jord = {M_earth_s:.4g} kg   R_jord = {R_earth_s:.4g} m")
+    beregn = st.radio("Beregn:", [
+        "v og T fra r (orbital­radius)",
+        "r fra T (omløbstid)",
+        "v_e – undvigelseshastighed",
+        "Keplers 3. lov: T₁/T₂ fra r₁/r₂",
+    ], horizontal=True)
+    st.divider()
+
+    if beregn == "v og T fra r (orbital­radius)":
+        c1, c2 = st.columns(2)
+        M_c = c1.number_input("M – centralmasse (kg)", value=M_earth_s, format="%.6g",
+                               help=f"Jordens masse: {M_earth_s:.4g} kg")
+        r_c = c2.number_input("r – orbitalradius (m)", value=R_earth_s + 400e3, format="%.6g",
+                               help=f"ISS: R_jord + 400 km = {R_earth_s + 400e3:.4g} m")
+        v_orb = np.sqrt(G_grav_s * M_c / r_c)
+        T_orb = 2 * np.pi * r_c / v_orb
+        st.success(f"**v = {v_orb:.4g} m/s**   **T = {T_orb:.4g} s = {T_orb/60:.4g} min**")
+        st.latex(rf"v = \sqrt{{\frac{{GM}}{{r}}}} = {v_orb:.4g}\ \text{{m/s}},\quad T = \frac{{2\pi r}}{{v}} = {T_orb:.4g}\ \text{{s}}")
+        if r_c > R_earth_s:
+            st.caption(f"Højde over Jordan: {(r_c - R_earth_s)/1e3:.4g} km")
+        if st.button("📋 Gem v", key="gem_sat_v"):
+            gem_resultat(v_orb, "m/s", "v_orbital")
+
+    elif beregn == "r fra T (omløbstid)":
+        c1, c2 = st.columns(2)
+        M_c = c1.number_input("M – centralmasse (kg)", value=M_earth_s, format="%.6g")
+        T_c = c2.number_input("T – omløbstid (s)", value=5400.0, format="%.6g", help="ISS ≈ 5540 s ≈ 92 min")
+        r_c = (G_grav_s * M_c * T_c**2 / (4 * np.pi**2))**(1/3)
+        v_c = 2 * np.pi * r_c / T_c
+        st.success(f"**r = {r_c:.4g} m**   (v = {v_c:.4g} m/s)")
+        st.latex(rf"r = \left(\frac{{GMT^2}}{{4\pi^2}}\right)^{{1/3}} = {r_c:.4g}\ \text{{m}}")
+        if r_c > R_earth_s:
+            st.caption(f"Højde over Jordan: {(r_c - R_earth_s)/1e3:.4g} km")
+        if st.button("📋 Gem r", key="gem_sat_r"):
+            gem_resultat(r_c, "m", "r")
+
+    elif beregn == "v_e – undvigelseshastighed":
+        c1, c2 = st.columns(2)
+        M_c = c1.number_input("M – masse (kg)", value=M_earth_s, format="%.6g")
+        r_c = c2.number_input("r – afstand fra centrum (m)", value=R_earth_s, format="%.6g",
+                               help="Jordens radius: 6.371e6 m")
+        v_e = np.sqrt(2 * G_grav_s * M_c / r_c)
+        v_orb_e = np.sqrt(G_grav_s * M_c / r_c)
+        st.success(f"**v_e = {v_e:.4g} m/s  =  {v_e/1e3:.4g} km/s**")
+        st.info(f"Orbitalhastighed samme afstand: {v_orb_e:.4g} m/s  (v_e = √2 · v_orb)")
+        st.latex(rf"v_e = \sqrt{{\frac{{2GM}}{{r}}}} = {v_e:.4g}\ \text{{m/s}}")
+        if st.button("📋 Gem v_e", key="gem_sat_ve"):
+            gem_resultat(v_e, "m/s", "v_e")
+
+    else:
+        st.markdown("Keplers 3. lov: **T² ∝ r³**")
+        st.latex(r"\frac{T_1^2}{T_2^2} = \frac{r_1^3}{r_2^3}")
+        kepler_mode = st.radio("Find:", ["T₁ (given r₁, r₂, T₂)", "r₁ (given T₁, T₂, r₂)"], horizontal=True)
+        c1, c2, c3 = st.columns(3)
+        if kepler_mode == "T₁ (given r₁, r₂, T₂)":
+            r1_k = c1.number_input("r₁ (m)", value=R_earth_s + 400e3, format="%.6g", key="kep_r1")
+            r2_k = c2.number_input("r₂ (m)", value=R_earth_s + 2000e3, format="%.6g", key="kep_r2")
+            T2_k = c3.number_input("T₂ (s)", value=7128.0, format="%.6g", key="kep_T2")
+            T1_k = T2_k * (r1_k / r2_k)**(3/2)
+            st.success(f"**T₁ = {T1_k:.4g} s = {T1_k/60:.4g} min**")
+            st.latex(rf"T_1 = T_2\!\left(\frac{{r_1}}{{r_2}}\right)^{{3/2}} = {T2_k:.4g}\cdot\left(\frac{{{r1_k:.4g}}}{{{r2_k:.4g}}}\right)^{{3/2}} = {T1_k:.4g}\ \text{{s}}")
+        else:
+            T1_k = c1.number_input("T₁ (s)", value=5540.0, format="%.6g", key="kep_T1b")
+            T2_k = c2.number_input("T₂ (s)", value=7128.0, format="%.6g", key="kep_T2b")
+            r2_k = c3.number_input("r₂ (m)", value=R_earth_s + 2000e3, format="%.6g", key="kep_r2b")
+            r1_k = r2_k * (T1_k / T2_k)**(2/3)
+            st.success(f"**r₁ = {r1_k:.4g} m**")
+            st.latex(rf"r_1 = r_2\!\left(\frac{{T_1}}{{T_2}}\right)^{{2/3}} = {r2_k:.4g}\cdot\left(\frac{{{T1_k:.4g}}}{{{T2_k:.4g}}}\right)^{{2/3}} = {r1_k:.4g}\ \text{{m}}")
+
+elif formel == "Statisk ligevægt:  ΣF = 0 og Στ = 0":
+    st.latex(r"\sum F = 0 \qquad \sum \tau = 0")
+    st.markdown("Legemet er i hvile. Vælg omdrejningspunkt klogt for at eliminere ukendte kræfter.")
+    beregn = st.radio("Scenarie:", [
+        "Bjælke på hængsel + snor",
+        "To understøtninger – punktlaster",
+        "Vippepunkt: hvornår tipper kassen?",
+    ], horizontal=True)
+    st.divider()
+
+    if beregn == "Bjælke på hængsel + snor":
+        st.markdown("Vandret bjælke (masse M, længde L) med hængsel i venstre ende og skrå snor ved højre ende.")
+        st.latex(r"T\sin\phi \cdot L = Mg\cdot\frac{L}{2} + F_{\text{last}}\cdot d")
+        c1, c2, c3, c4, c5 = st.columns(5)
+        M_bj   = c1.number_input("M – bjælkemasse (kg)", value=10.0, min_value=0.0, format="%.6g", key="liev_M")
+        L_bj   = c2.number_input("L – bjælkelængde (m)", value=2.0, min_value=1e-6, format="%.6g", key="liev_L")
+        F_last = c3.number_input("F_last – last (N)", value=50.0, min_value=0.0, format="%.6g", key="liev_Fl")
+        d_last = c4.number_input("d – lastens afstand fra hængsel (m)", value=1.5, min_value=0.0, format="%.6g", key="liev_d")
+        phi_deg = c5.number_input("φ – snorvinkel over vandret (°)", value=45.0, min_value=1.0, max_value=89.9, format="%.6g", key="liev_phi")
+        phi_r = np.radians(phi_deg)
+        T_snor = (M_bj * G * L_bj / 2 + F_last * d_last) / (L_bj * np.sin(phi_r))
+        H_x = T_snor * np.cos(phi_r)
+        V_y = M_bj * G + F_last - T_snor * np.sin(phi_r)
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Snorkraft T", f"{T_snor:.4g} N")
+        col2.metric("Hængselsreaktion x", f"{H_x:.4g} N")
+        col3.metric("Hængselsreaktion y", f"{V_y:.4g} N")
+        st.latex(rf"T = \frac{{MgL/2 + F_{{last}}d}}{{L\sin\phi}} = \frac{{{M_bj:.4g}\cdot{G}\cdot{L_bj:.4g}/2 + {F_last:.4g}\cdot{d_last:.4g}}}{{{L_bj:.4g}\cdot\sin({phi_deg:.4g}°)}} = {T_snor:.4g}\ \text{{N}}")
+        if st.button("📋 Gem T_snor", key="gem_liev_T"):
+            gem_resultat(T_snor, "N", "T_snor")
+
+    elif beregn == "To understøtninger – punktlaster":
+        st.markdown("Bjælke understøttet i A (x=0) og B (x=L). Tag moment om A: R_B·L = ΣF_i·x_i + Mg·L/2.")
+        c1, c2 = st.columns(2)
+        L_b2 = c1.number_input("L – spænd (m)", value=4.0, min_value=1e-6, format="%.6g", key="liev2_L")
+        M_b2 = c2.number_input("M – bjælkemasse (kg, 0=masseløs)", value=0.0, min_value=0.0, format="%.6g", key="liev2_M")
+        n_laster = st.number_input("Antal punktlaster", value=2, min_value=1, max_value=5, step=1, key="liev2_n")
+        F_vals, d_vals = [], []
+        cols_f = st.columns(int(n_laster))
+        for i in range(int(n_laster)):
+            with cols_f[i]:
+                F_vals.append(st.number_input(f"F_{i+1} (N)", value=100.0 if i == 0 else 200.0,
+                                               format="%.6g", key=f"liev_F_{i}"))
+                d_vals.append(st.number_input(f"x_{i+1} (m)", value=1.0 if i == 0 else 3.0,
+                                               min_value=0.0, max_value=float(L_b2),
+                                               format="%.6g", key=f"liev_d_{i}"))
+        tau_om_A = sum(F * d for F, d in zip(F_vals, d_vals)) + M_b2 * G * L_b2 / 2
+        R_B = tau_om_A / L_b2
+        R_A = sum(F_vals) + M_b2 * G - R_B
+        col1, col2 = st.columns(2)
+        col1.success(f"**R_A = {R_A:.4g} N**")
+        col2.success(f"**R_B = {R_B:.4g} N**")
+        st.latex(rf"R_B = \frac{{\sum F_i x_i + Mg\cdot L/2}}{{L}} = {R_B:.4g}\ \text{{N}},\quad R_A = {R_A:.4g}\ \text{{N}}")
+        if st.button("📋 Gem R_A", key="gem_liev_RA"):
+            gem_resultat(R_A, "N", "R_A")
+
+    else:
+        st.markdown("Kasse (bredde b, højde h, masse M) skubbes med vandret kraft F. Hvornår tipper fremfor at glide?")
+        st.latex(r"F_{\text{tip}} = \frac{Mgb}{2h} \qquad F_{\text{glide}} = \mu M g")
+        c1, c2, c3, c4 = st.columns(4)
+        M_k  = c1.number_input("M – masse (kg)", value=20.0, min_value=1e-12, format="%.6g", key="tip_M")
+        b_k  = c2.number_input("b – bredde (m)", value=0.5, min_value=1e-6, format="%.6g", key="tip_b")
+        h_k  = c3.number_input("h – højde (m)", value=1.0, min_value=1e-6, format="%.6g", key="tip_h")
+        mu_k2 = c4.number_input("μ – friktionskoefficient", value=0.4, min_value=0.0, format="%.6g", key="tip_mu")
+        F_tip = M_k * G * b_k / (2 * h_k)
+        F_glide = mu_k2 * M_k * G
+        col1, col2 = st.columns(2)
+        col1.metric("F_tip – tipper", f"{F_tip:.4g} N")
+        col2.metric("F_glide – glider", f"{F_glide:.4g} N")
+        if F_tip < F_glide:
+            st.success(f"**Tipper** inden den glider  (F_tip {F_tip:.4g} N < F_glide {F_glide:.4g} N)")
+        elif F_glide < F_tip:
+            st.info(f"**Glider** inden den tipper  (F_glide {F_glide:.4g} N < F_tip {F_tip:.4g} N)")
+        else:
+            st.info("Tipper og glider samtid.")
