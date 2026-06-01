@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar, show_tips
+from utils import show_sidebar_constants, show_resultat_sidebar, show_tips, formula_card_grid
 
 st.set_page_config(page_title="Svingninger", page_icon="〰️", layout="wide")
 show_sidebar_constants()
@@ -11,14 +11,15 @@ st.divider()
 
 G = 9.82
 
-formel = st.selectbox("Vælg formel", [
-    "Fjedermasse:  T = 2π√(m/k)",
-    "Simpelt pendul:  T = 2π√(L/g)",
-    "Vinkelfrekvens:  ω = √(k/m)",
-    "Bevægelsesligning:  x(t) = A·cos(ωt + φ)",
-    "Energi i svingning:  E = ½·k·A²",
-    "Dæmpet svingning:  x(t) = A·e^(−γt)·cos(ω't + φ)",
-], key="sving_formel")
+_SVING_FORMULAS = [
+    ("Fjedermasse",          "T = 2π√(m/k)",                  "Fjedermasse:  T = 2π√(m/k)"),
+    ("Simpelt pendul",       "T = 2π√(L/g)",                  "Simpelt pendul:  T = 2π√(L/g)"),
+    ("Vinkelfrekvens",       "ω = √(k/m)",                    "Vinkelfrekvens:  ω = √(k/m)"),
+    ("Bevægelsesligning",    "x(t) = A·cos(ωt+φ)",            "Bevægelsesligning:  x(t) = A·cos(ωt + φ)"),
+    ("Energi i svingning",   "E = ½·k·A²",                   "Energi i svingning:  E = ½·k·A²"),
+    ("Dæmpet svingning",     "x(t) = A·e^(−γt)·cos(ω't+φ)", "Dæmpet svingning:  x(t) = A·e^(−γt)·cos(ω't + φ)"),
+]
+formel = formula_card_grid(_SVING_FORMULAS, "sving_formel")
 
 SVING_TIPS = {
     "Fjedermasse:  T = 2π√(m/k)": "T afhænger ikke af amplitude. Stivere fjeder (stor k) → kortere periode.",

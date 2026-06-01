@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar, show_tips
+from utils import show_sidebar_constants, show_resultat_sidebar, show_tips, formula_card_grid
 
 st.set_page_config(page_title="Usikkerhed", page_icon="📏", layout="wide")
 show_sidebar_constants()
@@ -17,19 +17,20 @@ if st.session_state.pop("example_usikkerhed_2025q2", None):
 if st.session_state.pop("example_usikkerhed_2025q3", None):
     st.session_state["usk_formel"] = "Potenslov-fitting:  y = A · xᵅ  (log-log regression)"
 
-formel = st.selectbox("Vælg beregning", [
-    "Gennemsnit og standardafvigelse",
-    "Standardmåleusikkerhed (type A)",
-    "Forenelighedstest – er ny måling OK?",
-    "Relativ og absolut usikkerhed",
-    "Fejlpropagation – addition/subtraktion",
-    "Fejlpropagation – multiplikation/division",
-    "Fejlpropagation – potens:  z = xⁿ",
-    "Fejlpropagation – generel (numerisk)",
-    "Samlet usikkerhed (type A + B)",
-    "Potenslov-fitting:  y = A · xᵅ  (log-log regression)",
-    "Lineær regression:  y = a · x + b",
-], key="usk_formel")
+_USK_FORMULAS = [
+    ("Gennemsnit og stdafv.",  "x̄,  s = √(Σ(xᵢ−x̄)²/(n−1))",  "Gennemsnit og standardafvigelse"),
+    ("Standardusikkerhed A",   "u_A = s/√n",                   "Standardmåleusikkerhed (type A)"),
+    ("Forenelighedstest",      "|x_ny − x̄|/u_A < 2?",         "Forenelighedstest – er ny måling OK?"),
+    ("Relativ/absolut",        "Δx/x  og  Δx",                 "Relativ og absolut usikkerhed"),
+    ("Fejlprop. +/−",          "Δz = √(Δx²+Δy²)",             "Fejlpropagation – addition/subtraktion"),
+    ("Fejlprop. ×/÷",          "Δz/z = √((Δx/x)²+(Δy/y)²)",   "Fejlpropagation – multiplikation/division"),
+    ("Fejlprop. potens",       "Δz/z = |n|·Δx/x",             "Fejlpropagation – potens:  z = xⁿ"),
+    ("Fejlprop. generel",      "numerisk ±Δ-metode",           "Fejlpropagation – generel (numerisk)"),
+    ("Samlet usikkerhed",      "u_tot = √(u_A²+u_B²)",        "Samlet usikkerhed (type A + B)"),
+    ("Potenslov-fitting",      "y = A·xᵅ  (log-log)",          "Potenslov-fitting:  y = A · xᵅ  (log-log regression)"),
+    ("Lineær regression",      "y = a·x + b",                  "Lineær regression:  y = a · x + b"),
+]
+formel = formula_card_grid(_USK_FORMULAS, "usk_formel")
 
 USK_TIPS = {
     "Gennemsnit og standardafvigelse": "s er standardafvigelsen for stikprøven (n−1 i nævner). SEM = s/√n er usikkerheden på middelværdien.",

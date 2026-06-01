@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar, show_tips
+from utils import show_sidebar_constants, show_resultat_sidebar, show_tips, formula_card_grid
 
 st.set_page_config(page_title="Kollisioner", page_icon="💥", layout="wide")
 show_sidebar_constants()
@@ -9,15 +9,16 @@ st.title("💥 Kollisioner & Impulsbevarelse")
 st.markdown("Elastiske, uelastiske kollisioner og bevarelse af impuls — Lecture 10 (10060)")
 st.divider()
 
-formel = st.selectbox("Vælg formel / kollisionstype", [
-    "Bevarelse af impuls (generelt):  Σp_før = Σp_efter",
-    "Fuldstændig uelastisk kollision (objekter hænger sammen)",
-    "Elastisk kollision – 1D (KE bevaret)",
-    "Kollision i 2D – vektorkomponenter",
-    "Koefficient for restitution:  e = Δv_efter / Δv_før",
-    "Eksplosion / udskydning",
-    "Massemidtpunkt og -hastighed",
-], key="kol_formel")
+_KOL_FORMULAS = [
+    ("Impulsbevarelse",      "Σp_før = Σp_efter",             "Bevarelse af impuls (generelt):  Σp_før = Σp_efter"),
+    ("Uelastisk kollision",  "v'=(m₁v₁+m₂v₂)/(m₁+m₂)",      "Fuldstændig uelastisk kollision (objekter hænger sammen)"),
+    ("Elastisk kollision",   "v₁'=(m₁−m₂)v₁/(m₁+m₂)",       "Elastisk kollision – 1D (KE bevaret)"),
+    ("Kollision 2D",         "vektorkomponenter x og y",       "Kollision i 2D – vektorkomponenter"),
+    ("Restitutionskoeff.",   "e = Δv_efter/Δv_før",           "Koefficient for restitution:  e = Δv_efter / Δv_før"),
+    ("Eksplosion",           "0 = m₁v₁' + m₂v₂'",            "Eksplosion / udskydning"),
+    ("Massemidtpunkt",       "x_cm = Σ(mᵢxᵢ)/M",             "Massemidtpunkt og -hastighed"),
+]
+formel = formula_card_grid(_KOL_FORMULAS, "kol_formel")
 
 KOL_TIPS = {
     "Bevarelse af impuls (generelt):  Σp_før = Σp_efter": "Impuls bevares altid (ingen ydre kræfter). To ukendte → behov for ekstra ligning (elastisk: KE bevares).",

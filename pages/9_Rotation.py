@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips
+from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips, formula_card_grid
 
 st.set_page_config(page_title="Rotation", page_icon="🔄", layout="wide")
 show_sidebar_constants()
@@ -19,19 +19,20 @@ if st.session_state.pop("example_rotation_2024q13", None):
     st.session_state["rot_w1"] = 5.0
     st.session_state["rot_w2"] = 3.0
 
-formel = st.selectbox("Vælg formel", [
-    "Vinkelkinematik (analog til lineær kinematik)",
-    "Sammenhæng lineær ↔ vinkelbevægelse",
-    "Inertimoment – standardlegemer",
-    "Steiners sætning:  I = Icm + M·d²",
-    "Rotationskinetisk energi:  K = ½·I·ω²",
-    "Newtons 2. lov for rotation:  τ = I·α",
-    "Arbejde og effekt ved rotation",
-    "Rulning uden glidning",
-    "Impulsmoment:  L = I·ω",
-    "Bevarelse af impulsmoment",
-    "Trisse + ophængt masse (Yo-Yo / Atwood med rotation)",
-], key="rot_formel")
+_ROT_FORMULAS = [
+    ("Vinkelkinematik",      "ω=ω₀+αt,  θ=ω₀t+½αt²",        "Vinkelkinematik (analog til lineær kinematik)"),
+    ("Lineær ↔ vinkel",      "v=ωr,  aₜ=αr,  aₐ=ω²r",       "Sammenhæng lineær ↔ vinkelbevægelse"),
+    ("Inertimoment",         "½MR², MR², ⅖MR², ⅟₁₂ML²",     "Inertimoment – standardlegemer"),
+    ("Steiners sætning",     "I = Icm + M·d²",                "Steiners sætning:  I = Icm + M·d²"),
+    ("Rotationsenergi",      "K = ½·I·ω²",                    "Rotationskinetisk energi:  K = ½·I·ω²"),
+    ("τ = I·α",              "Newton for rotation",            "Newtons 2. lov for rotation:  τ = I·α"),
+    ("Arbejde & effekt",     "W = τ·θ,  P = τ·ω",            "Arbejde og effekt ved rotation"),
+    ("Rulning",              "v_cm = ω·R",                    "Rulning uden glidning"),
+    ("Impulsmoment",         "L = I · ω",                     "Impulsmoment:  L = I·ω"),
+    ("Impulsmoment-bevarelse","I₁ω₁ = I₂ω₂",                 "Bevarelse af impulsmoment"),
+    ("Trisse + masse",       "mg−T=ma,  T·R=I·α",             "Trisse + ophængt masse (Yo-Yo / Atwood med rotation)"),
+]
+formel = formula_card_grid(_ROT_FORMULAS, "rot_formel")
 
 ROT_TIPS = {
     "Vinkelkinematik (analog til lineær kinematik)": "Analogt med lineær kinematik: α↔a, ω↔v, θ↔s. Husk enhederne: θ i rad, ω i rad/s, α i rad/s².",

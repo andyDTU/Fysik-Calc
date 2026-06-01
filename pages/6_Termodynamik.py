@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar, show_tips
+from utils import show_sidebar_constants, show_resultat_sidebar, show_tips, formula_card_grid
 
 st.set_page_config(page_title="Termodynamik", page_icon="🌡️", layout="wide")
 show_sidebar_constants()
@@ -12,18 +12,19 @@ st.divider()
 R = 8.314    # J/(mol·K)
 k_B = 1.381e-23
 
-formel = st.selectbox("Vælg formel", [
-    "Ideel gaslov:  p · V = n · R · T",
-    "Kombineret gaslov:  p₁V₁/T₁ = p₂V₂/T₂",
-    "Varmekapacitet:  Q = m · c · ΔT",
-    "Faseovergang:  Q = m · L",
-    "Arbejde af gas – isobar:  W = p · ΔV",
-    "Arbejde af gas – isoterm:  W = nRT·ln(V₂/V₁)",
-    "Adiabatisk proces:  pV^γ = konst",
-    "1. termodynamikslov:  ΔU = Q − W",
-    "Carnot-virkningsgrad:  η = 1 − Tk/Tv",
-    "Termisk udvidelse",
-], key="termo_formel")
+_TERMO_FORMULAS = [
+    ("Ideel gaslov",         "pV = nRT",                      "Ideel gaslov:  p · V = n · R · T"),
+    ("Kombineret gaslov",    "p₁V₁/T₁ = p₂V₂/T₂",           "Kombineret gaslov:  p₁V₁/T₁ = p₂V₂/T₂"),
+    ("Varmekapacitet",       "Q = m·c·ΔT",                   "Varmekapacitet:  Q = m · c · ΔT"),
+    ("Faseovergang",         "Q = m · L",                     "Faseovergang:  Q = m · L"),
+    ("Isobar arbejde",       "W = p·ΔV",                     "Arbejde af gas – isobar:  W = p · ΔV"),
+    ("Isoterm arbejde",      "W = nRT·ln(V₂/V₁)",            "Arbejde af gas – isoterm:  W = nRT·ln(V₂/V₁)"),
+    ("Adiabatisk proces",    "pV^γ = konst",                  "Adiabatisk proces:  pV^γ = konst"),
+    ("1. termodynamikslov",  "ΔU = Q − W",                   "1. termodynamikslov:  ΔU = Q − W"),
+    ("Carnot-virkningsgrad", "η = 1 − Tk/Tv",                "Carnot-virkningsgrad:  η = 1 − Tk/Tv"),
+    ("Termisk udvidelse",    "ΔL = α·L₀·ΔT",                 "Termisk udvidelse"),
+]
+formel = formula_card_grid(_TERMO_FORMULAS, "termo_formel")
 
 TERMO_TIPS = {
     "Ideel gaslov:  p · V = n · R · T": "T skal være i Kelvin (K = °C + 273.15). p i Pascal, V i m³, n i mol.",

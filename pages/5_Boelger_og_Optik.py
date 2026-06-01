@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar, show_tips
+from utils import show_sidebar_constants, show_resultat_sidebar, show_tips, formula_card_grid
 
 st.set_page_config(page_title="Bølger & Optik", page_icon="🌊", layout="wide")
 show_sidebar_constants()
@@ -9,21 +9,22 @@ st.title("🌊 Bølger & Optik")
 st.markdown("Bølgehastighed, brydning, linser, Doppler og dobbeltspalte")
 st.divider()
 
-formel = st.selectbox("Vælg formel", [
-    "Bølgehastighed:  v = f · λ",
-    "Snells lov:  n₁·sin(θ₁) = n₂·sin(θ₂)",
-    "Totalrefleksion og kritisk vinkel",
-    "Linsformel:  1/f = 1/do + 1/di",
-    "Forstørring:  M = -di / do",
-    "Doppler-effekt",
-    "Dobbeltspalte (Young):  d·sin(θ) = n·λ",
-    "Diffraktionsgitter:  d·sin(θ) = m·λ",
-    "Enkelt­spalte diffraktion",
-    "Tyndfilm interferens",
-    "Malus' lov:  I = I₀·cos²(θ)",
-    "Stående bølger – streng/rør",
-    "Lysets brydningsindeks:  n = c / v",
-], key="bolge_formel")
+_BOLGE_FORMULAS = [
+    ("Bølgehastighed",      "v = f · λ",                      "Bølgehastighed:  v = f · λ"),
+    ("Snells lov",          "n₁sinθ₁ = n₂sinθ₂",             "Snells lov:  n₁·sin(θ₁) = n₂·sin(θ₂)"),
+    ("Totalrefleksion",     "sinθc = n₂/n₁",                  "Totalrefleksion og kritisk vinkel"),
+    ("Linsformel",          "1/f = 1/do + 1/di",              "Linsformel:  1/f = 1/do + 1/di"),
+    ("Forstørring",         "M = −di/do",                     "Forstørring:  M = -di / do"),
+    ("Doppler-effekt",      "f' = f·(v±v_L)/(v∓v_S)",        "Doppler-effekt"),
+    ("Dobbeltspalte (Young)","d·sinθ = n·λ",                  "Dobbeltspalte (Young):  d·sin(θ) = n·λ"),
+    ("Diffraktionsgitter",  "d·sinθ = m·λ",                   "Diffraktionsgitter:  d·sin(θ) = m·λ"),
+    ("Enkelt­spalte",       "a·sinθ = m·λ (mørk)",            "Enkelt­spalte diffraktion"),
+    ("Tyndfilm interferens","2nt = mλ (lys)",                  "Tyndfilm interferens"),
+    ("Malus' lov",          "I = I₀·cos²θ",                   "Malus' lov:  I = I₀·cos²(θ)"),
+    ("Stående bølger",      "λₙ = 2L/n (streng)",             "Stående bølger – streng/rør"),
+    ("Brydningsindeks",     "n = c/v",                         "Lysets brydningsindeks:  n = c / v"),
+]
+formel = formula_card_grid(_BOLGE_FORMULAS, "bolge_formel")
 
 BOLGE_TIPS = {
     "Bølgehastighed:  v = f · λ": "v = f·λ. For lyd i luft ≈ 343 m/s. For lys = c = 3×10⁸ m/s.",

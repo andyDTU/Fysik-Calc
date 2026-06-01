@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar, show_tips
+from utils import show_sidebar_constants, show_resultat_sidebar, show_tips, formula_card_grid
 
 st.set_page_config(page_title="Elektricitet", page_icon="⚡", layout="wide")
 show_sidebar_constants()
@@ -12,23 +12,24 @@ st.divider()
 k_e = 8.988e9   # Coulombs konstant
 mu0 = 4 * np.pi * 1e-7  # vakuumpermeabilitet
 
-formel = st.selectbox("Vælg formel", [
-    "Ohms lov:  U = R · I",
-    "Elektrisk effekt",
-    "Seriekobling af modstande",
-    "Parallelkobling af modstande",
-    "Kondensator:  Q = C · U",
-    "Energi i kondensator:  E = ½ · C · U²",
-    "RC-kredsløb:  τ = R · C",
-    "RL-kredsløb:  τ = L / R",
-    "Coulombs lov:  F = k · q₁ · q₂ / r²",
-    "Elektrisk felt:  E = F / q = k · Q / r²",
-    "Magnetfelt fra uendelig ledning:  B = μ₀·I / (2π·r)",
-    "Lorentzkraft:  F = q · v · B",
-    "Lorentzkraft på ledning:  F = B · I · L",
-    "Induceret EMF:  ε = B · L · v",
-    "Faradays lov:  ε = -N · ΔΦ / Δt",
-], key="elek_formel")
+_ELEK_FORMULAS = [
+    ("Ohms lov",               "U = R · I",                  "Ohms lov:  U = R · I"),
+    ("Elektrisk effekt",       "P = UI = U²/R = I²R",        "Elektrisk effekt"),
+    ("Seriekobling",           "R_tot = R₁+R₂+⋯",            "Seriekobling af modstande"),
+    ("Parallelkobling",        "1/R_tot = 1/R₁+1/R₂+⋯",      "Parallelkobling af modstande"),
+    ("Kondensator",            "Q = C · U",                   "Kondensator:  Q = C · U"),
+    ("Energi i kondensator",   "E = ½·C·U²",                 "Energi i kondensator:  E = ½ · C · U²"),
+    ("RC-kredsløb",            "τ = R · C",                   "RC-kredsløb:  τ = R · C"),
+    ("RL-kredsløb",            "τ = L / R",                   "RL-kredsløb:  τ = L / R"),
+    ("Coulombs lov",           "F = k·q₁q₂/r²",              "Coulombs lov:  F = k · q₁ · q₂ / r²"),
+    ("Elektrisk felt",         "E = F/q = k·Q/r²",           "Elektrisk felt:  E = F / q = k · Q / r²"),
+    ("Magnetfelt (ledning)",   "B = μ₀I/(2πr)",               "Magnetfelt fra uendelig ledning:  B = μ₀·I / (2π·r)"),
+    ("Lorentzkraft (partikel)","F = q·v·B",                   "Lorentzkraft:  F = q · v · B"),
+    ("Lorentzkraft (ledning)", "F = B·I·L",                   "Lorentzkraft på ledning:  F = B · I · L"),
+    ("Induceret EMF",          "ε = B·L·v",                   "Induceret EMF:  ε = B · L · v"),
+    ("Faradays lov",           "ε = −N·ΔΦ/Δt",               "Faradays lov:  ε = -N · ΔΦ / Δt"),
+]
+formel = formula_card_grid(_ELEK_FORMULAS, "elek_formel")
 
 ELEK_TIPS = {
     "Ohms lov:  U = R · I": "U i Volt, R i Ohm, I i Ampere. Husk: spænding OVER en modstand, strøm IGENNEM.",

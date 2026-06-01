@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips
+from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips, formula_card_grid
 
 st.set_page_config(page_title="Dynamik", page_icon="💪", layout="wide")
 show_sidebar_constants()
@@ -18,20 +18,21 @@ if st.session_state.pop("example_dynamik_2024q14", None):
     st.session_state["dyn_F"] = 500000.0
     st.session_state["dyn_sigma"] = 1.6e9
 
-formel = st.selectbox("Vælg formel", [
-    "Newtons 2. lov:  F = m · a",
-    "Tyngdekraft:  G = m · g",
-    "Friktion:  f = μ · N",
-    "Centripetalkraft:  Fc = m · v² / r",
-    "Normalkraft i sløjfe (top/bund)",
-    "Gravitationsloven:  F = G·m₁·m₂ / r²",
-    "Impuls:  p = m · v",
-    "Impulsmomentloven:  F · Δt = Δp",
-    "Kraftmoment:  τ = F · l",
-    "Hældende plan",
-    "Atwood-maskine:  to masser over trisse",
-    "Spænding og tøjning:  σ = F / A",
-], key="dyn_formel")
+_DYN_FORMULAS = [
+    ("Newtons 2. lov",       "F = m · a",                   "Newtons 2. lov:  F = m · a"),
+    ("Tyngdekraft",          "G = m · g",                   "Tyngdekraft:  G = m · g"),
+    ("Friktion",             "f = μ · N",                   "Friktion:  f = μ · N"),
+    ("Centripetalkraft",     "Fc = m·v²/r",                 "Centripetalkraft:  Fc = m · v² / r"),
+    ("Normalkraft i sløjfe", "top: N=mv²/r−mg",             "Normalkraft i sløjfe (top/bund)"),
+    ("Gravitationsloven",    "F = G·m₁·m₂/r²",             "Gravitationsloven:  F = G·m₁·m₂ / r²"),
+    ("Impuls",               "p = m · v",                   "Impuls:  p = m · v"),
+    ("Impulsmomentloven",    "F·Δt = Δp",                   "Impulsmomentloven:  F · Δt = Δp"),
+    ("Kraftmoment",          "τ = F · l",                   "Kraftmoment:  τ = F · l"),
+    ("Hældende plan",        "N=mg·cosθ,  f≤μN",            "Hældende plan"),
+    ("Atwood-maskine",       "a=(m₂−m₁)g/(m₁+m₂)",        "Atwood-maskine:  to masser over trisse"),
+    ("Spænding og tøjning",  "σ=F/A,  d=√(4F/πσ)",         "Spænding og tøjning:  σ = F / A"),
+]
+formel = formula_card_grid(_DYN_FORMULAS, "dyn_formel")
 
 DYN_TIPS = {
     "Newtons 2. lov:  F = m · a": "Brug nettokraften ΣF, ikke bare én kraft. Husk retning (fortegn).",

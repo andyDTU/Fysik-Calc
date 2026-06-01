@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips
+from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips, formula_card_grid
 
 st.set_page_config(page_title="Energi & Arbejde", page_icon="🔋", layout="wide")
 show_sidebar_constants()
@@ -11,16 +11,17 @@ st.divider()
 
 G = 9.82
 
-formel = st.selectbox("Vælg formel", [
-    "Kinetisk energi:  Ek = ½ · m · v²",
-    "Potentiel energi:  Ep = m · g · h",
-    "Fjederkraft og -energi",
-    "Arbejde:  W = F · s · cos(θ)",
-    "Effekt:  P = W / t = F · v",
-    "Energibevarelse:  Ek₁ + Ep₁ = Ek₂ + Ep₂",
-    "Energibevarelse med friktion",
-    "Mekanisk virkningsgrad:  η = P_ud / P_ind",
-], key="energi_formel")
+_ENERGI_FORMULAS = [
+    ("Kinetisk energi",       "Ek = ½·m·v²",                 "Kinetisk energi:  Ek = ½ · m · v²"),
+    ("Potentiel energi",      "Ep = m·g·h",                  "Potentiel energi:  Ep = m · g · h"),
+    ("Fjeder",                "F=k·x,  Ef=½k·x²",            "Fjederkraft og -energi"),
+    ("Arbejde",               "W = F·s·cos(θ)",               "Arbejde:  W = F · s · cos(θ)"),
+    ("Effekt",                "P = W/t = F·v",               "Effekt:  P = W / t = F · v"),
+    ("Energibevarelse",       "Ek₁+Ep₁ = Ek₂+Ep₂",         "Energibevarelse:  Ek₁ + Ep₁ = Ek₂ + Ep₂"),
+    ("Energibev. + friktion", "ΔE = Wfriktion",              "Energibevarelse med friktion"),
+    ("Virkningsgrad",         "η = P_ud / P_ind",            "Mekanisk virkningsgrad:  η = P_ud / P_ind"),
+]
+formel = formula_card_grid(_ENERGI_FORMULAS, "energi_formel")
 
 ENERGI_TIPS = {
     "Kinetisk energi:  Ek = ½ · m · v²": "Ek afhænger af v². Dobbelt hastighed → fire gange energien.",

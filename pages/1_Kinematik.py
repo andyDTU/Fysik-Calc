@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips
+from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips, formula_card_grid
 
 st.set_page_config(page_title="Kinematik", page_icon="🏃", layout="wide")
 show_sidebar_constants()
@@ -25,16 +25,17 @@ if st.session_state.pop("example_kinematik_2025q4", None):
     st.session_state["kin_ja2_a"] = -9.82
     st.session_state["kin_ja2_t"] = 2.0
 
-formel = st.selectbox("Vælg formel", [
-    "Uniform bevægelse:  s = v · t",
-    "Jævnt accelereret (1):  v = v₀ + a · t",
-    "Jævnt accelereret (2):  s = v₀·t + ½·a·t²",
-    "Jævnt accelereret (3):  v² = v₀² + 2·a·s",
-    "Kastebevægelse (vandret kast)",
-    "Kastebevægelse (skråt kast)",
-    "Cirkulær bevægelse",
-    "Cirkulær bevægelse – RPM-omregner og centripetal",
-], key="kin_formel")
+_KIN_FORMULAS = [
+    ("Uniform bevægelse",   "s = v · t",                      "Uniform bevægelse:  s = v · t"),
+    ("Jævnt acc. (1)",      "v = v₀ + a · t",                 "Jævnt accelereret (1):  v = v₀ + a · t"),
+    ("Jævnt acc. (2)",      "s = v₀·t + ½·a·t²",             "Jævnt accelereret (2):  s = v₀·t + ½·a·t²"),
+    ("Jævnt acc. (3)",      "v² = v₀² + 2·a·s",              "Jævnt accelereret (3):  v² = v₀² + 2·a·s"),
+    ("Vandret kast",        "x = v₀·t,  y = ½·g·t²",         "Kastebevægelse (vandret kast)"),
+    ("Skråt kast",          "x = v₀cosθ·t,  y = h₀+v₀sinθ·t−½gt²", "Kastebevægelse (skråt kast)"),
+    ("Cirkulær bevægelse",  "v=ω·r,  aₐ=v²/r,  T=2π/ω",     "Cirkulær bevægelse"),
+    ("Cirkulær (RPM)",      "ω = 2π·RPM/60,  r = aₐ/ω²",    "Cirkulær bevægelse – RPM-omregner og centripetal"),
+]
+formel = formula_card_grid(_KIN_FORMULAS, "kin_formel")
 
 KIN_TIPS = {
     "Uniform bevægelse:  s = v · t": "Bruges ved konstant fart (acceleration = 0). Husk: s er tilbagelagt strækning.",

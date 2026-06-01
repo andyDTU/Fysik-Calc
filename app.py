@@ -8,66 +8,54 @@ st.set_page_config(
 )
 
 show_sidebar_constants()
+
 st.title("⚡ Fysik-Calc")
-st.subheader("Det ultimative regneværktøj til fysikeksamen")
-st.divider()
+st.markdown("**Det ultimative regneværktøj til DTU 10060 – Fysik og Kemi**")
 
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.markdown("### 🏃 Kinematik")
-    st.markdown("Uniform bevægelse, jævnt accelereret, kastebevægelse, cirkulær bevægelse")
-    st.markdown("---")
-    st.markdown("### 💪 Dynamik")
-    st.markdown("Newtons love, friktion, centripetalkraft, impuls, kraftmoment, hældende plan")
-    st.markdown("---")
-    st.markdown("### 🔄 Rotation")
-    st.markdown("Vinkelkinematik, inertimoment, τ=Iα, rulning, impulsmoment — Lec. 11-12")
-
-with col2:
-    st.markdown("### 🔋 Energi & Arbejde")
-    st.markdown("Kinetisk/potentiel energi, fjederkraft, arbejde, effekt, energibevarelse")
-    st.markdown("---")
-    st.markdown("### 💥 Kollisioner")
-    st.markdown("Elastisk/uelastisk kollision, restitutionskoefficient, eksplosion — Lec. 10")
-    st.markdown("---")
-    st.markdown("### 🌡️ Termodynamik")
-    st.markdown("Ideel gaslov, varmekapacitet, faseovergang, 1. termodynamikslov, Carnot")
-
-with col3:
-    st.markdown("### ⚡ Elektricitet")
-    st.markdown("Ohms lov, serie/parallelkobling, kondensator, Coulombs lov, magnetfelt, Lorentzkraft")
-    st.markdown("---")
-    st.markdown("### 🌊 Bølger & Optik")
-    st.markdown("Bølgehastighed, Snells lov, linsformel, Doppler-effekt, dobbeltspalte")
-    st.markdown("---")
-    st.markdown("### ☢️ Atomfysik")
-    st.markdown("Radioaktivt henfald, halvvejstid, E=mc², fotonenergI, de Broglie, Bohrs model")
+col_srch, _ = st.columns([1, 3])
+if col_srch.button("🔍 Søg efter formel", use_container_width=True):
+    st.switch_page("pages/00_Søg.py")
 
 st.divider()
 
-col_a, col_b = st.columns(2)
-with col_a:
-    st.markdown("### 📏 Usikkerhed & Fejlanalyse")
-    st.markdown("Gennemsnit, standardafvigelse, fejlpropagation, type A/B usikkerhed — Lec. 3")
+TILES = [
+    ("🏃", "Kinematik",        "pages/1_Kinematik.py",
+     "s=vt · v=v₀+at · kast · cirkulær · RPM"),
+    ("💪", "Dynamik",          "pages/2_Dynamik.py",
+     "F=ma · friktion · Fc=mv²/r · gravitation · hælding"),
+    ("🔋", "Energi",           "pages/3_Energi.py",
+     "Ek=½mv² · Ep=mgh · fjeder · arbejde · effekt"),
+    ("💥", "Kollisioner",      "pages/10_Kollisioner.py",
+     "elastisk · uelastisk · restitution · eksplosion"),
+    ("🔄", "Rotation",         "pages/9_Rotation.py",
+     "τ=Iα · inertimoment · Steiner · rulning · L=Iω"),
+    ("〰️", "Svingninger",     "pages/11_Svingninger.py",
+     "T=2π√(m/k) · pendul · SHM · dæmpet"),
+    ("⚡", "Elektricitet",     "pages/4_Elektricitet.py",
+     "Ohm · serie/parallel · kondensator · Coulomb · Lorentz"),
+    ("🌡️", "Termodynamik",    "pages/6_Termodynamik.py",
+     "pV=nRT · Q=mcΔT · faseovergang · Carnot · adiabat"),
+    ("🌊", "Bølger & Optik",   "pages/5_Boelger_og_Optik.py",
+     "v=fλ · Snell · linse · Doppler · Young"),
+    ("☢️", "Atomfysik",       "pages/7_Atomfysik.py",
+     "henfald · T½ · E=mc² · foton · de Broglie · Bohr"),
+    ("📏", "Usikkerhed",       "pages/8_Usikkerhed.py",
+     "gennemsnit · fejlpropagation · potenslov · regression"),
+    ("🚀", "Relativitetsteori","pages/12_Relativitetsteori.py",
+     "γ=1/√(1−v²/c²) · tidsudvidelse · E=γm₀c²"),
+]
+
+cols_per_row = 3
+rows = [TILES[i:i+cols_per_row] for i in range(0, len(TILES), cols_per_row)]
+
+for row in rows:
+    grid = st.columns(cols_per_row)
+    for col, (emoji, navn, fil, formler) in zip(grid, row):
+        with col.container(border=True):
+            st.markdown(f"### {emoji} {navn}")
+            st.caption(formler)
+            if st.button(f"Åbn {navn}", key=f"tile_{navn}", use_container_width=True):
+                st.switch_page(fil)
 
 st.divider()
-st.info("👈 Vælg et emne i menuen til venstre for at komme i gang.")
-
-with st.expander("📐 Konstanter"):
-    st.markdown("""
-| Konstant | Symbol | Værdi |
-|----------|--------|-------|
-| Tyngdeacceleration | g | 9.82 m/s² |
-| Lysets hastighed | c | 2.998 × 10⁸ m/s |
-| Plancks konstant | h | 6.626 × 10⁻³⁴ J·s |
-| Boltzmanns konstant | k_B | 1.381 × 10⁻²³ J/K |
-| Gaskonstant | R | 8.314 J/(mol·K) |
-| Avogadros tal | N_A | 6.022 × 10²³ mol⁻¹ |
-| Elementarladning | e | 1.602 × 10⁻¹⁹ C |
-| Coulombs konstant | k | 8.988 × 10⁹ N·m²/C² |
-| Vakuumpermeabilitet | μ₀ | 4π × 10⁻⁷ T·m/A |
-| Elektronmasse | m_e | 9.109 × 10⁻³¹ kg |
-| Protonmasse | m_p | 1.673 × 10⁻²⁷ kg |
-| Atommasse enhed | u | 1.661 × 10⁻²⁷ kg |
-""")
+st.info("💡 Tip: Brug **🔍 Søg** øverst for at finde en formel direkte, eller klik på et emne ovenfor.")

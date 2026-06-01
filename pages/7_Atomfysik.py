@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar, show_tips
+from utils import show_sidebar_constants, show_resultat_sidebar, show_tips, formula_card_grid
 
 st.set_page_config(page_title="Atomfysik & Kvantemekanik", page_icon="☢️", layout="wide")
 show_sidebar_constants()
@@ -16,17 +16,18 @@ m_e = 9.109e-31   # elektronmasse (kg)
 u   = 1.661e-27   # atommasseenhed (kg)
 ln2 = np.log(2)
 
-formel = st.selectbox("Vælg formel", [
-    "Radioaktivt henfald:  N = N₀ · e^(−λt)",
-    "Aktivitet:  A = λ · N",
-    "Halvvejstid:  T½ = ln(2) / λ",
-    "Energi-masse:  E = Δm · c²",
-    "Fotonenergí:  E = h · f = h·c / λ",
-    "de Broglie bølgelængde:  λ = h / (m·v)",
-    "Bohrs model – hydrogenspektret",
-    "Fotoelektrisk effekt",
-    "Compton-spredning",
-], key="atom_formel")
+_ATOM_FORMULAS = [
+    ("Radioaktivt henfald",  "N = N₀·e^(−λt)",               "Radioaktivt henfald:  N = N₀ · e^(−λt)"),
+    ("Aktivitet",            "A = λ · N",                     "Aktivitet:  A = λ · N"),
+    ("Halvvejstid",          "T½ = ln(2)/λ",                  "Halvvejstid:  T½ = ln(2) / λ"),
+    ("Energi–masse",         "E = Δm·c²",                    "Energi-masse:  E = Δm · c²"),
+    ("Fotonenergí",          "E = h·f = hc/λ",               "Fotonenergí:  E = h · f = h·c / λ"),
+    ("de Broglie",           "λ = h/(m·v)",                   "de Broglie bølgelængde:  λ = h / (m·v)"),
+    ("Bohrs model",          "En = −13.6 eV/n²",             "Bohrs model – hydrogenspektret"),
+    ("Fotoelektrisk effekt", "Ek = hf − φ",                  "Fotoelektrisk effekt"),
+    ("Compton-spredning",    "Δλ = (h/mₑc)(1−cosθ)",         "Compton-spredning"),
+]
+formel = formula_card_grid(_ATOM_FORMULAS, "atom_formel")
 
 ATOM_TIPS = {
     "Radioaktivt henfald:  N = N₀ · e^(−λt)": "λ = ln(2)/T½. N(t) = N₀·e^(−λt). Aktivitet A = λN. Enheder: Bq = henfald/s.",

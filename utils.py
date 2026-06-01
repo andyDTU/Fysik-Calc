@@ -66,6 +66,35 @@ def show_tips(formel: str, tips_dict: dict):
     if tip:
         st.info(f"💡 {tip}")
 
+# ── Formelkort-grid (erstatter selectbox på emne-sider) ──────────────────────
+
+def formula_card_grid(formulas, key, columns=2):
+    """
+    formulas: list of (short_name, eq_hint, full_key) tuples
+    key: session_state key that stores the selected full_key
+    Returns the currently selected full_key string.
+    """
+    full_keys = [f[2] for f in formulas]
+    if key not in st.session_state or st.session_state[key] not in full_keys:
+        st.session_state[key] = full_keys[0]
+
+    grid_cols = st.columns(columns)
+    for i, (short_name, eq_hint, full_key) in enumerate(formulas):
+        grid_col = grid_cols[i % columns]
+        is_active = st.session_state[key] == full_key
+        with grid_col.container(border=True):
+            marker = "✓ " if is_active else ""
+            st.markdown(f"**{marker}{short_name}**")
+            if eq_hint:
+                st.caption(eq_hint)
+            btn_label = "Valgt" if is_active else "Vælg"
+            if st.button(btn_label, key=f"{key}_card_{i}",
+                         use_container_width=True,
+                         type="primary" if is_active else "secondary"):
+                st.session_state[key] = full_key
+
+    return st.session_state[key]
+
 # ── Komplet formel-indeks (bruges af søgesiden) ───────────────────────────────
 
 FORMLER = [

@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips
+from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips, formula_card_grid
 
 st.set_page_config(page_title="Relativitetsteori", page_icon="🚀", layout="wide")
 show_sidebar_constants()
@@ -11,15 +11,16 @@ st.divider()
 
 c = 2.998e8   # lysets hastighed (m/s)
 
-formel = st.selectbox("Vælg formel", [
-    "Lorentz-faktor:  γ = 1 / √(1 − v²/c²)",
-    "Tidsudvidelse:  Δt = γ · Δt₀",
-    "Længdeforkortning:  L = L₀ / γ",
-    "Relativistisk kinetisk energi:  Ek = (γ − 1) · m₀c²",
-    "Relativistisk totalenergi:  E = γ · m₀c²",
-    "Relativistisk impuls:  p = γ · m₀ · v",
-    "Energi–impuls relation:  E² = (pc)² + (m₀c²)²",
-], key="rel_formel")
+_REL_FORMULAS = [
+    ("Lorentz-faktor",       "γ = 1/√(1−v²/c²)",             "Lorentz-faktor:  γ = 1 / √(1 − v²/c²)"),
+    ("Tidsudvidelse",        "Δt = γ · Δt₀",                 "Tidsudvidelse:  Δt = γ · Δt₀"),
+    ("Længdeforkortning",    "L = L₀ / γ",                   "Længdeforkortning:  L = L₀ / γ"),
+    ("Relativistisk Ek",     "Ek = (γ−1)·m₀c²",              "Relativistisk kinetisk energi:  Ek = (γ − 1) · m₀c²"),
+    ("Relativistisk E",      "E = γ · m₀c²",                 "Relativistisk totalenergi:  E = γ · m₀c²"),
+    ("Relativistisk impuls", "p = γ · m₀ · v",               "Relativistisk impuls:  p = γ · m₀ · v"),
+    ("E²–p²–relation",       "E² = (pc)² + (m₀c²)²",        "Energi–impuls relation:  E² = (pc)² + (m₀c²)²"),
+]
+formel = formula_card_grid(_REL_FORMULAS, "rel_formel")
 
 REL_TIPS = {
     "Lorentz-faktor:  γ = 1 / √(1 − v²/c²)": "γ ≥ 1 altid. v → c giver γ → ∞. Ved v = 0.866c er γ = 2. Brug β = v/c for overskuelighed.",
