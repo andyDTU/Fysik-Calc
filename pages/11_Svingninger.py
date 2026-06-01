@@ -20,6 +20,9 @@ _SVING_FORMULAS = [
     ("Energi i svingning",   "E = ½·k·A²",                   "Energi i svingning:  E = ½·k·A²"),
     ("Dæmpet svingning",     "x(t) = A·e^(−γt)·cos(ω't+φ)", "Dæmpet svingning:  x(t) = A·e^(−γt)·cos(ω't + φ)"),
     ("Fysisk pendul",        "T = 2π√(I/(mgd))",             "Fysisk pendul:  T = 2π√(I/(mgd))"),
+    ("Fjedre serie/parallel","k_s = k₁k₂/(k₁+k₂)",          "Fjedre serie/parallel"),
+    ("Tvungen svingning",    "A(ω) = F₀/m / √(…)",          "Tvungen svingning og resonans"),
+    ("Q-faktor",             "Q = ω₀/(2γ)",                  "Q-faktor og resonansbredde"),
 ]
 formel = formula_card_grid(_SVING_FORMULAS, "sving_formel")
 
@@ -31,6 +34,9 @@ SVING_TIPS = {
     "Energi i svingning:  E = ½·k·A²": "E = ½kA² = konstant. Ved x=0: alt er kinetisk. Ved x=±A: alt er potentielt.",
     "Dæmpet svingning:  x(t) = A·e^(−γt)·cos(ω't + φ)": "γ = b/(2m). Underdæmpet: γ < ω₀. Kritisk: γ = ω₀. Overdæmpet: γ > ω₀.",
     "Fysisk pendul:  T = 2π√(I/(mgd))": "I = inertimoment om drejningspunktet (Steiner: I = Icm + md²). d = afstand fra drejningspunkt til massemidtpunkt.",
+    "Fjedre serie/parallel": "Serie: svagere end svageste fjeder. Parallel: stivere end stiveste. T ændres fordi k_eff ændres.",
+    "Tvungen svingning og resonans": "Resonans ved ω_drive ≈ ω₀. Amplitude divergerer hvis b → 0. Q angiver skarphed af resonanstoppen.",
+    "Q-faktor og resonansbredde": "Høj Q → smal resonanspik, langsom energitab. Q = ω₀m/b = ω₀/(2γ). Halveffekt-båndbredde Δω = ω₀/Q.",
 }
 show_tips(formel, SVING_TIPS)
 st.divider()
@@ -258,3 +264,120 @@ elif formel == "Fysisk pendul:  T = 2π√(I/(mgd))":
         d_fys = I_fys / (m_fys * G) * (2 * np.pi / T_fys)**2
         st.success(f"**d = {d_fys:.4g} m**")
         st.latex(rf"d = \frac{{I}}{{{m_fys:.4g}\cdot{G}}} \cdot \left(\frac{{2\pi}}{{{T_fys:.4g}}}\right)^2 = {d_fys:.4g}\ \text{{m}}")
+
+elif formel == "Fjedre serie/parallel":
+    st.latex(r"\text{Serie: } \frac{1}{k_s} = \frac{1}{k_1} + \frac{1}{k_2} \qquad \text{Parallel: } k_p = k_1 + k_2")
+    beregn = st.radio("Kobling:", ["Serie", "Parallel"], horizontal=True, key="sving_fjeder_kob")
+    st.divider()
+
+    c1, c2, c3 = st.columns(3)
+    k1 = c1.number_input("k₁ (N/m)", value=100.0, min_value=1e-12, format="%.6g")
+    k2 = c2.number_input("k₂ (N/m)", value=200.0, min_value=1e-12, format="%.6g")
+    m  = c3.number_input("m – masse (kg, til T)", value=1.0, min_value=1e-12, format="%.6g")
+
+    use_k3 = st.checkbox("Tilføj tredje fjeder k₃")
+    k3 = 0.0
+    if use_k3:
+        k3 = st.number_input("k₃ (N/m)", value=300.0, min_value=1e-12, format="%.6g")
+
+    if beregn == "Serie":
+        if use_k3:
+            k_eff = 1 / (1/k1 + 1/k2 + 1/k3)
+            st.latex(rf"\frac{{1}}{{k_s}} = \frac{{1}}{{{k1:.4g}}} + \frac{{1}}{{{k2:.4g}}} + \frac{{1}}{{{k3:.4g}}}")
+        else:
+            k_eff = k1 * k2 / (k1 + k2)
+            st.latex(rf"k_s = \frac{{k_1 k_2}}{{k_1+k_2}} = \frac{{{k1:.4g} \cdot {k2:.4g}}}{{{k1:.4g}+{k2:.4g}}}")
+    else:
+        k_eff = k1 + k2 + (k3 if use_k3 else 0.0)
+        if use_k3:
+            st.latex(rf"k_p = k_1 + k_2 + k_3 = {k1:.4g} + {k2:.4g} + {k3:.4g}")
+        else:
+            st.latex(rf"k_p = k_1 + k_2 = {k1:.4g} + {k2:.4g}")
+
+    T_eff = 2 * np.pi * np.sqrt(m / k_eff)
+    omega_eff = np.sqrt(k_eff / m)
+    st.success(f"**k_eff = {k_eff:.6g} N/m**   →   T = {T_eff:.6g} s,  ω = {omega_eff:.6g} rad/s")
+    st.latex(rf"k_{{eff}} = {k_eff:.6g}\ \text{{N/m}} \quad T = 2\pi\sqrt{{\frac{{{m:.4g}}}{{{k_eff:.4g}}}}} = {T_eff:.6g}\ \text{{s}}")
+    gem_resultat(k_eff, "N/m", "k_eff")
+
+elif formel == "Tvungen svingning og resonans":
+    st.latex(r"A(\omega) = \frac{F_0/m}{\sqrt{(\omega_0^2 - \omega^2)^2 + (2\gamma\omega)^2}}")
+    st.markdown("**F₀** = kraftens amplitude (N),  **ω** = drivfrekvens,  **ω₀** = naturlig frekvens,  **γ = b/(2m)**")
+    st.divider()
+
+    c1, c2, c3, c4, c5 = st.columns(5)
+    F0    = c1.number_input("F₀ – kraft (N)", value=1.0, min_value=1e-12, format="%.6g")
+    m_tv  = c2.number_input("m – masse (kg)", value=1.0, min_value=1e-12, format="%.6g")
+    k_tv  = c3.number_input("k – fjeder (N/m)", value=100.0, min_value=1e-12, format="%.6g")
+    b_tv  = c4.number_input("b – dæmpning (N·s/m)", value=2.0, min_value=0.0, format="%.6g")
+    omega_d = c5.number_input("ω_drive (rad/s)", value=10.0, min_value=1e-12, format="%.6g")
+
+    omega0 = np.sqrt(k_tv / m_tv)
+    gamma  = b_tv / (2 * m_tv)
+    denom  = np.sqrt((omega0**2 - omega_d**2)**2 + (2 * gamma * omega_d)**2)
+    A_drive = (F0 / m_tv) / denom
+
+    omega_res = np.sqrt(max(omega0**2 - 2 * gamma**2, 0.0))
+    if omega_res > 0:
+        denom_res = np.sqrt((omega0**2 - omega_res**2)**2 + (2 * gamma * omega_res)**2)
+        A_res = (F0 / m_tv) / denom_res
+    else:
+        A_res = float("nan")
+
+    st.divider()
+    col1, col2, col3 = st.columns(3)
+    col1.metric("ω₀ (rad/s)", f"{omega0:.4g}")
+    col2.metric("A(ω_drive) (m)", f"{A_drive:.4g}")
+    col3.metric("A_resonans (m)", f"{A_res:.4g}" if not np.isnan(A_res) else "—")
+
+    st.success(f"**A(ω_drive) = {A_drive:.6g} m**")
+    st.latex(rf"A = \frac{{{F0:.4g}/{m_tv:.4g}}}{{\sqrt{{({omega0:.4g}^2-{omega_d:.4g}^2)^2+(2\cdot{gamma:.4g}\cdot{omega_d:.4g})^2}}}} = {A_drive:.6g}\ \text{{m}}")
+    if omega_res > 0:
+        st.caption(f"Resonans ved ω_res = {omega_res:.4g} rad/s  (A_res = {A_res:.4g} m)")
+    else:
+        st.caption("Overdæmpet: ingen resonanstop (γ > ω₀/√2)")
+    gem_resultat(A_drive, "m", "A_tvungen")
+
+elif formel == "Q-faktor og resonansbredde":
+    st.latex(r"Q = \frac{\omega_0}{2\gamma} = \frac{\omega_0 m}{b} \qquad \Delta\omega = \frac{\omega_0}{Q} = 2\gamma")
+    st.markdown("Q angiver antallet af svingninger før energien er faldet til 1/e² ≈ 14 % af startværdien.")
+    st.divider()
+
+    input_mode = st.radio("Givet:", ["k, m og b", "ω₀ og γ", "ω₀ og Q"], horizontal=True, key="sving_Q_input")
+    st.divider()
+
+    if input_mode == "k, m og b":
+        c1, c2, c3 = st.columns(3)
+        k_q = c1.number_input("k (N/m)", value=100.0, min_value=1e-12, format="%.6g")
+        m_q = c2.number_input("m (kg)", value=1.0, min_value=1e-12, format="%.6g")
+        b_q = c3.number_input("b (N·s/m)", value=2.0, min_value=1e-12, format="%.6g")
+        omega0_q = np.sqrt(k_q / m_q)
+        gamma_q  = b_q / (2 * m_q)
+
+    elif input_mode == "ω₀ og γ":
+        c1, c2 = st.columns(2)
+        omega0_q = c1.number_input("ω₀ (rad/s)", value=10.0, min_value=1e-12, format="%.6g")
+        gamma_q  = c2.number_input("γ (1/s)", value=1.0, min_value=1e-12, format="%.6g")
+
+    else:
+        c1, c2 = st.columns(2)
+        omega0_q = c1.number_input("ω₀ (rad/s)", value=10.0, min_value=1e-12, format="%.6g")
+        Q_in     = c2.number_input("Q", value=5.0, min_value=1e-12, format="%.6g")
+        gamma_q  = omega0_q / (2 * Q_in)
+
+    Q_q      = omega0_q / (2 * gamma_q)
+    delta_omega = omega0_q / Q_q
+    omega_lo = omega0_q - delta_omega / 2
+    omega_hi = omega0_q + delta_omega / 2
+    tau_e    = 1 / gamma_q
+
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Q", f"{Q_q:.4g}")
+    col2.metric("ω₀ (rad/s)", f"{omega0_q:.4g}")
+    col3.metric("Δω (rad/s)", f"{delta_omega:.4g}")
+    col4.metric("τ_energi (s)", f"{tau_e:.4g}")
+
+    st.success(f"**Q = {Q_q:.6g}**   (Δω = {delta_omega:.4g} rad/s,  halveffekt­frekvenser: {omega_lo:.4g} – {omega_hi:.4g} rad/s)")
+    st.latex(rf"Q = \frac{{\omega_0}}{{2\gamma}} = \frac{{{omega0_q:.4g}}}{{2 \cdot {gamma_q:.4g}}} = {Q_q:.4g}")
+    st.caption(f"Energien halveret efter {np.log(2)/gamma_q:.4g} s  |  Amplitude halveret efter {np.log(2)/(gamma_q):.4g} s × 2 = {2*np.log(2)/gamma_q:.4g} s")
+    gem_resultat(Q_q, "", "Q")

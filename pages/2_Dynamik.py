@@ -19,29 +19,63 @@ if st.session_state.pop("example_dynamik_2024q14", None):
     st.session_state["dyn_F"] = 500000.0
     st.session_state["dyn_sigma"] = 1.6e9
 
-_DYN_FORMULAS = [
-    ("Newtons 2. lov",       "F = m · a",                   "Newtons 2. lov:  F = m · a"),
-    ("Tyngdekraft",          "G = m · g",                   "Tyngdekraft:  G = m · g"),
-    ("Friktion",             "f = μ · N",                   "Friktion:  f = μ · N"),
-    ("Centripetalkraft",     "Fc = m·v²/r",                 "Centripetalkraft:  Fc = m · v² / r"),
-    ("Normalkraft i sløjfe", "top: N=mv²/r−mg",             "Normalkraft i sløjfe (top/bund)"),
-    ("Gravitationsloven",    "F = G·m₁·m₂/r²",             "Gravitationsloven:  F = G·m₁·m₂ / r²"),
-    ("Impuls",               "p = m · v",                   "Impuls:  p = m · v"),
-    ("Impulsmomentloven",    "F·Δt = Δp",                   "Impulsmomentloven:  F · Δt = Δp"),
-    ("Kraftmoment",          "τ = F · l",                   "Kraftmoment:  τ = F · l"),
-    ("Hældende plan",        "N=mg·cosθ,  f≤μN",            "Hældende plan"),
-    ("Atwood-maskine",       "a=(m₂−m₁)g/(m₁+m₂)",        "Atwood-maskine:  to masser over trisse"),
-    ("Spænding og tøjning",  "σ=F/A,  d=√(4F/πσ)",         "Spænding og tøjning:  σ = F / A"),
-    ("Konisk pendul",        "tanθ=ω²r/g,  T=2π√(Lcosθ/g)", "Konisk pendul"),
-    ("Bernoulli-ligning",    "p+½ρv²+ρgh = konst",           "Bernoulli-ligning"),
-    ("Snorpendel – snorkraft", "T=m(v₀²/R−2g+3gcosθ)",      "Snorpendel – snorkraft ved vilkårlig vinkel"),
-    ("Kraft i vinkel på ru flade", "a=(Fcosθ−μ(mg−Fsinθ))/m", "Kraft i vinkel på ru flade"),
-    ("Arkimedes",             "F_b = ρ·V·g",                 "Arkimedes' princip:  F_b = ρ · V · g"),
-    ("Terminal hastighed",    "v_T = √(2mg/CρA)",            "Terminal hastighed:  v_T = √(2mg / CρA)"),
-    ("Satellit / Kepler",     "v=√(GM/r),  T²∝r³",           "Satellit og Keplers 3. lov"),
-    ("Statisk ligevægt",      "ΣF=0,  Στ=0",                 "Statisk ligevægt:  ΣF = 0 og Στ = 0"),
+_DYN_GROUPS = [
+    ("⚡ Kræfter & Newton", [
+        ("Newtons 2. lov",       "F = m · a",                     "Newtons 2. lov:  F = m · a"),
+        ("Tyngdekraft",          "G = m · g",                     "Tyngdekraft:  G = m · g"),
+        ("Friktion",             "f = μ · N",                     "Friktion:  f = μ · N"),
+        ("Centripetalkraft",     "Fc = m·v²/r",                   "Centripetalkraft:  Fc = m · v² / r"),
+        ("Normalkraft i sløjfe", "top: N=mv²/r−mg",               "Normalkraft i sløjfe (top/bund)"),
+        ("Gravitationsloven",    "F = G·m₁·m₂/r²",               "Gravitationsloven:  F = G·m₁·m₂ / r²"),
+        ("Kraftmoment",          "τ = F · l",                     "Kraftmoment:  τ = F · l"),
+        ("Statisk ligevægt",     "ΣF=0,  Στ=0",                   "Statisk ligevægt:  ΣF = 0 og Στ = 0"),
+    ]),
+    ("🏃 Mekanik & Bevægelse", [
+        ("Impuls",               "p = m · v",                     "Impuls:  p = m · v"),
+        ("Impulsmomentloven",    "F·Δt = Δp",                     "Impulsmomentloven:  F · Δt = Δp"),
+        ("Hældende plan",        "N=mg·cosθ,  f≤μN",              "Hældende plan"),
+        ("Atwood-maskine",       "a=(m₂−m₁)g/(m₁+m₂)",          "Atwood-maskine:  to masser over trisse"),
+        ("Konisk pendul",        "tanθ=ω²r/g",                    "Konisk pendul"),
+        ("Snorpendel – snorkraft", "T=m(v₀²/R−2g+3gcosθ)",       "Snorpendel – snorkraft ved vilkårlig vinkel"),
+        ("Kraft i vinkel",       "a=(Fcosθ−μ(mg−Fsinθ))/m",      "Kraft i vinkel på ru flade"),
+        ("Satellit / Kepler",    "v=√(GM/r),  T²∝r³",             "Satellit og Keplers 3. lov"),
+    ]),
+    ("🌊 Fluider & Materialer", [
+        ("Bernoulli-ligning",    "p+½ρv²+ρgh = konst",            "Bernoulli-ligning"),
+        ("Arkimedes",            "F_b = ρ·V·g",                   "Arkimedes' princip:  F_b = ρ · V · g"),
+        ("Terminal hastighed",   "v_T = √(2mg/CρA)",              "Terminal hastighed:  v_T = √(2mg / CρA)"),
+        ("Spænding og tøjning",  "σ=F/A,  d=√(4F/πσ)",           "Spænding og tøjning:  σ = F / A"),
+    ]),
 ]
-formel = formula_card_grid(_DYN_FORMULAS, "dyn_formel")
+
+# Flat list kept for initialisation and lookup
+_DYN_FORMULAS = [f for _, grp in _DYN_GROUPS for f in grp]
+_DYN_FULL_KEYS = [f[2] for f in _DYN_FORMULAS]
+
+if "dyn_formel" not in st.session_state or st.session_state["dyn_formel"] not in _DYN_FULL_KEYS:
+    st.session_state["dyn_formel"] = _DYN_FULL_KEYS[0]
+
+def _dyn_card_group(label, formulas, columns=4):
+    st.caption(f"**{label}**")
+    cols = st.columns(columns)
+    for i, (short_name, eq_hint, full_key) in enumerate(formulas):
+        is_active = st.session_state["dyn_formel"] == full_key
+        with cols[i % columns].container(border=True):
+            st.markdown(f"**{'✓ ' if is_active else ''}{short_name}**")
+            if eq_hint:
+                st.caption(eq_hint)
+            if st.button("Valgt" if is_active else "Vælg",
+                         key=f"_dyn_{full_key}",
+                         use_container_width=True,
+                         type="primary" if is_active else "secondary"):
+                st.session_state["dyn_formel"] = full_key
+                st.rerun()
+
+for _grp_label, _grp_formulas in _DYN_GROUPS:
+    _dyn_card_group(_grp_label, _grp_formulas)
+    st.write("")
+
+formel = st.session_state["dyn_formel"]
 
 DYN_TIPS = {
     "Newtons 2. lov:  F = m · a": "Brug nettokraften ΣF, ikke bare én kraft. Husk retning (fortegn).",
