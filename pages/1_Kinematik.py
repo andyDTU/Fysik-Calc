@@ -31,6 +31,7 @@ _KIN_FORMULAS = [
     ("Jævnt acc. (1)",      "v = v₀ + a · t",                 "Jævnt accelereret (1):  v = v₀ + a · t"),
     ("Jævnt acc. (2)",      "s = v₀·t + ½·a·t²",             "Jævnt accelereret (2):  s = v₀·t + ½·a·t²"),
     ("Jævnt acc. (3)",      "v² = v₀² + 2·a·s",              "Jævnt accelereret (3):  v² = v₀² + 2·a·s"),
+    ("Vertikalt kast",      "t=(v₀+√(v₀²+2gh₀))/g  ±δ",     "Vertikalt kast"),
     ("Vandret kast",        "x = v₀·t,  y = ½·g·t²",         "Kastebevægelse (vandret kast)"),
     ("Skråt kast",          "x = v₀cosθ·t,  y = h₀+v₀sinθ·t−½gt²", "Kastebevægelse (skråt kast)"),
     ("Cirkulær bevægelse",  "v=ω·r,  aₐ=v²/r,  T=2π/ω",     "Cirkulær bevægelse"),
@@ -43,6 +44,7 @@ KIN_TIPS = {
     "Jævnt accelereret (1):  v = v₀ + a · t": "Find slut- eller starthastighed. Brug a = −g = −9.82 m/s² ved frit fald.",
     "Jævnt accelereret (2):  s = v₀·t + ½·a·t²": "Find strækning eller tid. Sæt v₀ = 0 ved start fra ro. Diskriminant < 0 → ingen reel løsning.",
     "Jævnt accelereret (3):  v² = v₀² + 2·a·s": "Bruges når tid er ukendt. Find v eller strækning direkte fra start- og sluttilstand.",
+    "Vertikalt kast": "Kastes opad (v₀ > 0) eller falder fra ro (v₀ = 0). Aktivér usikkerhed (checkbox) for eksakt fejlpropagation – typisk eksamensspørgsmål.",
     "Kastebevægelse (vandret kast)": "x-retning: uniform (v₀). y-retning: frit fald (v₀y = 0). Flyvetid t = √(2h/g).",
     "Kastebevægelse (skråt kast)": "Opdel i vₓ = v₀cos(θ) og vᵧ = v₀sin(θ). Maks. rækkevidde ved θ = 45° (uden luftmodstand).",
     "Cirkulær bevægelse": "Centripetal­acceleration peger mod centrum: ac = v²/r = ω²r. Perioden T = 2πr/v.",
@@ -280,6 +282,127 @@ elif formel == "Jævnt accelereret (3):  v² = v₀² + 2·a·s":
             st.latex(rf"s = \frac{{v^2 - v_0^2}}{{2a}} = {s:.6g}\ \text{{m}}")
             if st.button("📋 Gem s", key="gem_kin_ja3_s"):
                 gem_resultat(s, "m", "s")
+
+# ── Vertikalt kast ─────────────────────────────────────────────────────────────
+elif formel == "Vertikalt kast":
+    st.latex(r"y(t) = h_0 + v_0 \cdot t - \tfrac{1}{2}g \cdot t^2 = 0 \quad\Rightarrow\quad t = \frac{v_0 + \sqrt{v_0^2 + 2g h_0}}{g}")
+    st.markdown("Sten kastes **lodret opad** fra højden **h₀** med starthastighed **v₀** (opad = positiv). Beregner landingstidspunkt, maks. højde og landingshastighed.")
+
+    vis_usk = st.checkbox("Medtag usikkerhed (fejlpropagation)", key="kin_vkast_usk")
+    st.divider()
+
+    if not vis_usk:
+        c1, c2, c3 = st.columns(3)
+        h0 = c1.number_input("h₀ – starthøjde (m)", value=1.60, min_value=0.0, format="%.6g")
+        v0 = c2.number_input("v₀ – starthastighed opad (m/s)", value=4.20, format="%.6g")
+        g  = c3.number_input("g – tyngdeaccl. (m/s²)", value=9.82, min_value=0.001, format="%.6g")
+    else:
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            st.markdown("**h₀ (m)**")
+            h0  = st.number_input("h₀", value=1.60, min_value=0.0, format="%.6g", label_visibility="collapsed", key="kin_vkast_h0")
+            dh0 = st.number_input("δh₀ (m)", value=0.05, min_value=0.0, format="%.6g", key="kin_vkast_dh0")
+        with c2:
+            st.markdown("**v₀ (m/s)**")
+            v0  = st.number_input("v₀", value=4.20, format="%.6g", label_visibility="collapsed", key="kin_vkast_v0")
+            dv0 = st.number_input("δv₀ (m/s)", value=0.05, min_value=0.0, format="%.6g", key="kin_vkast_dv0")
+        with c3:
+            st.markdown("**g (m/s²)**")
+            g   = st.number_input("g", value=9.82, min_value=0.001, format="%.6g", label_visibility="collapsed", key="kin_vkast_g")
+            dg  = st.number_input("δg (m/s²)", value=0.01, min_value=0.0, format="%.6g", key="kin_vkast_dg")
+
+    disc = v0**2 + 2.0 * g * h0
+    if disc < 0:
+        st.error("Ingen reel løsning: v₀² + 2·g·h₀ < 0")
+        st.stop()
+
+    D      = np.sqrt(disc)
+    t_land = (v0 + D) / g
+    h_max  = h0 + v0**2 / (2.0 * g)
+    t_top  = max(v0 / g, 0.0)
+    v_land = D  # = √(v₀² + 2·g·h₀)
+
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Landingstid  t", f"{t_land:.4g} s")
+    col2.metric("Maks. højde  h_max", f"{h_max:.4g} m")
+    col3.metric("Tid til top", f"{t_top:.4g} s")
+    col4.metric("Landingshastighed", f"{v_land:.4g} m/s")
+
+    if vis_usk:
+        # ── Fejlpropagation for t_land ──
+        dt_dh0 = 1.0 / D
+        dt_dv0 = (D + v0) / (g * D)
+        dt_dg  = (-v0 * D - v0**2 - g * h0) / (g**2 * D)
+        dt = np.sqrt((dt_dh0 * dh0)**2 + (dt_dv0 * dv0)**2 + (dt_dg * dg)**2)
+
+        # ── Fejlpropagation for v_land = D = √(v₀²+2g·h₀) ──
+        dv_dv0 = v0 / D
+        dv_dg  = h0 / D
+        dv_dh0 = g  / D
+        dv = np.sqrt((dv_dv0 * dv0)**2 + (dv_dg * dg)**2 + (dv_dh0 * dh0)**2)
+
+        # ── Fejlpropagation for h_max = h₀ + v₀²/(2g) ──
+        dhm_dh0 = 1.0
+        dhm_dv0 = v0 / g
+        dhm_dg  = -v0**2 / (2.0 * g**2)
+        dhm = np.sqrt((dhm_dh0 * dh0)**2 + (dhm_dv0 * dv0)**2 + (dhm_dg * dg)**2)
+
+        st.success(
+            f"**t = {t_land:.4g} ± {dt:.2g} s**  "
+            f" |  **h_max = {h_max:.4g} ± {dhm:.2g} m**  "
+            f" |  **v_land = {v_land:.4g} ± {dv:.2g} m/s**"
+        )
+
+        with st.expander("Vis fejlpropagation – landingstid t"):
+            st.latex(r"D = \sqrt{v_0^2 + 2g h_0}, \quad t = \frac{v_0 + D}{g}")
+            st.latex(
+                r"\frac{\partial t}{\partial h_0} = \frac{1}{D}, \quad"
+                r"\frac{\partial t}{\partial v_0} = \frac{D + v_0}{g D}, \quad"
+                r"\frac{\partial t}{\partial g} = \frac{-v_0 D - v_0^2 - g h_0}{g^2 D}"
+            )
+            st.latex(
+                r"\delta t = \sqrt{\!\left(\frac{\partial t}{\partial h_0}\delta h_0\right)^{\!2}"
+                r"+\left(\frac{\partial t}{\partial v_0}\delta v_0\right)^{\!2}"
+                r"+\left(\frac{\partial t}{\partial g}\delta g\right)^{\!2}}"
+            )
+            st.markdown(f"""
+| Bidrag | Partiel afledede | Usikkerhed | Bidrag til δt |
+|--------|-----------------|------------|--------------|
+| ∂t/∂h₀ | {dt_dh0:.5g} s/m | δh₀ = {dh0:.4g} m | {dt_dh0*dh0:.5g} s |
+| ∂t/∂v₀ | {dt_dv0:.5g} s/(m/s) | δv₀ = {dv0:.4g} m/s | {dt_dv0*dv0:.5g} s |
+| ∂t/∂g  | {dt_dg:.5g} s/(m/s²) | δg = {dg:.4g} m/s² | {abs(dt_dg*dg):.5g} s |
+| **δt** | | | **{dt:.5g} s** |
+""")
+
+        with st.expander("Vis fejlpropagation – h_max og v_land"):
+            st.latex(r"h_{max} = h_0 + \frac{v_0^2}{2g}")
+            st.latex(
+                rf"\delta h_{{max}} = \sqrt{{(\delta h_0)^2 + \left(\frac{{v_0}}{{g}}\delta v_0\right)^2"
+                rf" + \left(\frac{{v_0^2}}{{2g^2}}\delta g\right)^2}} = {dhm:.5g}\ \text{{m}}"
+            )
+            st.latex(r"v_{land} = \sqrt{v_0^2 + 2g h_0} = D")
+            st.latex(
+                rf"\delta v_{{land}} = \sqrt{{\left(\frac{{v_0}}{{D}}\delta v_0\right)^2"
+                rf" + \left(\frac{{h_0}}{{D}}\delta g\right)^2"
+                rf" + \left(\frac{{g}}{{D}}\delta h_0\right)^2}} = {dv:.5g}\ \text{{m/s}}"
+            )
+
+        if abs(h0 - 1.60) < 0.01 and abs(v0 - 4.20) < 0.01 and abs(g - 9.82) < 0.01:
+            st.info("📋 **Eksempel (Spg. 1)** – svar I: t = 1.141 ± 0.011 s ✓")
+    else:
+        with st.expander("Vis udregning"):
+            st.latex(rf"D = \sqrt{{{v0:.6g}^2 + 2 \cdot {g:.6g} \cdot {h0:.6g}}} = {D:.6g}")
+            st.latex(rf"t = \frac{{{v0:.6g} + {D:.6g}}}{{{g:.6g}}} = {t_land:.6g}\ \text{{s}}")
+            st.latex(rf"h_{{max}} = {h0:.6g} + \frac{{{v0:.6g}^2}}{{2 \cdot {g:.6g}}} = {h_max:.6g}\ \text{{m}}")
+            st.latex(rf"v_{{land}} = D = {v_land:.6g}\ \text{{m/s}}")
+
+    ca, cb, cc = st.columns(3)
+    if ca.button("📋 Gem t", key="gem_kin_vkast_t"):
+        gem_resultat(t_land, "s", "t")
+    if cb.button("📋 Gem h_max", key="gem_kin_vkast_hmax"):
+        gem_resultat(h_max, "m", "h_max")
+    if cc.button("📋 Gem v_land", key="gem_kin_vkast_vlnd"):
+        gem_resultat(v_land, "m/s", "v_land")
 
 # ── Vandret kast ───────────────────────────────────────────────────────────────
 elif formel == "Kastebevægelse (vandret kast)":
