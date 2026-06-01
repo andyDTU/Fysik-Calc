@@ -30,6 +30,9 @@ _USK_FORMULAS = [
     ("Samlet usikkerhed",      "u_tot = √(u_A²+u_B²)",        "Samlet usikkerhed (type A + B)"),
     ("Potenslov-fitting",      "y = A·xᵅ  (log-log)",          "Potenslov-fitting:  y = A · xᵅ  (log-log regression)"),
     ("Lineær regression",      "y = a·x + b",                  "Lineær regression:  y = a · x + b"),
+    ("Eksponentielt fit",      "y = A·eᵇˣ  (semi-log)",        "Eksponentielt fit:  y = A · eᵇˣ  (semi-log regression)"),
+    ("Numerisk diff.",         "dy/dx ≈ Δy/Δx",                "Numerisk differentiation:  dy/dx fra arrays"),
+    ("Numerisk integration",   "∫y dx  (trapez)",               "Numerisk integration:  ∫y dx (trapezregel)"),
 ]
 formel = formula_card_grid(_USK_FORMULAS, "usk_formel")
 
@@ -45,6 +48,9 @@ USK_TIPS = {
     "Samlet usikkerhed (type A + B)": "u_total = √(u_A² + u_B²). Type B er f.eks. instrument­usikkerhed fra specifikationer.",
     "Potenslov-fitting:  y = A · xᵅ  (log-log regression)": "ln(y) = ln(A) + α·ln(x). Hældningen på log-log-plot er α. R² tæt på 1 = godt fit.",
     "Lineær regression:  y = a · x + b": "Mindste kvadraters metode. Hældning a = Σ(xᵢ−x̄)(yᵢ−ȳ) / Σ(xᵢ−x̄)². R² = 1: perfekt fit.",
+    "Eksponentielt fit:  y = A · eᵇˣ  (semi-log regression)": "ln(y) = bx + ln(A). Hæng x af mod ln(y) — hældning = b. Henfald: λ = −b, T½ = ln(2)/λ. R² nær 1 = godt fit.",
+    "Numerisk differentiation:  dy/dx fra arrays": "Central differens: dy/dx ≈ (y[i+1]−y[i-1])/(x[i+1]−x[i-1]). Bruges til v fra x(t) eller a fra v(t). Præcisere end simpel Δy/Δx.",
+    "Numerisk integration:  ∫y dx (trapezregel)": "Areal ≈ Σ (x[i+1]−x[i])·(y[i]+y[i+1])/2. Bruges til impuls fra F(t) (J = ∫F dt) eller arbejde fra F(x) (W = ∫F dx).",
 }
 show_tips(formel, USK_TIPS)
 st.divider()
@@ -513,6 +519,207 @@ elif formel == "Lineær regression:  y = a · x + b":
                                           key="linreg_pred_x")
                 y_pred = a_coef * x_pred + b_coef
                 st.success(f"**{y_label}({x_pred:.4g}) = {y_pred:.6g}**")
+
+    except ValueError:
+        st.error("Ugyldig input – brug kommaseparerede tal.")
+
+elif formel == "Eksponentielt fit:  y = A · eᵇˣ  (semi-log regression)":
+    st.latex(r"y = A \cdot e^{bx} \quad \Leftrightarrow \quad \ln y = bx + \ln A")
+    st.markdown("Semi-log regression: bruges til **radioaktivt henfald**, RC-kredse, eksponentiel vækst/aftag.")
+    st.markdown("**Henfaldskonstant** λ = −b &nbsp;&nbsp;·&nbsp;&nbsp; **Halveringstid** T½ = ln(2)/λ")
+    st.divider()
+
+    st.info("💡 Paste direkte fra eksamens kode: `np.array([...])` — wrapperen fjernes automatisk")
+    col_x, col_y = st.columns(2)
+    x_label = col_x.text_input("x-navn (fx tid t):", value="t", key="expfit_xlab")
+    y_label = col_y.text_input("y-navn (fx aktivitet N):", value="N", key="expfit_ylab")
+
+    raw_x = st.text_input(f"{x_label}-værdier:", value="0, 10, 20, 30, 40, 50",
+                          help="np.array([0,10,20,30,40,50])  eller  0, 10, 20, 30, 40, 50",
+                          key="expfit_rawx")
+    raw_y = st.text_input(f"{y_label}-værdier:", value="100, 75, 56, 42, 32, 24",
+                          help="np.array([100,75,56,42,32,24])  eller  100, 75, 56, 42, 32, 24",
+                          key="expfit_rawy")
+
+    try:
+        x_vals = parse_numpy_array(raw_x)
+        y_vals = parse_numpy_array(raw_y)
+
+        if len(x_vals) != len(y_vals):
+            st.error("Antal x- og y-værdier er ikke ens.")
+        elif len(x_vals) < 2:
+            st.error("Minimum 2 datapunkter kræves.")
+        elif any(y <= 0 for y in y_vals):
+            st.error("Alle y-værdier skal være positive (ln kræver y > 0).")
+        else:
+            ln_y = np.log(y_vals)
+
+            coeffs, cov = np.polyfit(x_vals, ln_y, 1, cov=True)
+            b_coef, lnA = coeffs
+            A = np.exp(lnA)
+            sigma_b   = np.sqrt(cov[0, 0])
+
+            ln_y_fit = b_coef * x_vals + lnA
+            ss_res = np.sum((ln_y - ln_y_fit) ** 2)
+            ss_tot = np.sum((ln_y - np.mean(ln_y)) ** 2)
+            R2 = 1 - ss_res / ss_tot if ss_tot > 0 else 1.0
+
+            st.success(f"**b = {b_coef:.4g} ± {sigma_b:.4g}**   (A = {A:.4g},  R² = {R2:.4f})")
+            st.latex(rf"{y_label} = {A:.4g} \cdot e^{{({b_coef:.4g})\,{x_label}}}")
+
+            col1, col2, col3, col4 = st.columns(4)
+            col1.metric("b (eksponent)", f"{b_coef:.4g}")
+            col2.metric("σ_b (usikkerhed)", f"{sigma_b:.4g}")
+            col3.metric("A (startværdi)", f"{A:.4g}")
+            col4.metric("R² (semi-log)", f"{R2:.4f}")
+
+            if b_coef < 0:
+                lam = -b_coef
+                T_half = np.log(2) / lam
+                st.info(f"📉 **Henfald:** λ = {lam:.4g},  T½ = ln(2)/λ = **{T_half:.4g}** (samme enhed som {x_label})")
+            elif b_coef > 0:
+                st.info(f"📈 **Vækst:** b = {b_coef:.4g} > 0 (eksponentiel stigning)")
+
+            with st.expander("Vis data og residualer"):
+                rows = []
+                for xi, yi in zip(x_vals, y_vals):
+                    yi_fit = A * np.exp(b_coef * xi)
+                    rows.append({x_label: f"{xi:.6g}", y_label: f"{yi:.6g}",
+                                  f"{y_label}_fit": f"{yi_fit:.4g}",
+                                  "residual": f"{yi - yi_fit:.4g}"})
+                st.table(rows)
+
+            with st.expander("Vis udregning"):
+                st.latex(r"b = \frac{\sum x_i \ln y_i - n\bar{x}\,\overline{\ln y}}{\sum x_i^2 - n\bar{x}^2}")
+                st.latex(rf"b = {b_coef:.6g},\quad \ln A = {lnA:.6g},\quad A = e^{{{lnA:.6g}}} = {A:.6g}")
+
+    except ValueError:
+        st.error("Ugyldig input – brug kommaseparerede tal.")
+
+elif formel == "Numerisk differentiation:  dy/dx fra arrays":
+    st.latex(r"\left.\frac{dy}{dx}\right|_i \approx \frac{y_{i+1}-y_{i-1}}{x_{i+1}-x_{i-1}} \quad \text{(central differens)}")
+    st.markdown("Bruges til at finde **hastighed** fra position x(t), eller **acceleration** fra v(t).")
+    st.divider()
+
+    st.info("💡 Paste direkte fra eksamens kode: `np.array([...])` — wrapperen fjernes automatisk")
+    col_x, col_y = st.columns(2)
+    x_label = col_x.text_input("x-navn (uafhængig):", value="t", key="numdiff_xlab")
+    y_label = col_y.text_input("y-navn (afhængig):", value="x", key="numdiff_ylab")
+
+    raw_x = st.text_input(f"{x_label}-værdier:", value="0.0, 0.5, 1.0, 1.5, 2.0",
+                          help="np.array([0.0,0.5,1.0,1.5,2.0])  eller  0.0, 0.5, 1.0, 1.5, 2.0",
+                          key="numdiff_rawx")
+    raw_y = st.text_input(f"{y_label}-værdier:", value="0.0, 1.2, 4.8, 10.8, 19.2",
+                          help="np.array([0.0,1.2,4.8,10.8,19.2])  eller  0.0, 1.2, 4.8, 10.8, 19.2",
+                          key="numdiff_rawy")
+
+    try:
+        x_vals = parse_numpy_array(raw_x)
+        y_vals = parse_numpy_array(raw_y)
+
+        if len(x_vals) != len(y_vals):
+            st.error("Antal x- og y-værdier er ikke ens.")
+        elif len(x_vals) < 2:
+            st.error("Minimum 2 datapunkter kræves.")
+        else:
+            n = len(x_vals)
+            dydx = np.zeros(n)
+
+            for i in range(n):
+                if i == 0:
+                    dydx[i] = (y_vals[1] - y_vals[0]) / (x_vals[1] - x_vals[0])
+                elif i == n - 1:
+                    dydx[i] = (y_vals[-1] - y_vals[-2]) / (x_vals[-1] - x_vals[-2])
+                else:
+                    dydx[i] = (y_vals[i+1] - y_vals[i-1]) / (x_vals[i+1] - x_vals[i-1])
+
+            deriv_label = f"d{y_label}/d{x_label}"
+            st.success(f"**{deriv_label} beregnet** (central differens, forover/bagud ved kanterne)")
+
+            rows = [{x_label: f"{xi:.6g}", y_label: f"{yi:.6g}", deriv_label: f"{dyi:.6g}"}
+                    for xi, yi, dyi in zip(x_vals, y_vals, dydx)]
+            st.table(rows)
+
+            col1, col2, col3 = st.columns(3)
+            col1.metric(f"Min {deriv_label}", f"{np.min(dydx):.4g}")
+            col2.metric(f"Max {deriv_label}", f"{np.max(dydx):.4g}")
+            col3.metric(f"Gennemsnit {deriv_label}", f"{np.mean(dydx):.4g}")
+
+            with st.expander("Forklaring – central differens"):
+                st.markdown(r"""
+**Central differens** (midtpunkter, 2. ordens præcis):
+
+$$\frac{dy}{dx}\bigg|_i \approx \frac{y_{i+1}-y_{i-1}}{x_{i+1}-x_{i-1}}$$
+
+**Forover­forskydning** (første punkt):  dy/dx ≈ (y[1] − y[0]) / (x[1] − x[0])
+
+**Bagudforskydning** (sidste punkt):  dy/dx ≈ (y[n-1] − y[n-2]) / (x[n-1] − x[n-2])
+
+Central differens er præcisere end simpel Δy/Δx, da den bruger punkter på begge sider.
+""")
+
+    except ValueError:
+        st.error("Ugyldig input – brug kommaseparerede tal.")
+
+elif formel == "Numerisk integration:  ∫y dx (trapezregel)":
+    st.latex(r"\int_a^b y\,dx \approx \sum_{i=0}^{n-2} \frac{x_{i+1}-x_i}{2}\bigl(y_i + y_{i+1}\bigr)")
+    st.markdown("Trapezreglen approksimerer arealet under kurven.")
+    st.markdown("Bruges til **impuls** J = ∫F dt, **arbejde** W = ∫F dx, **position** Δx = ∫v dt mm.")
+    st.divider()
+
+    st.info("💡 Paste direkte fra eksamens kode: `np.array([...])` — wrapperen fjernes automatisk")
+    col_x, col_y = st.columns(2)
+    x_label = col_x.text_input("x-navn:", value="t", key="numint_xlab")
+    y_label = col_y.text_input("y-navn:", value="F", key="numint_ylab")
+
+    raw_x = st.text_input(f"{x_label}-værdier:", value="0.0, 0.1, 0.2, 0.3, 0.4",
+                          help="np.array([0.0,0.1,0.2,...])  eller  0.0, 0.1, 0.2, ...",
+                          key="numint_rawx")
+    raw_y = st.text_input(f"{y_label}-værdier:", value="0, 50, 80, 50, 0",
+                          help="np.array([0,50,80,50,0])  eller  0, 50, 80, 50, 0",
+                          key="numint_rawy")
+
+    try:
+        x_vals = parse_numpy_array(raw_x)
+        y_vals = parse_numpy_array(raw_y)
+
+        if len(x_vals) != len(y_vals):
+            st.error("Antal x- og y-værdier er ikke ens.")
+        elif len(x_vals) < 2:
+            st.error("Minimum 2 datapunkter kræves.")
+        else:
+            total = np.trapz(y_vals, x_vals)
+
+            cumulative = np.zeros(len(x_vals))
+            for i in range(1, len(x_vals)):
+                cumulative[i] = cumulative[i-1] + 0.5 * (x_vals[i] - x_vals[i-1]) * (y_vals[i] + y_vals[i-1])
+
+            integ_label = f"∫{y_label} d{x_label}"
+            st.success(f"**{integ_label} = {total:.6g}**")
+
+            col1, col2 = st.columns(2)
+            col1.metric("Samlet integral", f"{total:.6g}")
+            col2.metric("Antal trapezflader", f"{len(x_vals) - 1}")
+
+            with st.expander("Vis kumulativt integral"):
+                rows = [{x_label: f"{xi:.6g}", y_label: f"{yi:.6g}", "kumulativt ∫": f"{ci:.6g}"}
+                        for xi, yi, ci in zip(x_vals, y_vals, cumulative)]
+                st.table(rows)
+
+            with st.expander("Forklaring – trapezregel"):
+                st.markdown(r"""
+**Trapezregel** – hvert interval bidrager med:
+
+$$\Delta I_i = \frac{x_{i+1}-x_i}{2}\bigl(y_i + y_{i+1}\bigr)$$
+
+**Eksempler på fysiske integraler:**
+| Integral | Fysisk størrelse |
+|---|---|
+| ∫F dt | Impuls J [N·s] |
+| ∫F dx | Arbejde W [J] |
+| ∫v dt | Position Δx [m] |
+| ∫a dt | Hastighedsændring Δv [m/s] |
+""")
 
     except ValueError:
         st.error("Ugyldig input – brug kommaseparerede tal.")
