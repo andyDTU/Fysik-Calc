@@ -35,6 +35,7 @@ _DYN_FORMULAS = [
     ("Konisk pendul",        "tanθ=ω²r/g,  T=2π√(Lcosθ/g)", "Konisk pendul"),
     ("Bernoulli-ligning",    "p+½ρv²+ρgh = konst",           "Bernoulli-ligning"),
     ("Snorpendel – snorkraft", "T=m(v₀²/R−2g+3gcosθ)",      "Snorpendel – snorkraft ved vilkårlig vinkel"),
+    ("Kraft i vinkel på ru flade", "a=(Fcosθ−μ(mg−Fsinθ))/m", "Kraft i vinkel på ru flade"),
 ]
 formel = formula_card_grid(_DYN_FORMULAS, "dyn_formel")
 
@@ -54,6 +55,7 @@ DYN_TIPS = {
     "Konisk pendul": "Pendullod drejer i vandret cirkel. tanθ = ω²r/g. Periode T = 2π√(L·cosθ/g) — afhænger ikke af massen!",
     "Bernoulli-ligning": "Gælder for ideel (ikke-viskøs, inkompressibel) strømning. Torricelli: v = √(2gh) for hul i beholder.",
     "Snorpendel – snorkraft ved vilkårlig vinkel": "Snoren starter lodret, loddet har vandret hastighed v₀. T = m(v₀²/R − 2g + 3g·cosθ). Ved θ=90° (vandret snor): T = m(v₀²/R − 2g).",
+    "Kraft i vinkel på ru flade": "F trækker i vinkel θ opad. Normalkraft reduceres: N = mg − F·sinθ. Acceleration a = (F·cosθ − μk·N)/m. Optimal vinkel θ_min = arctan(μk) giver mindste F for konstant v.",
 }
 show_tips(formel, DYN_TIPS)
 st.divider()
@@ -756,3 +758,74 @@ Snoren er vandret ved **θ = 90°**: T = m(v₀²/R − 2g)
 
     if st.button("📋 Gem T", key="gem_dyn_snor_T"):
         gem_resultat(T_sp, "N", "T_snor")
+
+elif formel == "Kraft i vinkel på ru flade":
+    st.latex(r"a = \frac{F\cos\theta - \mu_k(mg - F\sin\theta)}{m}")
+    st.markdown("Blok (masse **m**) trækkes med kraft **F** i vinkel **θ** over horisontalt underlag med kinetisk friktion **μk**.")
+    st.divider()
+
+    mode_kv = st.radio("Beregn:", [
+        "a – acceleration",
+        "F – kraft for konstant hastighed (a=0)",
+        "θ_min – optimal vinkel for mindste F",
+    ], horizontal=True)
+    st.divider()
+
+    c1_kv, c2_kv, c3_kv, c4_kv = st.columns(4)
+    m_kv  = c1_kv.number_input("m – masse (kg)", value=5.0, min_value=1e-12, format="%.6g", key="kv_m")
+    mu_kv = c2_kv.number_input("μk – kinetisk friktionskoefficient", value=0.3, min_value=0.0, format="%.6g", key="kv_mu")
+    g_kv  = c3_kv.number_input("g (m/s²)", value=G, format="%.6g", key="kv_g")
+
+    if mode_kv == "a – acceleration":
+        F_kv    = c4_kv.number_input("F – kraft (N)", value=30.0, min_value=0.0, format="%.6g", key="kv_F")
+        theta_kv = st.number_input("θ – kraftens vinkel over vandret (°)", value=20.0, min_value=0.0, max_value=89.9, format="%.6g", key="kv_th")
+        th_r_kv = np.radians(theta_kv)
+        N_kv    = m_kv * g_kv - F_kv * np.sin(th_r_kv)
+        if N_kv < 0:
+            st.warning(f"N = {N_kv:.4g} N < 0 — blokken løftes af underlaget. Reducer F eller θ.")
+        else:
+            f_kv = mu_kv * N_kv
+            a_kv = (F_kv * np.cos(th_r_kv) - f_kv) / m_kv
+            col1, col2, col3 = st.columns(3)
+            col1.metric("N – normalkraft", f"{N_kv:.4g} N")
+            col2.metric("f – friktionskraft", f"{f_kv:.4g} N")
+            col3.success(f"**a = {a_kv:.4g} m/s²**")
+            st.latex(rf"N = mg - F\sin\theta = {m_kv:.4g}\cdot{g_kv:.4g} - {F_kv:.4g}\cdot\sin({theta_kv:.4g}°) = {N_kv:.4g}\ \text{{N}}")
+            st.latex(rf"a = \frac{{F\cos\theta - \mu_k N}}{{m}} = \frac{{{F_kv:.4g}\cdot\cos({theta_kv:.4g}°) - {mu_kv:.4g}\cdot{N_kv:.4g}}}{{{m_kv:.4g}}} = {a_kv:.4g}\ \text{{m/s}}^2")
+            if a_kv < 0:
+                st.info("a < 0: friktionen overvinder trækkraften — blokken bevæger sig ikke (ved a=0-betingelse).")
+            if st.button("📋 Gem a", key="gem_kv_a"):
+                gem_resultat(a_kv, "m/s²", "a")
+
+    elif mode_kv == "F – kraft for konstant hastighed (a=0)":
+        theta_kv = st.number_input("θ – kraftens vinkel over vandret (°)", value=20.0, min_value=0.0, max_value=89.9, format="%.6g", key="kv_th2")
+        th_r_kv = np.radians(theta_kv)
+        denom_kv = np.cos(th_r_kv) + mu_kv * np.sin(th_r_kv)
+        if abs(denom_kv) < 1e-12:
+            st.error("Ingen løsning ved denne vinkel.")
+        else:
+            F_kv = mu_kv * m_kv * g_kv / denom_kv
+            N_kv = m_kv * g_kv - F_kv * np.sin(th_r_kv)
+            col1, col2 = st.columns(2)
+            col1.success(f"**F = {F_kv:.4g} N** (konstant v)")
+            col2.metric("N – normalkraft", f"{N_kv:.4g} N")
+            st.latex(rf"F = \frac{{\mu_k m g}}{{\cos\theta + \mu_k \sin\theta}} = \frac{{{mu_kv:.4g}\cdot{m_kv:.4g}\cdot{g_kv:.4g}}}{{\cos({theta_kv:.4g}°) + {mu_kv:.4g}\cdot\sin({theta_kv:.4g}°)}} = {F_kv:.4g}\ \text{{N}}")
+            if st.button("📋 Gem F", key="gem_kv_F"):
+                gem_resultat(F_kv, "N", "F")
+
+    else:
+        theta_min = np.degrees(np.arctan(mu_kv))
+        th_r_min = np.radians(theta_min)
+        F_min_val = mu_kv * m_kv * g_kv / (np.cos(th_r_min) + mu_kv * np.sin(th_r_min))
+        st.success(f"**θ_min = arctan(μk) = arctan({mu_kv:.4g}) = {theta_min:.4g}°**")
+        st.info(f"Mindste nødvendige kraft ved θ_min: **F_min = {F_min_val:.4g} N**")
+        st.latex(rf"\theta_{{min}} = \arctan(\mu_k) = \arctan({mu_kv:.4g}) = {theta_min:.4g}°")
+        st.latex(rf"F_{{min}} = \frac{{\mu_k m g}}{{\cos\theta_{{min}} + \mu_k \sin\theta_{{min}}}} = {F_min_val:.4g}\ \text{{N}}")
+        with st.expander("Afledning"):
+            st.markdown(r"""
+**Minimer** $F = \frac{\mu_k m g}{\cos\theta + \mu_k \sin\theta}$ med hensyn til $\theta$:
+
+$\frac{dF}{d\theta} = 0 \implies -\sin\theta + \mu_k\cos\theta = 0 \implies \tan\theta = \mu_k$
+
+$\therefore\; \theta_{min} = \arctan(\mu_k)$
+""")

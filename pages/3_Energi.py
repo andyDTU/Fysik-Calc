@@ -21,6 +21,8 @@ _ENERGI_FORMULAS = [
     ("Energibevarelse",       "Ek₁+Ep₁ = Ek₂+Ep₂",         "Energibevarelse:  Ek₁ + Ep₁ = Ek₂ + Ep₂"),
     ("Energibev. + friktion", "ΔE = Wfriktion",              "Energibevarelse med friktion"),
     ("Virkningsgrad",         "η = P_ud / P_ind",            "Mekanisk virkningsgrad:  η = P_ud / P_ind"),
+    ("Pendul – v og T",       "v=√(2gR(1−cosθ)),  T=m(3g−2gcosθ)", "Pendul – hastighed og snorkraft (energibevarelse)"),
+    ("Fjeder – fald",         "mg(h+d) = ½kd²",              "Fjeder – maks. kompression ved fald"),
 ]
 formel = formula_card_grid(_ENERGI_FORMULAS, "energi_formel")
 
@@ -33,6 +35,8 @@ ENERGI_TIPS = {
     "Energibevarelse:  Ek₁ + Ep₁ = Ek₂ + Ep₂": "Kun gyldig uden friktion og andre ikke-konservative kræfter. Ek = ½mv², Ep = mgh.",
     "Energibevarelse med friktion": "Tabsled: W_friktion = f·d = μ·N·d. Ek₁ + Ep₁ = Ek₂ + Ep₂ + |W_friktion|.",
     "Mekanisk virkningsgrad:  η = P_ud / P_ind": "η < 1 altid. η = 1 svarer til ingen energitab (ideelt system).",
+    "Pendul – hastighed og snorkraft (energibevarelse)": "Pendul slippes fra hvile i vinkel θ med lodret. v_bund = √(2gR(1−cosθ)). Snorkraft i bunden: T = m(3g − 2g·cosθ). Bruges ved centripetalbevægelse.",
+    "Fjeder – maks. kompression ved fald": "Legeme falder fra højde h ned på fjeder (k). Energibev: mg(h+d) = ½kd². Løs andengradsligningen: kd² − 2mgd − 2mgh = 0.",
 }
 show_tips(formel, ENERGI_TIPS)
 st.divider()
@@ -388,3 +392,117 @@ elif formel == "Mekanisk virkningsgrad:  η = P_ud / P_ind":
         P_ind = P_ud / eta
         st.success(f"**P_ind = {P_ind:.6g} W**")
         st.latex(rf"P_{{ind}} = \frac{{P_{{ud}}}}{{\eta}} = \frac{{{P_ud:.6g}}}{{{eta:.6g}}} = {P_ind:.6g}\ \text{{W}}")
+
+elif formel == "Pendul – hastighed og snorkraft (energibevarelse)":
+    st.latex(r"v = \sqrt{2gR(1 - \cos\theta)} \qquad T = m(3g - 2g\cos\theta)")
+    st.markdown("Pendul slippes fra hvile i vinkel **θ** fra lodret. Find hastighed og snorkraft når snoren er lodret (bunden).")
+    st.divider()
+
+    beregn_pend = st.radio("Beregn:", ["v og T i bunden (givet θ)", "θ – udgangsvinkel (givet v i bunden)"], horizontal=True)
+    st.divider()
+
+    c1_p, c2_p, c3_p = st.columns(3)
+    m_pend = c1_p.number_input("m – masse (kg)", value=0.5, min_value=1e-12, format="%.6g", key="pend_m")
+    R_pend = c2_p.number_input("R – snorens længde (m)", value=1.0, min_value=1e-12, format="%.6g", key="pend_R")
+    g_pend = c3_p.number_input("g (m/s²)", value=G, format="%.6g", key="pend_g")
+
+    if beregn_pend == "v og T i bunden (givet θ)":
+        theta_pend = st.number_input("θ – udgangsvinkel fra lodret (°)", value=45.0, min_value=0.0, max_value=179.9, format="%.6g", key="pend_th")
+        th_r = np.radians(theta_pend)
+        v_pend = np.sqrt(2 * g_pend * R_pend * (1 - np.cos(th_r)))
+        T_pend = m_pend * (3 * g_pend - 2 * g_pend * np.cos(th_r))
+
+        col1, col2 = st.columns(2)
+        col1.success(f"**v = {v_pend:.6g} m/s**")
+        col2.success(f"**T = {T_pend:.6g} N**")
+        st.latex(rf"v = \sqrt{{2gR(1-\cos\theta)}} = \sqrt{{2 \cdot {g_pend:.6g} \cdot {R_pend:.6g} \cdot (1 - \cos {theta_pend:.4g}°)}} = {v_pend:.6g}\ \text{{m/s}}")
+        st.latex(rf"T = m(3g - 2g\cos\theta) = {m_pend:.6g}(3 \cdot {g_pend:.6g} - 2 \cdot {g_pend:.6g} \cdot \cos {theta_pend:.4g}°) = {T_pend:.6g}\ \text{{N}}")
+
+        with st.expander("Afledning"):
+            st.markdown("""
+**Energibevarelse** (hvile ved θ → bevægelse ved bunden):
+- Ep-tab: ΔEp = mgR(1 − cosθ)
+- Ek-gevinst: ½mv²
+- v = √(2gR(1−cosθ))
+
+**Centripetalbetingelse** i bunden (nedad = positiv):
+- T − mg = mv²/R
+- T = mg + mv²/R = mg + 2mg(1−cosθ) = m·g(3 − 2cosθ)
+""")
+
+        if abs(theta_pend - 90.0) < 0.5:
+            st.info(f"θ = 90°: v = √(2gR) = {np.sqrt(2*g_pend*R_pend):.4g} m/s, T = 3mg = {3*m_pend*g_pend:.4g} N")
+
+    else:
+        v_given = st.number_input("v – hastighed i bunden (m/s)", value=3.13, min_value=0.0, format="%.6g", key="pend_vg")
+        val_cos = 1 - v_given**2 / (2 * g_pend * R_pend)
+        if val_cos < -1 or val_cos > 1:
+            st.error("Hastigheden er for stor – snoren ville ikke holdes stram hele vejen.")
+        else:
+            theta_found = np.degrees(np.arccos(val_cos))
+            T_found = m_pend * (3 * g_pend - 2 * g_pend * val_cos)
+            st.success(f"**θ = {theta_found:.4g}°**")
+            st.info(f"Snorkraft i bunden: T = {T_found:.4g} N")
+            st.latex(rf"\theta = \arccos\!\left(1 - \frac{{v^2}}{{2gR}}\right) = \arccos\!\left(1 - \frac{{{v_given:.6g}^2}}{{2 \cdot {g_pend:.6g} \cdot {R_pend:.6g}}}\right) = {theta_found:.4g}°")
+
+elif formel == "Fjeder – maks. kompression ved fald":
+    st.latex(r"mg(h + d) = \frac{1}{2}k d^2")
+    st.markdown("Legeme (masse **m**) falder fra højde **h** over fjederens øverste ende og komprimerer den en afstand **d**. Løses ved andengradsligning: **kd² − 2mgd − 2mgh = 0**")
+    st.divider()
+
+    beregn_fj = st.radio("Beregn:", ["d – maks. kompression (m)", "h – faldhøjde (m)", "k – fjederkonstant (N/m)"], horizontal=True)
+    st.divider()
+
+    if beregn_fj == "d – maks. kompression (m)":
+        c1, c2, c3 = st.columns(3)
+        m_fj = c1.number_input("m – masse (kg)", value=1.2, min_value=1e-12, format="%.6g", key="fj_m")
+        h_fj = c2.number_input("h – faldhøjde over fjeder (m)", value=0.80, min_value=0.0, format="%.6g", key="fj_h")
+        k_fj = c3.number_input("k – fjederkonstant (N/m)", value=1600.0, min_value=1e-12, format="%.6g", key="fj_k")
+        g_fj = st.number_input("g (m/s²)", value=G, format="%.6g", key="fj_g")
+
+        # kd² - 2mgd - 2mgh = 0
+        a_q = k_fj
+        b_q = -2 * m_fj * g_fj
+        c_q = -2 * m_fj * g_fj * h_fj
+        disc = b_q**2 - 4 * a_q * c_q
+        d_fj = (-b_q + np.sqrt(disc)) / (2 * a_q)
+
+        st.success(f"**d = {d_fj:.6g} m**")
+        st.latex(rf"d = \frac{{mg + \sqrt{{m^2g^2 + 2kmgh}}}}{{k}} = \frac{{{m_fj:.6g}\cdot{g_fj:.6g} + \sqrt{{({m_fj:.6g}\cdot{g_fj:.6g})^2 + 2\cdot{k_fj:.6g}\cdot{m_fj:.6g}\cdot{g_fj:.6g}\cdot{h_fj:.6g}}}}}{{{k_fj:.6g}}} = {d_fj:.6g}\ \text{{m}}")
+
+        with st.expander("Vis udregning"):
+            st.markdown(f"**a** = k = {a_q:.6g}, **b** = −2mg = {b_q:.6g}, **c** = −2mgh = {c_q:.6g}")
+            st.markdown(f"Diskriminant = b²−4ac = {disc:.6g}")
+            st.markdown(f"d = (−b + √disc) / 2a = {d_fj:.6g} m")
+            Ef = 0.5 * k_fj * d_fj**2
+            Ep_lost = m_fj * g_fj * (h_fj + d_fj)
+            st.metric("Fjederenergi Ef = ½kd²", f"{Ef:.4g} J")
+            st.metric("Tyngdekraftpotentiale frigivet", f"{Ep_lost:.4g} J")
+
+        if abs(m_fj - 1.2) < 0.01 and abs(h_fj - 0.80) < 0.01 and abs(k_fj - 1600.0) < 1.0:
+            st.success("📋 Svarer til opgave fra kap. 8 (m=1.2 kg, h=0.80 m, k=1600 N/m).")
+
+    elif beregn_fj == "h – faldhøjde (m)":
+        c1, c2, c3 = st.columns(3)
+        m_fj = c1.number_input("m – masse (kg)", value=1.2, min_value=1e-12, format="%.6g", key="fj_m2")
+        d_fj = c2.number_input("d – kompression (m)", value=0.1, min_value=1e-12, format="%.6g", key="fj_d2")
+        k_fj = c3.number_input("k – fjederkonstant (N/m)", value=1600.0, min_value=1e-12, format="%.6g", key="fj_k2")
+        g_fj = st.number_input("g (m/s²)", value=G, format="%.6g", key="fj_g2")
+
+        h_fj = (0.5 * k_fj * d_fj**2 - m_fj * g_fj * d_fj) / (m_fj * g_fj)
+        if h_fj < 0:
+            st.warning(f"h = {h_fj:.4g} m (negativ → legemet rammer fjeder fra under fjedertoppen; muligt men usædvanligt)")
+        else:
+            st.success(f"**h = {h_fj:.6g} m**")
+        st.latex(rf"h = \frac{{\frac{{1}}{{2}}kd^2}}{{mg}} - d = \frac{{{0.5*k_fj*d_fj**2:.6g}}}{{{m_fj*g_fj:.6g}}} - {d_fj:.6g} = {h_fj:.6g}\ \text{{m}}")
+
+    else:
+        c1, c2, c3 = st.columns(3)
+        m_fj = c1.number_input("m – masse (kg)", value=1.2, min_value=1e-12, format="%.6g", key="fj_m3")
+        h_fj = c2.number_input("h – faldhøjde (m)", value=0.80, min_value=0.0, format="%.6g", key="fj_h3")
+        d_fj = c3.number_input("d – kompression (m)", value=0.1, min_value=1e-12, format="%.6g", key="fj_d3")
+        g_fj = st.number_input("g (m/s²)", value=G, format="%.6g", key="fj_g3")
+
+        k_fj = 2 * m_fj * g_fj * (h_fj + d_fj) / d_fj**2
+        st.success(f"**k = {k_fj:.6g} N/m**")
+        st.latex(rf"k = \frac{{2mg(h+d)}}{{d^2}} = \frac{{2 \cdot {m_fj:.6g} \cdot {g_fj:.6g} \cdot ({h_fj:.6g}+{d_fj:.6g})}}{{{d_fj:.6g}^2}} = {k_fj:.6g}\ \text{{N/m}}")

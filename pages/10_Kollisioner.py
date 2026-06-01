@@ -18,6 +18,8 @@ _KOL_FORMULAS = [
     ("Restitutionskoeff.",   "e = Δv_efter/Δv_før",           "Koefficient for restitution:  e = Δv_efter / Δv_før"),
     ("Eksplosion",           "0 = m₁v₁' + m₂v₂'",            "Eksplosion / udskydning"),
     ("Massemidtpunkt",       "x_cm = Σ(mᵢxᵢ)/M",             "Massemidtpunkt og -hastighed"),
+    ("Impuls & gennemsnitskraft", "J = F·Δt = m·Δv",         "Impuls og gennemsnitskraft:  J = F·Δt = m·Δv"),
+    ("Kuglestød lodret",     "v'=mv/(M+m), h=v'²/2g",        "Kuglestød – bullet i klods (lodret):  v' = mv/(M+m)"),
 ]
 formel = formula_card_grid(_KOL_FORMULAS, "kol_formel")
 
@@ -27,6 +29,8 @@ KOL_TIPS = {
     "Elastisk kollision – 1D (KE bevaret)": "Både impuls og kinetisk energi bevares. Formler: v₁' = (m₁−m₂)v₁/(m₁+m₂), v₂' = 2m₁v₁/(m₁+m₂).",
     "Koefficient for restitution:  e = Δv_efter / Δv_før": "e = (v₂'−v₁')/(v₁−v₂). e=1: elastisk. e=0: fuldstændig uelastisk. 0 < e < 1: delvist uelastisk.",
     "Eksplosion / udskydning": "Impuls bevares: 0 = m₁v₁' + m₂v₂'. Total impuls før = 0 (hvile).",
+    "Impuls og gennemsnitskraft:  J = F·Δt = m·Δv": "Impuls J = Δp = m·Δv. Gennemsnitskraft: F_avg = J/Δt. Bruges ved slag/stød mod væg og kraftpulser.",
+    "Kuglestød – bullet i klods (lodret):  v' = mv/(M+m)": "Kugle (m, v) skydes lodret op i klods (M, hvile). Fuldstændig uelastisk: v' = mv/(M+m). Klodsen stiger h = v'²/(2g).",
 }
 show_tips(formel, KOL_TIPS)
 st.divider()
@@ -349,3 +353,118 @@ elif formel == "Massemidtpunkt og -hastighed":
 
     st.latex(rf"x_{{cm}} = \frac{{\sum m_i x_i}}{{M}} = {x_cm:.4g}\ \text{{m}}")
     st.latex(rf"v_{{cm}} = \frac{{\sum m_i v_i}}{{M}} = {v_cm:.4g}\ \text{{m/s}}")
+
+elif formel == "Impuls og gennemsnitskraft:  J = F·Δt = m·Δv":
+    st.latex(r"J = \Delta p = m \cdot \Delta v = F_{avg} \cdot \Delta t")
+    st.divider()
+
+    mode_imp = st.radio("Beregn:", [
+        "J – impuls fra Δv",
+        "F_avg – gennemsnitskraft fra J og Δt",
+        "Stød mod væg (elastisk) – F_avg",
+    ], horizontal=True)
+    st.divider()
+
+    G_kol = 9.82
+
+    if mode_imp == "J – impuls fra Δv":
+        c1, c2, c3 = st.columns(3)
+        m_imp   = c1.number_input("m – masse (kg)", value=0.1, min_value=1e-12, format="%.6g", key="imp_m")
+        v1_imp  = c2.number_input("v₁ – hastighed før (m/s)", value=10.0, format="%.6g", key="imp_v1")
+        v2_imp  = c3.number_input("v₂ – hastighed efter (m/s)", value=-8.0, format="%.6g", key="imp_v2")
+        J_imp = m_imp * (v2_imp - v1_imp)
+        st.success(f"**J = {J_imp:.6g} N·s**")
+        st.latex(rf"J = m(v_2 - v_1) = {m_imp:.6g} \cdot ({v2_imp:.6g} - {v1_imp:.6g}) = {J_imp:.6g}\ \text{{N·s}}")
+        dt_opt = st.number_input("Δt – kontakttid (s, valgfrit)", value=0.001, min_value=1e-12, format="%.6g", key="imp_dt_opt")
+        F_avg_opt = abs(J_imp) / dt_opt
+        st.info(f"Gennemsnitskraft: **F_avg = |J|/Δt = {F_avg_opt:.4g} N**")
+        st.latex(rf"F_{{avg}} = \frac{{|J|}}{{\Delta t}} = \frac{{{abs(J_imp):.6g}}}{{{dt_opt:.6g}}} = {F_avg_opt:.6g}\ \text{{N}}")
+
+    elif mode_imp == "F_avg – gennemsnitskraft fra J og Δt":
+        c1, c2 = st.columns(2)
+        J_val = c1.number_input("J – impuls (N·s)", value=1.8, format="%.6g", key="imp_J")
+        dt_val = c2.number_input("Δt – kontakttid (s)", value=0.001, min_value=1e-12, format="%.6g", key="imp_dt")
+        F_avg_val = abs(J_val) / dt_val
+        st.success(f"**F_avg = {F_avg_val:.6g} N**")
+        st.latex(rf"F_{{avg}} = \frac{{|J|}}{{\Delta t}} = \frac{{{abs(J_val):.6g}}}{{{dt_val:.6g}}} = {F_avg_val:.6g}\ \text{{N}}")
+
+    else:
+        st.markdown("**Elastisk stød mod væg** — kun normalkraftskomponenten vendes.")
+        c1, c2, c3, c4 = st.columns(4)
+        m_w  = c1.number_input("m – masse (kg)", value=0.1, min_value=1e-12, format="%.6g", key="wall_m")
+        v_w  = c2.number_input("v – fart (m/s)", value=10.0, min_value=0.0, format="%.6g", key="wall_v")
+        ang  = c3.number_input("θ – vinkel med væg­normalen (°)", value=0.0, min_value=0.0, max_value=89.9, format="%.6g", key="wall_ang")
+        dt_w = c4.number_input("Δt – kontakttid (s)", value=1e-3, min_value=1e-15, format="%.6g", key="wall_dt")
+        v_n = v_w * np.cos(np.radians(ang))
+        J_w = 2 * m_w * v_n
+        F_avg_w = J_w / dt_w
+        st.success(f"**|J| = {J_w:.6g} N·s**")
+        st.success(f"**F_avg = {F_avg_w:.6g} N**")
+        st.latex(rf"J = 2 m v \cos\theta = 2 \cdot {m_w:.6g} \cdot {v_w:.6g} \cdot \cos({ang:.4g}°) = {J_w:.6g}\ \text{{N·s}}")
+        st.latex(rf"F_{{avg}} = \frac{{J}}{{\Delta t}} = \frac{{{J_w:.6g}}}{{{dt_w:.6g}}} = {F_avg_w:.6g}\ \text{{N}}")
+
+elif formel == "Kuglestød – bullet i klods (lodret):  v' = mv/(M+m)":
+    st.latex(r"v' = \frac{m \cdot v_i}{M + m} \qquad h = \frac{v'^2}{2g}")
+    st.markdown("Kugle (masse **m**, hastighed **v_i** opad) skydes lodret ind i klods (masse **M**, i hvile). Fuldstændig uelastisk kollision. Klodsen stiger til højde **h**.")
+    st.divider()
+
+    G_kol2 = 9.82
+    mode_kb = st.radio("Beregn:", ["h – maksimal højde", "v_i – kugles starthastighed", "m – kugles masse"], horizontal=True)
+    st.divider()
+
+    if mode_kb == "h – maksimal højde":
+        c1, c2, c3 = st.columns(3)
+        m_kb  = c1.number_input("m – kugles masse (kg)", value=0.01, min_value=1e-12, format="%.6g", key="kb_m")
+        vi_kb = c2.number_input("v_i – kugles hastighed (m/s)", value=400.0, min_value=0.0, format="%.6g", key="kb_vi")
+        M_kb  = c3.number_input("M – klodses masse (kg)", value=1.0, min_value=1e-12, format="%.6g", key="kb_M")
+        g_kb  = st.number_input("g (m/s²)", value=G_kol2, format="%.6g", key="kb_g")
+
+        vp_kb = m_kb * vi_kb / (M_kb + m_kb)
+        h_kb  = vp_kb**2 / (2 * g_kb)
+
+        col1, col2 = st.columns(2)
+        col1.success(f"**v' = {vp_kb:.6g} m/s** (efter stød)")
+        col2.success(f"**h = {h_kb:.6g} m**")
+        st.latex(rf"v' = \frac{{m \cdot v_i}}{{M+m}} = \frac{{{m_kb:.6g} \cdot {vi_kb:.6g}}}{{{M_kb+m_kb:.6g}}} = {vp_kb:.6g}\ \text{{m/s}}")
+        st.latex(rf"h = \frac{{v'^2}}{{2g}} = \frac{{{vp_kb:.6g}^2}}{{2 \cdot {g_kb:.6g}}} = {h_kb:.6g}\ \text{{m}}")
+
+        KE_before = 0.5 * m_kb * vi_kb**2
+        KE_after  = 0.5 * (M_kb + m_kb) * vp_kb**2
+        with st.expander("Vis energitab"):
+            col3, col4, col5 = st.columns(3)
+            col3.metric("KE før (kugle)", f"{KE_before:.4g} J")
+            col4.metric("KE efter (system)", f"{KE_after:.4g} J")
+            pct = (1 - KE_after / KE_before) * 100 if KE_before > 0 else 0
+            col5.metric("Tab", f"{KE_before-KE_after:.4g} J  ({pct:.1f}%)")
+
+    elif mode_kb == "v_i – kugles starthastighed":
+        c1, c2, c3 = st.columns(3)
+        m_kb  = c1.number_input("m – kugles masse (kg)", value=0.01, min_value=1e-12, format="%.6g", key="kb_m2")
+        M_kb  = c2.number_input("M – klodses masse (kg)", value=1.0, min_value=1e-12, format="%.6g", key="kb_M2")
+        h_kb  = c3.number_input("h – opnået højde (m)", value=0.8, min_value=0.0, format="%.6g", key="kb_h2")
+        g_kb  = st.number_input("g (m/s²)", value=G_kol2, format="%.6g", key="kb_g2")
+
+        vp_kb = np.sqrt(2 * g_kb * h_kb)
+        vi_kb = vp_kb * (M_kb + m_kb) / m_kb
+        st.success(f"**v_i = {vi_kb:.6g} m/s**")
+        st.latex(rf"v' = \sqrt{{2gh}} = {vp_kb:.6g}\ \text{{m/s}}")
+        st.latex(rf"v_i = v' \cdot \frac{{M+m}}{{m}} = {vp_kb:.6g} \cdot \frac{{{M_kb+m_kb:.6g}}}{{{m_kb:.6g}}} = {vi_kb:.6g}\ \text{{m/s}}")
+
+    else:
+        c1, c2, c3 = st.columns(3)
+        vi_kb = c1.number_input("v_i – kugles hastighed (m/s)", value=400.0, min_value=1e-12, format="%.6g", key="kb_vi3")
+        M_kb  = c2.number_input("M – klodses masse (kg)", value=1.0, min_value=1e-12, format="%.6g", key="kb_M3")
+        h_kb  = c3.number_input("h – opnået højde (m)", value=0.8, min_value=0.0, format="%.6g", key="kb_h3")
+        g_kb  = st.number_input("g (m/s²)", value=G_kol2, format="%.6g", key="kb_g3")
+
+        vp_kb = np.sqrt(2 * g_kb * h_kb)
+        denom_kb = vi_kb - vp_kb
+        if abs(denom_kb) < 1e-12:
+            st.error("Ingen løsning – v_i = v'")
+        else:
+            m_kb = M_kb * vp_kb / denom_kb
+            if m_kb <= 0:
+                st.error("Ugyldig løsning – kontrollér inputværdier.")
+            else:
+                st.success(f"**m = {m_kb:.6g} kg**")
+                st.latex(rf"m = \frac{{M \cdot v'}}{{v_i - v'}} = \frac{{{M_kb:.6g} \cdot {vp_kb:.6g}}}{{{vi_kb:.6g} - {vp_kb:.6g}}} = {m_kb:.6g}\ \text{{kg}}")
