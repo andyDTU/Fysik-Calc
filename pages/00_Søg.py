@@ -29,6 +29,7 @@ SIDER = [
     ("💥", "Kollisioner",        "pages/10_Kollisioner.py",      "kol_formel"),
     ("〰️", "Svingninger",        "pages/11_Svingninger.py",      "sving_formel"),
     ("🚀", "Relativitetsteori",  "pages/12_Relativitetsteori.py","rel_formel"),
+    ("🧠", "Teorispørgsmål",    "pages/13_Teori.py",            "teori_emne"),
 ]
 
 søg_lc = søg.strip().lower()
