@@ -1,7 +1,7 @@
 # ⚡ Fysik-Calc
 
 Formelberegner til DTU kursus **10060 – Fysik og Kemi**.  
-117 formler fordelt på 12 emner med søgning, formeltips og resultatbuffer.
+121 formler fordelt på 12 emner med søgning, formeltips og resultatbuffer.
 
 ---
 
@@ -50,7 +50,7 @@ cd Fysik-Calc
 *(Dette "går ind i" mappen)*
 
 ```bash
-git checkout claude/wizardly-newton-ReRbT
+git checkout claude/busy-davinci-Su5Jz
 ```
 *(Dette skifter til den nyeste version af appen)*
 
@@ -142,7 +142,7 @@ Du skal se `app.py` i listen. Ser du noget andet, er du i den forkerte mappe.
 
 **Trin 3 – Hent opdateringen:**
 ```bash
-git pull origin claude/wizardly-newton-ReRbT
+git pull origin claude/busy-davinci-Su5Jz
 ```
 Du bør se noget tekst der slutter med "Already up to date." eller en liste af opdaterede filer.
 
@@ -212,16 +212,16 @@ Opgaver fra 2024 og 2025 med facit og direkte link til den rigtige beregner.
 
 ---
 
-## Emner (117 formler)
+## Emner (121 formler)
 
 | Side | Indhold |
 |------|---------|
 | 🏃 Kinematik | Uniform, jævnt acc., kast, cirkulær, RPM |
-| 💪 Dynamik | F=ma, friktion, centripetal, gravitation, hældende plan, Atwood, spænding |
+| 💪 Dynamik | F=ma, friktion, centripetal, gravitation, hældende plan, Atwood, to-snors ophæng, to-klods CM |
 | 🔋 Energi | Ek, Ep, fjeder, arbejde, effekt, energibevarelse |
 | ⚡ Elektricitet | Ohm, serie/parallel, kondensator, RC/RL, Coulomb, Lorentz, Faraday |
 | 🌊 Bølger & Optik | Bølgehastighed, Snell, linser, Doppler, Young, diffraktion |
-| 🌡️ Termodynamik | Ideel gas, varmekapacitet, faseovergang, isobar/isoterm/adiabat, Carnot |
+| 🌡️ Termodynamik | Ideel gas, varmekapacitet, faseovergang, isobar/isoterm/adiabat, Carnot, entropi, intern energi |
 | ☢️ Atomfysik | Henfald, halvvejstid, E=mc², fotoner, de Broglie, Bohr |
 | 📏 Usikkerhed | Gennemsnit, fejlpropagation, potenslov-fitting, lineær regression |
 | 🔄 Rotation | Vinkelkin., inertimoment, Steiner, τ=Iα, rulning, impulsmoment |
