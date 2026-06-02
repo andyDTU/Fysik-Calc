@@ -351,32 +351,63 @@ Legeme i cirkulær bevægelse i lodret plan. Centripetalkraft = netto radialkraf
 """)
     st.divider()
 
-    c1, c2, c3 = st.columns(3)
-    m = c1.number_input("m – masse (kg)", value=1.0, min_value=1e-12, format="%.6g")
-    v = c2.number_input("v – fart i det givne punkt (m/s)", value=10.0, min_value=0.0, format="%.6g")
-    r = c3.number_input("r – sløjferadius (m)", value=2.0, min_value=1e-12, format="%.6g")
-
-    Fc = m * v**2 / r
-    N_bund = m * G + Fc
-    N_top  = Fc - m * G
-    v_min  = np.sqrt(G * r)
-
+    beregn_sl = st.radio("Beregn:", [
+        "N – normalkraft (givet m, v, r)",
+        "v – hastighed (givet N, m, r)",
+    ], horizontal=True)
     st.divider()
-    col1, col2, col3 = st.columns(3)
-    col1.metric("N (bund)", f"{N_bund:.4g} N")
-    col2.metric("N (top)", f"{N_top:.4g} N")
-    col3.metric("v_min (top)", f"{v_min:.4g} m/s")
 
-    if N_top < 0:
-        st.warning(f"⚠️ N_top = {N_top:.4g} N < 0: legemet mister kontakten i toppen! Minimum: v ≥ {v_min:.4g} m/s.")
+    if beregn_sl == "N – normalkraft (givet m, v, r)":
+        c1, c2, c3 = st.columns(3)
+        m = c1.number_input("m – masse (kg)", value=1.0, min_value=1e-12, format="%.6g", key="sl_m_a")
+        v = c2.number_input("v – fart i det givne punkt (m/s)", value=10.0, min_value=0.0, format="%.6g", key="sl_v_a")
+        r = c3.number_input("r – sløjferadius (m)", value=2.0, min_value=1e-12, format="%.6g", key="sl_r_a")
+
+        Fc = m * v**2 / r
+        N_bund = m * G + Fc
+        N_top  = Fc - m * G
+        v_min  = np.sqrt(G * r)
+
+        col1, col2, col3 = st.columns(3)
+        col1.metric("N (bund)", f"{N_bund:.4g} N")
+        col2.metric("N (top)", f"{N_top:.4g} N")
+        col3.metric("v_min (top)", f"{v_min:.4g} m/s")
+
+        if N_top < 0:
+            st.warning(f"⚠️ N_top = {N_top:.4g} N < 0: legemet mister kontakten i toppen! Minimum: v ≥ {v_min:.4g} m/s.")
+        else:
+            st.success("Legemet holder kontakten i toppen.")
+
+        with st.expander("Vis udregning"):
+            st.latex(rf"F_c = \frac{{mv^2}}{{r}} = \frac{{{m:.4g}\cdot{v:.4g}^2}}{{{r:.4g}}} = {Fc:.4g}\ \text{{N}}")
+            st.latex(rf"N_{{bund}} = mg + F_c = {m:.4g}\cdot{G} + {Fc:.4g} = {N_bund:.4g}\ \text{{N}}")
+            st.latex(rf"N_{{top}} = F_c - mg = {Fc:.4g} - {m:.4g}\cdot{G} = {N_top:.4g}\ \text{{N}}")
+            st.latex(rf"v_{{min}} = \sqrt{{gr}} = \sqrt{{{G}\cdot{r:.4g}}} = {v_min:.4g}\ \text{{m/s}}")
+
     else:
-        st.success("Legemet holder kontakten i toppen.")
+        position = st.radio("Position:", ["Bund  (N = mg + mv²/r)", "Top  (N = mv²/r − mg)"], horizontal=True)
+        c1, c2, c3 = st.columns(3)
+        N_in = c1.number_input("N – normalkraft (N)", value=15.0, min_value=0.0, format="%.6g", key="sl_N_b")
+        m    = c2.number_input("m – masse (kg)", value=1.0, min_value=1e-12, format="%.6g", key="sl_m_b")
+        r    = c3.number_input("r – sløjferadius (m)", value=2.0, min_value=1e-12, format="%.6g", key="sl_r_b")
 
-    with st.expander("Vis udregning"):
-        st.latex(rf"F_c = \frac{{mv^2}}{{r}} = \frac{{{m:.4g}\cdot{v:.4g}^2}}{{{r:.4g}}} = {Fc:.4g}\ \text{{N}}")
-        st.latex(rf"N_{{bund}} = mg + F_c = {m:.4g}\cdot{G} + {Fc:.4g} = {N_bund:.4g}\ \text{{N}}")
-        st.latex(rf"N_{{top}} = F_c - mg = {Fc:.4g} - {m:.4g}\cdot{G} = {N_top:.4g}\ \text{{N}}")
-        st.latex(rf"v_{{min}} = \sqrt{{gr}} = \sqrt{{{G}\cdot{r:.4g}}} = {v_min:.4g}\ \text{{m/s}}")
+        if "Bund" in position:
+            val = r * (N_in - m * G) / m
+            latex_str = rf"v = \sqrt{{\frac{{r(N - mg)}}{{m}}}} = \sqrt{{\frac{{{r:.4g}({N_in:.4g} - {m:.4g}\cdot{G})}}{{{m:.4g}}}}} "
+        else:
+            val = r * (N_in + m * G) / m
+            latex_str = rf"v = \sqrt{{\frac{{r(N + mg)}}{{m}}}} = \sqrt{{\frac{{{r:.4g}({N_in:.4g} + {m:.4g}\cdot{G})}}{{{m:.4g}}}}} "
+
+        if val < 0:
+            st.error("v² < 0 – normalkraften er for lille til at opretholde cirkelbevægelse.")
+        else:
+            v = np.sqrt(val)
+            st.success(f"**v = {v:.6g} m/s**")
+            st.latex(latex_str + rf"= {v:.6g}\ \text{{m/s}}")
+            v_min = np.sqrt(G * r)
+            st.info(f"Minimum hastighed i top: v_min = √(g·r) = {v_min:.4g} m/s")
+            if st.button("📋 Gem v", key="gem_sl_v"):
+                gem_resultat(v, "m/s", "v")
 
 elif formel == "Impuls:  p = m · v":
     st.latex(r"p = m \cdot v")
