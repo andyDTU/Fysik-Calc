@@ -37,26 +37,91 @@ st.divider()
 
 if formel == "Bevarelse af impuls (generelt):  Σp_før = Σp_efter":
     st.latex(r"m_1 v_1 + m_2 v_2 = m_1 v_1' + m_2 v_2'")
-    st.info("To ukendte kræver en ekstra betingelse (elastisk, uelastisk eller givet e).")
     st.divider()
 
-    st.markdown("**Beregn impuls og bevægelsesmængde:**")
-    c1, c2, c3, c4 = st.columns(4)
-    m1 = c1.number_input("m₁ (kg)", value=2.0, min_value=1e-12, format="%.6g")
-    v1 = c2.number_input("v₁ – før (m/s)", value=5.0, format="%.6g")
-    m2 = c3.number_input("m₂ (kg)", value=3.0, min_value=1e-12, format="%.6g")
-    v2 = c4.number_input("v₂ – før (m/s)", value=-2.0, format="%.6g")
+    beregn_imp = st.radio("Beregn:", [
+        "Σp – vis total impuls",
+        "v₁' – hastighed af m₁ efter",
+        "v₂' – hastighed af m₂ efter",
+        "v₁ – hastighed af m₁ før",
+        "m₁ – masse af objekt 1",
+    ], horizontal=True)
+    st.divider()
 
-    p_total = m1 * v1 + m2 * v2
-    v_cm = p_total / (m1 + m2)
+    if beregn_imp == "Σp – vis total impuls":
+        c1, c2, c3, c4 = st.columns(4)
+        m1 = c1.number_input("m₁ (kg)", value=2.0, min_value=1e-12, format="%.6g")
+        v1 = c2.number_input("v₁ – før (m/s)", value=5.0, format="%.6g")
+        m2 = c3.number_input("m₂ (kg)", value=3.0, min_value=1e-12, format="%.6g")
+        v2 = c4.number_input("v₂ – før (m/s)", value=-2.0, format="%.6g")
+        p_total = m1 * v1 + m2 * v2
+        v_cm = p_total / (m1 + m2)
+        col1, col2, col3 = st.columns(3)
+        col1.metric("p₁ = m₁·v₁", f"{m1*v1:.4g} kg·m/s")
+        col2.metric("p₂ = m₂·v₂", f"{m2*v2:.4g} kg·m/s")
+        col3.metric("Σp = p₁ + p₂", f"{p_total:.4g} kg·m/s")
+        st.info(f"Massemidtpunktshastighed v_cm = {v_cm:.4g} m/s — bevares under kollision.")
+        st.latex(rf"p_{{total}} = {m1:.4g} \cdot {v1:.4g} + {m2:.4g} \cdot {v2:.4g} = {p_total:.6g}\ \text{{kg·m/s}}")
 
-    col1, col2, col3 = st.columns(3)
-    col1.metric("p₁ = m₁·v₁", f"{m1*v1:.4g} kg·m/s")
-    col2.metric("p₂ = m₂·v₂", f"{m2*v2:.4g} kg·m/s")
-    col3.metric("Σp = p₁ + p₂", f"{p_total:.4g} kg·m/s")
+    elif beregn_imp == "v₁' – hastighed af m₁ efter":
+        st.markdown("Kendte: m₁, v₁, m₂, v₂ og **v₂'** → find v₁'")
+        c1, c2, c3, c4, c5 = st.columns(5)
+        m1  = c1.number_input("m₁ (kg)",  value=2.0, min_value=1e-12, format="%.6g", key="ip_m1a")
+        v1  = c2.number_input("v₁ (m/s)", value=5.0, format="%.6g", key="ip_v1a")
+        m2  = c3.number_input("m₂ (kg)",  value=3.0, min_value=1e-12, format="%.6g", key="ip_m2a")
+        v2  = c4.number_input("v₂ (m/s)", value=0.0, format="%.6g", key="ip_v2a")
+        v2p = c5.number_input("v₂' (m/s)", value=4.0, format="%.6g", key="ip_v2pa")
+        v1p = (m1*v1 + m2*v2 - m2*v2p) / m1
+        st.success(f"**v₁' = {v1p:.6g} m/s**")
+        st.latex(rf"v_1' = \frac{{m_1 v_1 + m_2 v_2 - m_2 v_2'}}{{m_1}} = {v1p:.6g}\ \text{{m/s}}")
+        if st.button("📋 Gem v₁'", key="gem_imp_v1p"):
+            from utils import gem_resultat as _gem; _gem(v1p, "m/s", "v₁'")
 
-    st.info(f"Massemidtpunktshastighed v_cm = {v_cm:.4g} m/s — bevares under kollision.")
-    st.latex(rf"p_{{total}} = m_1 v_1 + m_2 v_2 = {m1:.6g} \cdot {v1:.6g} + {m2:.6g} \cdot {v2:.6g} = {p_total:.6g}\ \text{{kg·m/s}}")
+    elif beregn_imp == "v₂' – hastighed af m₂ efter":
+        st.markdown("Kendte: m₁, v₁, m₂, v₂ og **v₁'** → find v₂'")
+        c1, c2, c3, c4, c5 = st.columns(5)
+        m1  = c1.number_input("m₁ (kg)",  value=2.0, min_value=1e-12, format="%.6g", key="ip_m1b")
+        v1  = c2.number_input("v₁ (m/s)", value=5.0, format="%.6g", key="ip_v1b")
+        m2  = c3.number_input("m₂ (kg)",  value=3.0, min_value=1e-12, format="%.6g", key="ip_m2b")
+        v2  = c4.number_input("v₂ (m/s)", value=0.0, format="%.6g", key="ip_v2b")
+        v1p = c5.number_input("v₁' (m/s)", value=1.0, format="%.6g", key="ip_v1pb")
+        v2p = (m1*v1 + m2*v2 - m1*v1p) / m2
+        st.success(f"**v₂' = {v2p:.6g} m/s**")
+        st.latex(rf"v_2' = \frac{{m_1 v_1 + m_2 v_2 - m_1 v_1'}}{{m_2}} = {v2p:.6g}\ \text{{m/s}}")
+        if st.button("📋 Gem v₂'", key="gem_imp_v2p"):
+            from utils import gem_resultat as _gem; _gem(v2p, "m/s", "v₂'")
+
+    elif beregn_imp == "v₁ – hastighed af m₁ før":
+        st.markdown("Kendte: m₁, m₂, v₂, v₁', v₂' → find **v₁**")
+        c1, c2, c3, c4, c5 = st.columns(5)
+        m1  = c1.number_input("m₁ (kg)",  value=2.0, min_value=1e-12, format="%.6g", key="ip_m1c")
+        m2  = c2.number_input("m₂ (kg)",  value=3.0, min_value=1e-12, format="%.6g", key="ip_m2c")
+        v2  = c3.number_input("v₂ (m/s)", value=0.0, format="%.6g", key="ip_v2c")
+        v1p = c4.number_input("v₁' (m/s)", value=1.0, format="%.6g", key="ip_v1pc")
+        v2p = c5.number_input("v₂' (m/s)", value=4.0, format="%.6g", key="ip_v2pc")
+        v1 = (m1*v1p + m2*v2p - m2*v2) / m1
+        st.success(f"**v₁ = {v1:.6g} m/s**")
+        st.latex(rf"v_1 = \frac{{m_1 v_1' + m_2 v_2' - m_2 v_2}}{{m_1}} = {v1:.6g}\ \text{{m/s}}")
+        if st.button("📋 Gem v₁", key="gem_imp_v1"):
+            from utils import gem_resultat as _gem; _gem(v1, "m/s", "v₁")
+
+    else:
+        st.markdown("Kendte: v₁, v₂, v₁', v₂', m₂ → find **m₁**")
+        c1, c2, c3, c4, c5 = st.columns(5)
+        v1  = c1.number_input("v₁ (m/s)", value=5.0, format="%.6g", key="ip_v1d")
+        v2  = c2.number_input("v₂ (m/s)", value=0.0, format="%.6g", key="ip_v2d")
+        v1p = c3.number_input("v₁' (m/s)", value=1.0, format="%.6g", key="ip_v1pd")
+        v2p = c4.number_input("v₂' (m/s)", value=4.0, format="%.6g", key="ip_v2pd")
+        m2  = c5.number_input("m₂ (kg)",  value=3.0, min_value=1e-12, format="%.6g", key="ip_m2d")
+        denom = v1 - v1p
+        if abs(denom) < 1e-12:
+            st.error("v₁ = v₁' — kan ikke beregne m₁")
+        else:
+            m1 = m2 * (v2p - v2) / denom
+            st.success(f"**m₁ = {m1:.6g} kg**")
+            st.latex(rf"m_1 = \frac{{m_2(v_2' - v_2)}}{{v_1 - v_1'}} = {m1:.6g}\ \text{{kg}}")
+            if st.button("📋 Gem m₁", key="gem_imp_m1"):
+                from utils import gem_resultat as _gem; _gem(m1, "kg", "m₁")
 
 elif formel == "Fuldstændig uelastisk kollision (objekter hænger sammen)":
     st.latex(r"m_1 v_1 + m_2 v_2 = (m_1 + m_2) v'")
@@ -115,37 +180,79 @@ elif formel == "Elastisk kollision – 1D (KE bevaret)":
     st.info("Både impuls og kinetisk energi bevares. e = 1.")
     st.divider()
 
-    c1, c2, c3, c4 = st.columns(4)
-    m1 = c1.number_input("m₁ (kg)", value=2.0, min_value=1e-12, format="%.6g")
-    v1 = c2.number_input("v₁ – før (m/s)", value=4.0, format="%.6g")
-    m2 = c3.number_input("m₂ (kg)", value=6.0, min_value=1e-12, format="%.6g")
-    v2 = c4.number_input("v₂ – før (m/s)", value=0.0, format="%.6g")
+    beregn_el = st.radio("Beregn:", [
+        "v₁' og v₂' – standardberegning",
+        "m₁ – givet m₂, v₁, v₂ og v₁'",
+        "v₁ – givet masser og efterhastigheder",
+    ], horizontal=True)
+    st.divider()
 
-    M = m1 + m2
-    v1_after = ((m1 - m2) * v1 + 2 * m2 * v2) / M
-    v2_after = (2 * m1 * v1 + (m2 - m1) * v2) / M
+    if beregn_el == "v₁' og v₂' – standardberegning":
+        c1, c2, c3, c4 = st.columns(4)
+        m1 = c1.number_input("m₁ (kg)", value=2.0, min_value=1e-12, format="%.6g", key="el_m1a")
+        v1 = c2.number_input("v₁ – før (m/s)", value=4.0, format="%.6g", key="el_v1a")
+        m2 = c3.number_input("m₂ (kg)", value=6.0, min_value=1e-12, format="%.6g", key="el_m2a")
+        v2 = c4.number_input("v₂ – før (m/s)", value=0.0, format="%.6g", key="el_v2a")
 
-    KE_before = 0.5 * m1 * v1**2 + 0.5 * m2 * v2**2
-    KE_after  = 0.5 * m1 * v1_after**2 + 0.5 * m2 * v2_after**2
+        M = m1 + m2
+        v1_after = ((m1 - m2) * v1 + 2 * m2 * v2) / M
+        v2_after = (2 * m1 * v1 + (m2 - m1) * v2) / M
 
-    col1, col2 = st.columns(2)
-    col1.success(f"**v₁' = {v1_after:.6g} m/s**")
-    col2.success(f"**v₂' = {v2_after:.6g} m/s**")
+        KE_before = 0.5 * m1 * v1**2 + 0.5 * m2 * v2**2
+        KE_after  = 0.5 * m1 * v1_after**2 + 0.5 * m2 * v2_after**2
 
-    col3, col4, col5 = st.columns(3)
-    col3.metric("KE før", f"{KE_before:.4g} J")
-    col4.metric("KE efter", f"{KE_after:.4g} J")
-    col5.metric("ΔKE", f"{abs(KE_after - KE_before):.2e} J  (≈0)")
+        col1, col2 = st.columns(2)
+        col1.success(f"**v₁' = {v1_after:.6g} m/s**")
+        col2.success(f"**v₂' = {v2_after:.6g} m/s**")
 
-    with st.expander("Vis udregning"):
-        st.latex(rf"v_1' = \frac{{{m1:.6g}-{m2:.6g}}}{{{M:.6g}}} \cdot {v1:.6g} + \frac{{2 \cdot {m2:.6g}}}{{{M:.6g}}} \cdot {v2:.6g} = {v1_after:.6g}\ \text{{m/s}}")
-        st.latex(rf"v_2' = \frac{{2 \cdot {m1:.6g}}}{{{M:.6g}}} \cdot {v1:.6g} + \frac{{{m2:.6g}-{m1:.6g}}}{{{M:.6g}}} \cdot {v2:.6g} = {v2_after:.6g}\ \text{{m/s}}")
+        col3, col4, col5 = st.columns(3)
+        col3.metric("KE før", f"{KE_before:.4g} J")
+        col4.metric("KE efter", f"{KE_after:.4g} J")
+        col5.metric("ΔKE", f"{abs(KE_after - KE_before):.2e} J  (≈0)")
 
-    st.markdown("**Specialtilfælde:**")
-    if abs(m1 - m2) < 1e-6 * M:
-        st.info("m₁ ≈ m₂: Hastighederne bytter — v₁' ≈ v₂ og v₂' ≈ v₁")
-    if abs(v2) < 1e-9:
-        st.info(f"m₂ i ro: v₁' = {v1_after:.4g} m/s,  v₂' = {v2_after:.4g} m/s")
+        with st.expander("Vis udregning"):
+            st.latex(rf"v_1' = \frac{{{m1:.6g}-{m2:.6g}}}{{{M:.6g}}} \cdot {v1:.6g} + \frac{{2 \cdot {m2:.6g}}}{{{M:.6g}}} \cdot {v2:.6g} = {v1_after:.6g}\ \text{{m/s}}")
+            st.latex(rf"v_2' = \frac{{2 \cdot {m1:.6g}}}{{{M:.6g}}} \cdot {v1:.6g} + \frac{{{m2:.6g}-{m1:.6g}}}{{{M:.6g}}} \cdot {v2:.6g} = {v2_after:.6g}\ \text{{m/s}}")
+
+        st.markdown("**Specialtilfælde:**")
+        if abs(m1 - m2) < 1e-6 * M:
+            st.info("m₁ ≈ m₂: Hastighederne bytter — v₁' ≈ v₂ og v₂' ≈ v₁")
+        if abs(v2) < 1e-9:
+            st.info(f"m₂ i ro: v₁' = {v1_after:.4g} m/s,  v₂' = {v2_after:.4g} m/s")
+
+    elif beregn_el == "m₁ – givet m₂, v₁, v₂ og v₁'":
+        st.markdown("Kendte: m₂, v₁, v₂, v₁' → find **m₁** (og v₂' fra elasticitets­betingelse)")
+        c1, c2, c3, c4 = st.columns(4)
+        m2  = c1.number_input("m₂ (kg)", value=6.0, min_value=1e-12, format="%.6g", key="el_m2b")
+        v1  = c2.number_input("v₁ – før (m/s)", value=4.0, format="%.6g", key="el_v1b")
+        v2  = c3.number_input("v₂ – før (m/s)", value=0.0, format="%.6g", key="el_v2b")
+        v1p = c4.number_input("v₁' – efter (m/s)", value=-2.0, format="%.6g", key="el_v1pb")
+        denom = v1 - v1p
+        if abs(denom) < 1e-12:
+            st.error("v₁ = v₁' — ingen løsning")
+        else:
+            m1 = m2 * (v1 + v1p - 2 * v2) / denom
+            v2p = v1 - v2 + v1p
+            st.success(f"**m₁ = {m1:.6g} kg**")
+            st.success(f"**v₂' = {v2p:.6g} m/s** (fra elasticitets­betingelse: v₂'−v₁'=v₁−v₂)")
+            st.latex(rf"m_1 = m_2 \cdot \frac{{v_1 + v_1' - 2v_2}}{{v_1 - v_1'}} = {m2:.6g} \cdot \frac{{{v1:.6g}+{v1p:.6g}-2\cdot{v2:.6g}}}{{{v1:.6g}-{v1p:.6g}}} = {m1:.6g}\ \text{{kg}}")
+            st.latex(rf"v_2' = v_1 - v_2 + v_1' = {v1:.6g} - {v2:.6g} + {v1p:.6g} = {v2p:.6g}\ \text{{m/s}}")
+            if st.button("📋 Gem m₁", key="gem_el_m1"):
+                from utils import gem_resultat as _gem; _gem(m1, "kg", "m₁")
+
+    else:
+        st.markdown("Kendte: m₁, m₂, v₂, v₁', v₂' → find **v₁**")
+        c1, c2, c3, c4, c5 = st.columns(5)
+        m1  = c1.number_input("m₁ (kg)", value=2.0, min_value=1e-12, format="%.6g", key="el_m1c")
+        m2  = c2.number_input("m₂ (kg)", value=6.0, min_value=1e-12, format="%.6g", key="el_m2c")
+        v2  = c3.number_input("v₂ – før (m/s)", value=0.0, format="%.6g", key="el_v2c")
+        v1p = c4.number_input("v₁' – efter (m/s)", value=-2.0, format="%.6g", key="el_v1pc")
+        v2p = c5.number_input("v₂' – efter (m/s)", value=2.0, format="%.6g", key="el_v2pc")
+        v1 = v1p + m2 * (v2p - v2) / m1
+        st.success(f"**v₁ = {v1:.6g} m/s**")
+        st.latex(rf"v_1 = v_1' + \frac{{m_2(v_2' - v_2)}}{{m_1}} = {v1p:.6g} + \frac{{{m2:.6g} \cdot ({v2p:.6g} - {v2:.6g})}}{{{m1:.6g}}} = {v1:.6g}\ \text{{m/s}}")
+        if st.button("📋 Gem v₁", key="gem_el_v1"):
+            from utils import gem_resultat as _gem; _gem(v1, "m/s", "v₁")
 
 elif formel == "Kollision i 2D – vektorkomponenter":
     st.latex(r"\sum p_x: \quad m_1 v_{1x} + m_2 v_{2x} = m_1 v_{1x}' + m_2 v_{2x}'")
