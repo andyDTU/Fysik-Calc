@@ -300,7 +300,7 @@ elif formel == "Eksplosion / udskydning":
     st.markdown("Impuls bevares. Starter systemet i ro, er den samlede impuls = 0 efterfølgende.")
     st.divider()
 
-    beregn = st.radio("Beregn:", ["v₂' – hastighed af del 2", "m₁ – masse af del 1"], horizontal=True)
+    beregn = st.radio("Beregn:", ["v₂' – hastighed af del 2", "v₁' – hastighed af del 1", "m₁ – masse af del 1"], horizontal=True)
     st.divider()
 
     if beregn == "v₂' – hastighed af del 2":
@@ -313,6 +313,25 @@ elif formel == "Eksplosion / udskydning":
         KE = 0.5 * m1 * v1p**2 + 0.5 * m2 * v2p**2
         st.info(f"Frigivet kinetisk energi: {KE:.4g} J")
         st.latex(rf"v_2' = -\frac{{m_1 v_1'}}{{m_2}} = -\frac{{{m1:.6g} \cdot {v1p:.6g}}}{{{m2:.6g}}} = {v2p:.6g}\ \text{{m/s}}")
+        if st.button("📋 Gem v₂'", key="gem_eksp_v2"):
+            gem_resultat(v2p, "m/s", "v₂'")
+
+    elif beregn == "v₁' – hastighed af del 1":
+        st.markdown("**Kendt:** masse og hastighed af del 2 → Find hastighed af del 1")
+        c1, c2, c3 = st.columns(3)
+        m1  = c1.number_input("m₁ – masse af del 1 (kg)", value=2.0, min_value=1e-12, format="%.6g", key="eksp_m1b")
+        m2  = c2.number_input("m₂ – masse af del 2 (kg)", value=6.0, min_value=1e-12, format="%.6g", key="eksp_m2b")
+        v2p = c3.number_input("v₂' – hastighed af del 2 (m/s)", value=1.0, format="%.6g", key="eksp_v2b")
+        v1p = -m2 * v2p / m1
+        st.success(f"**v₁' = {v1p:.6g} m/s  (|v₁'| = {abs(v1p):.6g} m/s)**")
+        KE = 0.5 * m1 * v1p**2 + 0.5 * m2 * v2p**2
+        st.info(f"Frigivet kinetisk energi: {KE:.4g} J")
+        st.latex(
+            rf"v_1' = -\frac{{m_2 v_2'}}{{m_1}} = -\frac{{{m2:.6g} \cdot {v2p:.6g}}}{{{m1:.6g}}} = {v1p:.6g}\ \text{{m/s}}"
+        )
+        if st.button("📋 Gem v₁'", key="gem_eksp_v1"):
+            gem_resultat(abs(v1p), "m/s", "|v₁'|")
+
     else:
         c1, c2, c3 = st.columns(3)
         v1p = c1.number_input("v₁' (m/s)", value=-2.0, format="%.6g")
