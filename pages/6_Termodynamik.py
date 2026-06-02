@@ -22,6 +22,8 @@ _TERMO_FORMULAS = [
     ("Isoterm arbejde",      "W = nRT·ln(V₂/V₁)",            "Arbejde af gas – isoterm:  W = nRT·ln(V₂/V₁)"),
     ("Adiabatisk proces",    "pV^γ = konst",                  "Adiabatisk proces:  pV^γ = konst"),
     ("1. termodynamikslov",  "ΔU = Q − W",                   "1. termodynamikslov:  ΔU = Q − W"),
+    ("Intern energi (idealgas)", "U = (f/2)nRT",             "Intern energi idealgas:  U = (f/2)·n·R·T"),
+    ("Entropi",              "ΔS = Q_rev/T",                  "Entropi:  ΔS = Q_rev / T"),
     ("Carnot-virkningsgrad", "η = 1 − Tk/Tv",                "Carnot-virkningsgrad:  η = 1 − Tk/Tv"),
     ("Termisk udvidelse",    "ΔL = α·L₀·ΔT",                 "Termisk udvidelse"),
     ("Varmledning",          "Q/t = k·A·ΔT/L",               "Varmledning:  Q/t = k·A·ΔT/L"),
@@ -35,6 +37,8 @@ TERMO_TIPS = {
     "Faseovergang:  Q = m · L": "L_v (vand→damp) ≈ 2.26×10⁶ J/kg. L_f (is→vand) ≈ 3.34×10⁵ J/kg. Ingen temp.-ændring!",
     "Adiabatisk proces:  pV^γ = konst": "Q = 0. γ = Cp/Cv ≈ 1.4 for diatomisk gas. Gælder for hurtige processer.",
     "1. termodynamikslov:  ΔU = Q − W": "ΔU = Q − W. Q > 0: varme TIL systemet. W > 0: arbejde AF systemet.",
+    "Intern energi idealgas:  U = (f/2)·n·R·T": "Monoatomisk idealgas: f = 3 → U = (3/2)nRT. Diatomisk: f = 5 → U = (5/2)nRT. Cv = (f/2)R.",
+    "Entropi:  ΔS = Q_rev / T": "Isoterm: ΔS = Q/T = nR·ln(V₂/V₁). Isobar: ΔS = nCp·ln(T₂/T₁). Adiabatisk: ΔS = 0. Isochor: ΔS = nCv·ln(T₂/T₁).",
     "Carnot-virkningsgrad:  η = 1 − Tk/Tv": "η = 1 − Tk/Tv. Absolut temperatur! Max. virkningsgrad for enhver varmemaskine.",
     "Varmledning:  Q/t = k·A·ΔT/L": "k = varmeledningsevne (W/(m·K)). Fouriers lov. Stationær tilstand: samme Q/t hele vejen igennem.",
 }
@@ -506,3 +510,141 @@ elif formel == "Termisk udvidelse":
         V_ny = V0 + dV
         st.success(f"**ΔV = {dV:.6g} m³  →  nyt volumen: {V_ny:.6g} m³**")
         st.latex(rf"\Delta V = \beta V_0 \Delta T = {beta:.6g} \times 10^{{-6}} \cdot {V0:.6g} \cdot {dT:.6g} = {dV:.6g}\ \text{{m}}^3")
+
+elif formel == "Intern energi idealgas:  U = (f/2)·n·R·T":
+    st.latex(r"U = \frac{f}{2} n R T \qquad \Delta U = n C_v \Delta T \qquad C_v = \frac{f}{2}R")
+    st.info("Monoatomisk gas (He, Ar, ...): f = 3 → Cv = (3/2)R ≈ 12.47 J/(mol·K).  "
+            "Diatomisk gas (N₂, O₂, luft) ved stuetemperatur: f = 5 → Cv = (5/2)R ≈ 20.79 J/(mol·K).")
+    st.divider()
+
+    gastype = st.radio("Gastype:", ["Monoatomisk  (f = 3)", "Diatomisk  (f = 5)", "Brugerdefineret f"], horizontal=True)
+    if gastype == "Monoatomisk  (f = 3)":
+        f = 3
+    elif gastype == "Diatomisk  (f = 5)":
+        f = 5
+    else:
+        f = st.number_input("f – frihedsgrader", value=3, min_value=1, max_value=9, step=1)
+
+    Cv = (f / 2) * R
+    Cp = Cv + R
+    gamma = Cp / Cv
+    st.markdown(f"**Cv = {Cv:.4g} J/(mol·K)  |  Cp = {Cp:.4g} J/(mol·K)  |  γ = Cp/Cv = {gamma:.4g}**")
+    st.divider()
+
+    beregn_u = st.radio("Beregn:", ["U – total intern energi (J)", "ΔU – ændring (J)", "T fra U"], horizontal=True)
+
+    if beregn_u == "U – total intern energi (J)":
+        c1, c2 = st.columns(2)
+        n_u = c1.number_input("n – stofmængde (mol)", value=2.0, min_value=1e-12, format="%.6g")
+        T_u = c2.number_input("T – temperatur (K)", value=300.0, min_value=0.01, format="%.6g")
+        U = (f / 2) * n_u * R * T_u
+        st.success(f"**U = {U:.6g} J  =  {U/1000:.4g} kJ**")
+        st.latex(rf"U = \frac{{{f}}}{{2}} \cdot {n_u:.6g} \cdot {R} \cdot {T_u:.6g} = {U:.6g}\ \text{{J}}")
+
+    elif beregn_u == "ΔU – ændring (J)":
+        c1, c2, c3 = st.columns(3)
+        n_u  = c1.number_input("n – stofmængde (mol)", value=2.0, min_value=1e-12, format="%.6g")
+        T1_u = c2.number_input("T₁ – starttemperatur (K)", value=300.0, min_value=0.01, format="%.6g")
+        T2_u = c3.number_input("T₂ – sluttemperatur (K)", value=400.0, min_value=0.01, format="%.6g")
+        dU = n_u * Cv * (T2_u - T1_u)
+        st.success(f"**ΔU = {dU:.6g} J  =  {dU/1000:.4g} kJ**")
+        st.latex(rf"\Delta U = n C_v \Delta T = {n_u:.6g} \cdot {Cv:.4g} \cdot {T2_u - T1_u:.6g} = {dU:.6g}\ \text{{J}}")
+
+    else:
+        c1, c2 = st.columns(2)
+        n_u = c1.number_input("n – stofmængde (mol)", value=2.0, min_value=1e-12, format="%.6g")
+        U_u = c2.number_input("U – intern energi (J)", value=7482.0, format="%.6g")
+        T_res = U_u / ((f / 2) * n_u * R)
+        st.success(f"**T = {T_res:.6g} K  =  {T_res - 273.15:.4g} °C**")
+        st.latex(rf"T = \frac{{U}}{{\frac{{f}}{{2}} n R}} = \frac{{{U_u:.6g}}}{{\frac{{{f}}}{{2}} \cdot {n_u:.6g} \cdot {R}}} = {T_res:.6g}\ \text{{K}}")
+
+elif formel == "Entropi:  ΔS = Q_rev / T":
+    st.latex(r"\Delta S = \frac{Q_\text{rev}}{T}")
+    st.info("Entropi måler uorden. For reversible processer: ΔS = Q_rev/T.  "
+            "Adiabatisk reversibel: ΔS = 0 (isentropisk).  "
+            "For irreversible processer: ΔS > Q/T.")
+    st.divider()
+
+    proces = st.radio(
+        "Procestype:",
+        ["Isoterm (ΔT = 0)",
+         "Isobar (Δp = 0) – idealgas",
+         "Isochor (ΔV = 0) – idealgas",
+         "Adiabatisk (Q = 0)",
+         "Generel idealgas  ΔS = nCv·ln(T₂/T₁) + nR·ln(V₂/V₁)"],
+        horizontal=False,
+    )
+    st.divider()
+
+    gastype_s = st.radio("Gastype:", ["Monoatomisk  (f = 3)", "Diatomisk  (f = 5)", "Brugerdefineret f"], horizontal=True, key="s_gastype")
+    if gastype_s == "Monoatomisk  (f = 3)":
+        f_s = 3
+    elif gastype_s == "Diatomisk  (f = 5)":
+        f_s = 5
+    else:
+        f_s = st.number_input("f – frihedsgrader", value=3, min_value=1, max_value=9, step=1, key="s_f")
+
+    Cv_s = (f_s / 2) * R
+    Cp_s = Cv_s + R
+
+    if proces == "Isoterm (ΔT = 0)":
+        st.latex(r"\Delta S = \frac{Q}{T} = nR\ln\!\left(\frac{V_2}{V_1}\right)")
+        c1, c2, c3 = st.columns(3)
+        n_s  = c1.number_input("n – stofmængde (mol)", value=2.0, min_value=1e-12, format="%.6g", key="si_n")
+        T_s  = c2.number_input("T – temperatur (K, konstant)", value=300.0, min_value=0.01, format="%.6g", key="si_T")
+        mode_s = c3.radio("Givet:", ["V₂/V₁ (volumenforhold)", "Q – varme (J)"], key="si_mode")
+        st.divider()
+        if mode_s == "V₂/V₁ (volumenforhold)":
+            ratio = st.number_input("V₂/V₁", value=2.0, min_value=1e-9, format="%.6g", key="si_ratio")
+            dS = n_s * R * np.log(ratio)
+            st.success(f"**ΔS = {dS:.6g} J/K**")
+            st.latex(rf"\Delta S = nR\ln(V_2/V_1) = {n_s:.4g} \cdot {R} \cdot \ln({ratio:.4g}) = {dS:.6g}\ \text{{J/K}}")
+        else:
+            Q_s = st.number_input("Q – tilført varme (J)", value=1000.0, format="%.6g", key="si_Q")
+            dS = Q_s / T_s
+            st.success(f"**ΔS = {dS:.6g} J/K**")
+            st.latex(rf"\Delta S = \frac{{Q}}{{T}} = \frac{{{Q_s:.6g}}}{{{T_s:.6g}}} = {dS:.6g}\ \text{{J/K}}")
+
+    elif proces == "Isobar (Δp = 0) – idealgas":
+        st.latex(r"\Delta S = n C_p \ln\!\left(\frac{T_2}{T_1}\right)")
+        st.markdown(f"Cp = {Cp_s:.4g} J/(mol·K)")
+        c1, c2, c3 = st.columns(3)
+        n_s  = c1.number_input("n – stofmængde (mol)", value=2.0, min_value=1e-12, format="%.6g", key="sp_n")
+        T1_s = c2.number_input("T₁ – starttemperatur (K)", value=300.0, min_value=0.01, format="%.6g", key="sp_T1")
+        T2_s = c3.number_input("T₂ – sluttemperatur (K)", value=400.0, min_value=0.01, format="%.6g", key="sp_T2")
+        dS = n_s * Cp_s * np.log(T2_s / T1_s)
+        st.success(f"**ΔS = {dS:.6g} J/K**")
+        st.latex(rf"\Delta S = nC_p\ln(T_2/T_1) = {n_s:.4g} \cdot {Cp_s:.4g} \cdot \ln\!\left(\frac{{{T2_s:.4g}}}{{{T1_s:.4g}}}\right) = {dS:.6g}\ \text{{J/K}}")
+
+    elif proces == "Isochor (ΔV = 0) – idealgas":
+        st.latex(r"\Delta S = n C_v \ln\!\left(\frac{T_2}{T_1}\right)")
+        st.markdown(f"Cv = {Cv_s:.4g} J/(mol·K)")
+        c1, c2, c3 = st.columns(3)
+        n_s  = c1.number_input("n – stofmængde (mol)", value=2.0, min_value=1e-12, format="%.6g", key="sv_n")
+        T1_s = c2.number_input("T₁ – starttemperatur (K)", value=300.0, min_value=0.01, format="%.6g", key="sv_T1")
+        T2_s = c3.number_input("T₂ – sluttemperatur (K)", value=400.0, min_value=0.01, format="%.6g", key="sv_T2")
+        dS = n_s * Cv_s * np.log(T2_s / T1_s)
+        st.success(f"**ΔS = {dS:.6g} J/K**")
+        st.latex(rf"\Delta S = nC_v\ln(T_2/T_1) = {n_s:.4g} \cdot {Cv_s:.4g} \cdot \ln\!\left(\frac{{{T2_s:.4g}}}{{{T1_s:.4g}}}\right) = {dS:.6g}\ \text{{J/K}}")
+
+    elif proces == "Adiabatisk (Q = 0)":
+        st.latex(r"\Delta S = 0 \quad (\text{reversibel adiabatisk = isentropisk})")
+        st.success("**ΔS = 0 J/K** — ingen entropi­ændring ved reversibel adiabatisk proces.")
+        st.markdown("Gælder kun for **reversibel** adiabatisk. Irreversibel adiabatisk: ΔS > 0.")
+
+    else:
+        st.latex(r"\Delta S = nC_v\ln\!\left(\frac{T_2}{T_1}\right) + nR\ln\!\left(\frac{V_2}{V_1}\right)")
+        c1, c2 = st.columns(2)
+        n_s  = c1.number_input("n – stofmængde (mol)", value=2.0, min_value=1e-12, format="%.6g", key="sg_n")
+        c2.markdown(f"Cv = {Cv_s:.4g} J/(mol·K)")
+        cc1, cc2, cc3, cc4 = st.columns(4)
+        T1_s = cc1.number_input("T₁ (K)", value=300.0, min_value=0.01, format="%.6g", key="sg_T1")
+        T2_s = cc2.number_input("T₂ (K)", value=400.0, min_value=0.01, format="%.6g", key="sg_T2")
+        V1_s = cc3.number_input("V₁ (m³)", value=0.03, min_value=1e-12, format="%.6g", key="sg_V1")
+        V2_s = cc4.number_input("V₂ (m³)", value=0.06, min_value=1e-12, format="%.6g", key="sg_V2")
+        dS = n_s * Cv_s * np.log(T2_s / T1_s) + n_s * R * np.log(V2_s / V1_s)
+        st.success(f"**ΔS = {dS:.6g} J/K**")
+        st.latex(
+            rf"\Delta S = {n_s:.4g}\cdot{Cv_s:.4g}\cdot\ln\!\left(\frac{{{T2_s:.4g}}}{{{T1_s:.4g}}}\right)"
+            rf" + {n_s:.4g}\cdot{R}\cdot\ln\!\left(\frac{{{V2_s:.4g}}}{{{V1_s:.4g}}}\right) = {dS:.6g}\ \text{{J/K}}"
+        )

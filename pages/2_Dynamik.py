@@ -29,6 +29,7 @@ _DYN_GROUPS = [
         ("Gravitationsloven",    "F = G·m₁·m₂/r²",               "Gravitationsloven:  F = G·m₁·m₂ / r²"),
         ("Kraftmoment",          "τ = F · l",                     "Kraftmoment:  τ = F · l"),
         ("Statisk ligevægt",     "ΣF=0,  Στ=0",                   "Statisk ligevægt:  ΣF = 0 og Στ = 0"),
+        ("To-snors ophæng",      "T₁=mg·cosθ₂/sin(θ₁+θ₂)",       "To-snors ophæng:  T₁ og T₂"),
     ]),
     ("🏃 Mekanik & Bevægelse", [
         ("Impuls",               "p = m · v",                     "Impuls:  p = m · v"),
@@ -1132,3 +1133,50 @@ elif formel == "Statisk ligevægt:  ΣF = 0 og Στ = 0":
             st.info(f"**Glider** inden den tipper  (F_glide {F_glide:.4g} N < F_tip {F_tip:.4g} N)")
         else:
             st.info("Tipper og glider samtid.")
+
+elif formel == "To-snors ophæng:  T₁ og T₂":
+    st.latex(r"T_1 = \frac{mg\cos\theta_2}{\sin(\theta_1+\theta_2)} \qquad T_2 = \frac{mg\cos\theta_1}{\sin(\theta_1+\theta_2)}")
+    st.markdown(
+        "En masse **m** hænger fra loftet i to snore, der danner vinklerne **θ₁** og **θ₂** med lodret. "
+        "Fra ΣFₓ = 0: T₁sin θ₁ = T₂sin θ₂, og ΣFᵧ = 0: T₁cos θ₁ + T₂cos θ₂ = mg."
+    )
+    st.info("💡 Vinklerne er målt fra **lodret** til snoren. Hvis opgaven angiver vinklen fra vandret, trækker du den fra 90°.")
+    st.divider()
+
+    c1, c2, c3 = st.columns(3)
+    m_snor  = c1.number_input("m – masse (kg)", value=5.0, min_value=1e-12, format="%.6g", key="tsnor_m")
+    th1_deg = c2.number_input("θ₁ – vinkel fra lodret, snor 1 (°)", value=30.0, min_value=0.1, max_value=89.9, format="%.6g", key="tsnor_t1")
+    th2_deg = c3.number_input("θ₂ – vinkel fra lodret, snor 2 (°)", value=45.0, min_value=0.1, max_value=89.9, format="%.6g", key="tsnor_t2")
+
+    th1_r = np.radians(th1_deg)
+    th2_r = np.radians(th2_deg)
+    denom = np.sin(th1_r + th2_r)
+
+    if abs(denom) < 1e-12:
+        st.error("θ₁ + θ₂ = 180° → singulær (parallelle snore). Prøv andre vinkler.")
+    else:
+        mg = m_snor * G
+        T1 = mg * np.cos(th2_r) / denom
+        T2 = mg * np.cos(th1_r) / denom
+        ratio = T2 / T1
+
+        col1, col2, col3 = st.columns(3)
+        col1.metric("T₁", f"{T1:.4g} N")
+        col2.metric("T₂", f"{T2:.4g} N")
+        col3.metric("T₂/T₁", f"{ratio:.4g}")
+
+        st.latex(
+            rf"T_1 = \frac{{mg\cos\theta_2}}{{\sin(\theta_1+\theta_2)}} "
+            rf"= \frac{{{mg:.4g}\cdot\cos({th2_deg:.4g}°)}}{{\sin({th1_deg:.4g}°+{th2_deg:.4g}°)}} = {T1:.4g}\ \text{{N}}"
+        )
+        st.latex(
+            rf"T_2 = \frac{{mg\cos\theta_1}}{{\sin(\theta_1+\theta_2)}} "
+            rf"= \frac{{{mg:.4g}\cdot\cos({th1_deg:.4g}°)}}{{\sin({th1_deg:.4g}°+{th2_deg:.4g}°)}} = {T2:.4g}\ \text{{N}}"
+        )
+        st.markdown(f"**Kontrol:** T₁cosθ₁ + T₂cosθ₂ = {T1*np.cos(th1_r) + T2*np.cos(th2_r):.4g} N  ≈  mg = {mg:.4g} N")
+
+        col_g1, col_g2 = st.columns(2)
+        if col_g1.button("📋 Gem T₁", key="gem_T1_snor"):
+            gem_resultat(T1, "N", "T₁")
+        if col_g2.button("📋 Gem T₂", key="gem_T2_snor"):
+            gem_resultat(T2, "N", "T₂")
