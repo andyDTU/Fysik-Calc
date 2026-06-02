@@ -448,7 +448,7 @@ elif formel == "Lorentzkraft:  F = q · v · B":
     elif beregn == "v – hastighed (m/s)":
         c1, c2, c3 = st.columns(3)
         F = c1.number_input("F (N)", value=1.6e-14, format="%.6g")
-        q = c2.number_input("q (C)", value=1.6e-19, min_value=1e-12, format="%.6g")
+        q = c2.number_input("q (C)", value=1.6e-19, min_value=1e-30, format="%.6g")
         B = c3.number_input("B (T)", value=0.1, min_value=1e-12, format="%.6g")
         sin_t = np.sin(np.radians(theta))
         if abs(sin_t) < 1e-12:
@@ -460,7 +460,7 @@ elif formel == "Lorentzkraft:  F = q · v · B":
     else:
         c1, c2, c3 = st.columns(3)
         F = c1.number_input("F (N)", value=1.6e-14, format="%.6g")
-        q = c2.number_input("q (C)", value=1.6e-19, min_value=1e-12, format="%.6g")
+        q = c2.number_input("q (C)", value=1.6e-19, min_value=1e-30, format="%.6g")
         v = c3.number_input("v (m/s)", value=1e6, min_value=1e-12, format="%.6g")
         sin_t = np.sin(np.radians(theta))
         if abs(sin_t) < 1e-12:

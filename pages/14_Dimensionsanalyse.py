@@ -234,11 +234,8 @@ elif formel == "Pi-grupper (Buckingham Π)":
             if n_pi <= 0:
                 st.warning("Ingen dimensionsløse grupper (alle variable er dimensionelt uafhængige).")
             else:
-                U, s, Vt = np.linalg.svd(A.T)
-                tol = 1e-9
-                nullspace = Vt[np.abs(s) < tol if len(s) >= Vt.shape[0] else np.ones(Vt.shape[0], dtype=bool)]
-                if nullspace.shape[0] == 0:
-                    nullspace = Vt[k_dims:]
+                U, s, Vt = np.linalg.svd(A.T, full_matrices=True)
+                nullspace = Vt[k_dims:]
 
                 pi_idx = 1
                 for vec in nullspace:
