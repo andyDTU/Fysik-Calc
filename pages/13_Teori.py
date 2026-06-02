@@ -488,50 +488,401 @@ QUESTIONS = [
         "correct": "C",
         "explain": "Doppler-effekt: f' = f·v/(v−v_s) > f når kilden nærmer sig (v_s > 0). Bølgefronterne 'presses' sammen foran kilden → kortere bølgelængde → højere frekvens. Når ambulancen er passeret: f' = f·v/(v+v_s) < f → lavere frekvens.",
     },
+
+    # ── Rotation ──────────────────────────────────────────────────────────────────
+    {
+        "emne": "Rotation",
+        "q": "En massiv cylinder og en tynd ring har samme masse m og radius r. Hvem accelererer hurtigst ned ad en skråning (ruller uden glidning)?",
+        "options": ["A) Ringen — den er lettere ved kanten", "B) Cylinderen — I = ½mr² < mr²", "C) De accelererer ens — samme masse og radius", "D) Ringen — den har mere potentiel energi", "E) Afhænger af skråningens vinkel"],
+        "correct": "B",
+        "explain": "Acceleration a = g·sinθ/(1 + I/(mr²)). Cylinder: I=½mr² → a = g·sinθ/(1+½) = ⅔g·sinθ. Ring: I=mr² → a = g·sinθ/(1+1) = ½g·sinθ. Lavere I → mere kinetisk energi i translation → hurtigere. Massen falder ud.",
+    },
+    {
+        "emne": "Rotation",
+        "q": "En danseres arme trækkes ind mod kroppen mens hun snurrer frit (ingen ydre kraftmoment). Hvad sker med hendes vinkelhastighed?",
+        "options": ["A) Falder — hun mister kinetisk energi", "B) Er uændret — ingen ydre kraftmoment", "C) Stiger — impulsmoment L = Iω er bevaret, I falder", "D) Stiger kun hvis hun trækker armene LANGSOMT ind", "E) Afhænger af armmassen"],
+        "correct": "C",
+        "explain": "L = Iω = konstant (intet ydre kraftmoment). Armene ind → I falder → ω stiger for at bevare L. Kinetisk energi Ek = L²/(2I) stiger faktisk — muskler udfører arbejde ved at trykke ind mod centrifugalkraften.",
+    },
+    {
+        "emne": "Rotation",
+        "q": "Hvad er Steiners sætning (parallelakseteoret)?",
+        "options": ["A) I = ∫r² dm — definition af inertimoment", "B) I = I_cm + md² — inertimoment om parallel akse", "C) τ = Iα — rotationsanalog til F=ma", "D) L = Iω — impulsmoment", "E) I_total = I₁ + I₂ — sammensætning af inertimoment"],
+        "correct": "B",
+        "explain": "Steiners sætning: I_ny = I_cm + m·d², hvor d er afstanden fra massemidtpunktsaksens til den nye akse. I_cm er altid mindst — enhver anden parallel akse giver større I. Bruges når rotationscentret ikke er i massemidtpunktet.",
+    },
+    {
+        "emne": "Rotation",
+        "q": "En stang (masse m, længde L) roterer om sin ene ende. Hvad er dens inertimoment?",
+        "options": ["A) mL²/12 (om midten)", "B) mL²/6", "C) mL²/3 (om enden)", "D) mL²/2", "E) mL²"],
+        "correct": "C",
+        "explain": "Om midten: I_cm = mL²/12. Om enden (afstand d = L/2 fra midten): Steiner → I = mL²/12 + m(L/2)² = mL²/12 + mL²/4 = mL²/3. Husk: om enden = 4× om midten.",
+    },
+    {
+        "emne": "Rotation",
+        "q": "Et hjul decelererer fra 300 RPM til 0 på 5 sekunder med konstant vinkelacceleration. Hvad er α?",
+        "options": ["A) 60 rad/s²", "B) 6.28 rad/s²", "C) 3.14 rad/s²", "D) 10π/3 rad/s² ≈ 10.47 rad/s²", "E) 300 rad/s²"],
+        "correct": "B",
+        "explain": "ω₀ = 300·2π/60 = 10π rad/s ≈ 31.4 rad/s. α = (ω−ω₀)/t = (0−10π)/5 = −2π rad/s² ≈ −6.28 rad/s². Husk at omregne RPM → rad/s: ω = RPM·2π/60.",
+    },
+    {
+        "emne": "Rotation",
+        "q": "En bold rulles (uden glidning) op ad en bakke. Hvor meget af den samlede kinetiske energi udgøres af rotation (massiv kugle, I = 2mr²/5)?",
+        "options": ["A) 1/2 (50%)", "B) 2/7 ≈ 28.6%", "C) 1/3 (33.3%)", "D) 2/5 (40%)", "E) 1/7 ≈ 14.3%"],
+        "correct": "B",
+        "explain": "E_rot = ½Iω² = ½·(2mr²/5)·(v/r)² = mv²/5. E_trans = ½mv². E_total = ½mv² + mv²/5 = 7mv²/10. Andel = (mv²/5)/(7mv²/10) = (1/5)/(7/10) = 2/7 ≈ 28.6%. Resten (5/7) er translationsenergi.",
+    },
+    {
+        "emne": "Rotation",
+        "q": "To pladser er på et drejeplatform: A er 1 m fra centrum, B er 2 m fra centrum. Platformet roterer med konstant ω. Hvad gælder?",
+        "options": ["A) A og B har samme lineær hastighed", "B) A og B har samme vinkelacceleration", "C) B har dobbelt så stor centripetalkraft som A (samme masse)", "D) B har dobbelt så stor vinkelhastighed", "E) A har større centripetalkraft end B"],
+        "correct": "C",
+        "explain": "v = ωr → v_B = 2v_A. F_c = mω²r → F_c,B = mω²·2r = 2·mω²·r = 2·F_c,A. Vinkelhastighed ω er ens for alle punkter på et fast legeme. Lineær hastighed og centripetalkraft er proportional med r.",
+    },
+    {
+        "emne": "Rotation",
+        "q": "En kugles inertimoment er I = 2mr²/5. Den er sat til at rotere om en akse der tangerer overfladen. Find I om denne akse.",
+        "options": ["A) 2mr²/5", "B) 3mr²/5", "C) 7mr²/5", "D) mr²", "E) 5mr²/2"],
+        "correct": "C",
+        "explain": "Steiner: d = r (afstand fra centrum til tangentakse). I = I_cm + mr² = 2mr²/5 + mr² = 2mr²/5 + 5mr²/5 = 7mr²/5.",
+    },
+
+    # ── Svingninger ───────────────────────────────────────────────────────────────
+    {
+        "emne": "Svingninger",
+        "q": "Et fjedermasse-system har T = 2 s. Hvad sker med perioden hvis massen fordobles OG fjederkonstanten halveres?",
+        "options": ["A) T fordobles til 4 s", "B) T er uændret", "C) T firedobles til 8 s", "D) T øges med faktor 2 til 4 s", "E) T øges med faktor √2 til 2.83 s"],
+        "correct": "A",
+        "explain": "T = 2π√(m/k). Ny T' = 2π√(2m/(k/2)) = 2π√(4m/k) = 2·2π√(m/k) = 2T = 4 s. Fordoblet m giver faktor √2 opad, halveret k giver yderligere faktor √2 opad → samlet faktor 2.",
+    },
+    {
+        "emne": "Svingninger",
+        "q": "Et simpelt pendul svinger med T = 2 s på Jorden (g = 9.82 m/s²). Hvor lang er pendlet?",
+        "options": ["A) L ≈ 0.5 m", "B) L ≈ 0.99 m (≈ 1 m)", "C) L ≈ 2 m", "D) L ≈ 4 m", "E) Afhænger af masse"],
+        "correct": "B",
+        "explain": "T = 2π√(L/g) → L = g·T²/(4π²) = 9.82·4/(4π²) = 39.28/39.48 ≈ 0.994 m. Et sekundpendul (T=2 s) har L ≈ 1 m — dette er faktisk definitionen af 'en meter' historisk set!",
+    },
+    {
+        "emne": "Svingninger",
+        "q": "En harmonisk oscillator starter ved x = A (fuld amplitude, v = 0). Hvornår er den kinetiske energi lig den potentielle energi?",
+        "options": ["A) Aldrig — de veksler asymmetrisk", "B) Kun i x = 0", "C) Ved x = A/√2 (≈ 0.707A)", "D) Ved x = A/2", "E) Afhænger af fjederkonstanten"],
+        "correct": "C",
+        "explain": "Ek = Ep: ½mv² = ½kx². Total E = ½kA². Ek = ½k(A²−x²), Ep = ½kx². Ek = Ep → A²−x² = x² → x = A/√2. Bemærk: dette er IKKE ved x = A/2. Mange forveksler dette.",
+    },
+    {
+        "emne": "Svingninger",
+        "q": "Hvad er resonans i et dæmpet svingningssystem?",
+        "options": ["A) Systemet svinger med maksimal frekvens", "B) Dæmpningskonstanten er nul", "C) Amplitude er maksimal når ω_drive ≈ ω₀ (egenfrekvens)", "D) Svingningen stopper pludseligt", "E) Frekvensen dobbelt sig"],
+        "correct": "C",
+        "explain": "Resonans opstår når pådrivningsfrekvensen ω nærmer sig egenfrekvensen ω₀ = √(k/m). Amplituden er maksimal ved resonans. Jo lavere dæmpning, desto skarpere og højere resonanspeak. Bruges i MR-scanning, brodesign (undgå!), musikinstrumenter.",
+    },
+    {
+        "emne": "Svingninger",
+        "q": "To fjedre med k₁ = k₂ = 100 N/m kobles i serie. Hvad er den effektive fjederkonstant?",
+        "options": ["A) 200 N/m", "B) 100 N/m", "C) 50 N/m", "D) 141 N/m", "E) 70.7 N/m"],
+        "correct": "C",
+        "explain": "Serie: 1/k_eff = 1/k₁ + 1/k₂ = 1/100 + 1/100 = 2/100 → k_eff = 50 N/m. Serie giver blødere fjeder (lavere k). Parallel: k_eff = k₁ + k₂ = 200 N/m (stivere). Serie og parallel er modsat hinanden ift. modstande!",
+    },
+    {
+        "emne": "Svingninger",
+        "q": "Et simpelt pendul svinger med amplitude 5°. Fordobles amplituden til 10°. Hvad sker med perioden?",
+        "options": ["A) T fordobles", "B) T øges med √2", "C) T er (næsten) uændret — gælder for små vinkler", "D) T halveres", "E) T afhænger af amplitude — ingen klar regel"],
+        "correct": "C",
+        "explain": "T = 2π√(L/g) er uafhængig af amplitude for KLEINE vinkler (< ~15°). Begge vinkler er inden for det lineære regime. For store vinkler er der en lille korrektion, men den er negligibel her. Pendlets periode afhænger af L og g, ikke amplitude.",
+    },
+    {
+        "emne": "Svingninger",
+        "q": "En masse på en fjeder: v = 0 ved x = +A og x = −A. Hvad er v i x = 0?",
+        "options": ["A) v = 0 altid", "B) v = A·ω (maksimal)", "C) v = A·ω/2", "D) v = √(kA²/m)", "E) B og D er ens — begge korrekte"],
+        "correct": "E",
+        "explain": "v_max = A·ω = A·√(k/m). Fra energibevarelse: ½mv_max² = ½kA² → v_max = A√(k/m) = Aω. Begge svar er korrekte og ækvivalente. v_max opstår i ligevægtspositionen x = 0 hvor al energi er kinetisk.",
+    },
+
+    # ── Relativitetsteori ─────────────────────────────────────────────────────────
+    {
+        "emne": "Relativitetsteori",
+        "q": "En raket rejser forbi Jorden med v = 0.8c. Hvad er Lorentz-faktoren γ?",
+        "options": ["A) γ = 0.6", "B) γ = 0.8", "C) γ = 1.25", "D) γ = 1.67", "E) γ = 2.0"],
+        "correct": "D",
+        "explain": "γ = 1/√(1−v²/c²) = 1/√(1−0.64) = 1/√0.36 = 1/0.6 = 5/3 ≈ 1.667. Husk: γ ≥ 1 altid, og γ → ∞ når v → c. ved v = 0.8c: √(1−0.64) = √0.36 = 0.6, ikke 0.8.",
+    },
+    {
+        "emne": "Relativitetsteori",
+        "q": "Et ur om bord på en raket (v = 0.6c) tæller 10 s. Hvad registrerer en stationær observatør?",
+        "options": ["A) 8 s (kortere — bevægelse forkurter tid)", "B) 10 s (uændret)", "C) 12.5 s (længere — tidsudvidelse)", "D) 6 s", "E) Afhænger af om raketten accelererer"],
+        "correct": "C",
+        "explain": "γ = 1/√(1−0.36) = 1/0.8 = 1.25. Stationær tid Δt = γ·Δt₀ = 1.25·10 = 12.5 s. Bevægende ure GÅR LANGSOMMERE set fra en stationær observatør. Δt₀ er egentid (målt i rakettens referencesystem).",
+    },
+    {
+        "emne": "Relativitetsteori",
+        "q": "Et tog med hvilelængde L₀ = 100 m bevæger sig med v = 0.8c. Hvad er togenes observerede længde for en stationær person?",
+        "options": ["A) 100 m (uændret)", "B) 80 m", "C) 60 m", "D) 125 m", "E) 166.7 m"],
+        "correct": "C",
+        "explain": "Længdekontraktion: L = L₀/γ = 100/1.667 = 60 m. Objekter kontraheres i bevægelsesretningen. γ = 1/√(1−0.64) = 1/0.6 = 5/3. L = 100·0.6 = 60 m. Kun i bevægelsesretningen — tværgående dimensioner er uændrede.",
+    },
+    {
+        "emne": "Relativitetsteori",
+        "q": "Hvad er hvilemasse­energien for en elektron (m_e = 9.11×10⁻³¹ kg)?",
+        "options": ["A) 8.19×10⁻¹⁴ J = 0.511 MeV", "B) 1.60×10⁻¹⁹ J = 1 eV", "C) 938 MeV (protonenergi)", "D) 0 — elektroner er masseløse", "E) 1 J"],
+        "correct": "A",
+        "explain": "E₀ = m_e·c² = 9.11×10⁻³¹·(3×10⁸)² = 8.20×10⁻¹⁴ J. I eV: 8.20×10⁻¹⁴/1.602×10⁻¹⁹ = 511 000 eV = 0.511 MeV. Dette er et vigtigt grundtal i partikel­fysik.",
+    },
+    {
+        "emne": "Relativitetsteori",
+        "q": "Kan to partikler, der begge bevæger sig med 0.7c (men i modsatte retninger), 'se' hinanden med en relativ hastighed større end c?",
+        "options": ["A) Ja, relativ hastighed = 1.4c", "B) Nej, relativistisk hastighedsaddition giver v_rel < c", "C) Kun hvis de har forskellige masser", "D) Ja, op til 2c er tilladt", "E) Spørgsmålet giver ikke mening"],
+        "correct": "B",
+        "explain": "Relativistisk hastighedsaddition: v_rel = (v₁+v₂)/(1+v₁v₂/c²) = (0.7+0.7)c/(1+0.49) = 1.4c/1.49 ≈ 0.94c. Altid < c. Klassisk ville give 1.4c, men det er forkert. Ingenting kan overskride lyshastighed i noget referencesystem.",
+    },
+    {
+        "emne": "Relativitetsteori",
+        "q": "En partikel har kinetisk energi Ek = 3m₀c². Hvad er dens totale energi E?",
+        "options": ["A) E = 3m₀c²", "B) E = 4m₀c²", "C) E = √10·m₀c²", "D) E = 3.5m₀c²", "E) E = 9m₀c²"],
+        "correct": "B",
+        "explain": "E_total = E_hvilemasse + Ek = m₀c² + 3m₀c² = 4m₀c². Eller: E = γm₀c² → γ = 4. Kinetisk energi i relativitetsteori: Ek = (γ−1)m₀c², ikke ½mv².",
+    },
+    {
+        "emne": "Relativitetsteori",
+        "q": "Hvornår er den relativistiske kinetisk energi Ek = (γ−1)m₀c² en god approksimation til ½mv²?",
+        "options": ["A) Aldrig — de er altid forskellige", "B) Kun for masseløse partikler", "C) Når v << c (ikke-relativistisk grænse)", "D) Når v = c/2", "E) Kun for elektroner"],
+        "correct": "C",
+        "explain": "For v << c: γ ≈ 1 + v²/(2c²), så Ek = (γ−1)m₀c² ≈ ½m₀v². Den klassiske formel er en approksimation der er valid når v/c << 1 (typisk < 1%). For daglige hastigheder er fejlen negligibel.",
+    },
+
+    # ── Energi ────────────────────────────────────────────────────────────────────
+    {
+        "emne": "Energi",
+        "q": "En klods (m=2 kg) trykkes 10 cm ind i en fjeder (k=500 N/m) og slippes. Hvad er klodsen hastighed når fjederen er i naturlig længde?",
+        "options": ["A) 0.5 m/s", "B) 1.0 m/s", "C) 1.58 m/s", "D) 2.24 m/s", "E) 5.0 m/s"],
+        "correct": "C",
+        "explain": "Energibevarelse: ½kx² = ½mv². v = x·√(k/m) = 0.10·√(500/2) = 0.10·√250 = 0.10·15.81 = 1.581 m/s. Alternativt: v = Aω = A·√(k/m) — det er SHM-sammenhængen.",
+    },
+    {
+        "emne": "Energi",
+        "q": "Hvad er effektiviteten af en ideel Carnot-maskine der arbejder mellem Tv = 600 K og Tk = 300 K?",
+        "options": ["A) 100% — ideel maskine", "B) 75%", "C) 50%", "D) 25%", "E) Afhænger af kølemiddel"],
+        "correct": "C",
+        "explain": "η_Carnot = 1 − Tk/Tv = 1 − 300/600 = 1 − 0.5 = 50%. Ingen virkelig maskine kan nå 100%. Carnot-effektiviteten er den teoretisk maksimale — uanset konstruktion. Vigtig: brug altid KELVIN, ikke Celsius!",
+    },
+    {
+        "emne": "Energi",
+        "q": "En bold kastes op med starthastighed v₀. Hvad er boldens mekaniske energi i toppunktet (ingen luftmodstand)?",
+        "options": ["A) 0 — al kinetisk energi er tabt", "B) ½mv₀² (bevaret)", "C) mgh_max (kun potentiel)", "D) B og C er ens — begge korrekte", "E) Afhænger af masse"],
+        "correct": "D",
+        "explain": "Mekanisk energi bevares: E_total = ½mv₀² = mgh_max. I toppunktet er al energi potentiel: E = mgh_max = ½mv₀². Begge udtryk er ens og korrekte. Vælg det der er nemmest at bruge i den konkrete opgave.",
+    },
+    {
+        "emne": "Energi",
+        "q": "Hvad gælder for effekten P = dW/dt ved konstant hastighed v mod en konstant kraft F?",
+        "options": ["A) P = F²/v", "B) P = F·v", "C) P = ½mv²/t", "D) P = F·v²", "E) P = 0 da acceleration er nul"],
+        "correct": "B",
+        "explain": "P = dW/dt = F·ds/dt = F·v. Ved konstant v og konstant F (fx bil i konstant fart): P = F·v. Eksempel: bil 1000 N modstand, 30 m/s → P = 30 kW. Acceleration er nul, men motoren udfører stadig arbejde mod modstanden.",
+    },
+    {
+        "emne": "Energi",
+        "q": "En pendul svinger i luftmodstand (dæmpet). Hvad sker med dens mekaniske energi over tid?",
+        "options": ["A) Bevares — energibevarelse gælder altid", "B) Forøges — luften tilføjer energi", "C) Falder — energi dissiperes til varme", "D) Bevares hvis svingningsamplituden er lille", "E) Fluktuerer op og ned"],
+        "correct": "C",
+        "explain": "Med luftmodstand (ikke-konservativ kraft) bevares mekanisk energi IKKE. Energi overføres til termisk energi i luften. Amplitude falder eksponentielt: A(t) = A₀·e^(−bt/2m). Total energi E = E₀·e^(−bt/m) falder kontinuerligt.",
+    },
+
+    # ── Elektricitet ──────────────────────────────────────────────────────────────
+    {
+        "emne": "Elektricitet",
+        "q": "Tre modstande R₁=R₂=R₃=6Ω er koblet i parallelforbindelse. Hvad er den samlede modstand?",
+        "options": ["A) 18 Ω", "B) 6 Ω", "C) 3 Ω", "D) 2 Ω", "E) 1 Ω"],
+        "correct": "D",
+        "explain": "Parallel: 1/R = 1/6 + 1/6 + 1/6 = 3/6 = 1/2 → R = 2Ω. For n identiske modstande R i parallel: R_eff = R/n = 6/3 = 2Ω. Parallelforbindelses samlede modstand er ALTID mindre end den mindste enkeltmodstand.",
+    },
+    {
+        "emne": "Elektricitet",
+        "q": "En kondensator C er ladet til spænding U. Hvad er den lagrede energi?",
+        "options": ["A) E = CU", "B) E = ½CU", "C) E = ½CU²", "D) E = CU²", "E) E = C²U"],
+        "correct": "C",
+        "explain": "E = ½CU² = ½Q²/C = Q²/(2C). Faktoren ½ skyldes at ladningen opbygges gradvist — man kan ikke blot gange Q med U, da U varierer under opladningen. Sammenlign: ½kx² for fjeder, ½mv² for kinetisk energi.",
+    },
+    {
+        "emne": "Elektricitet",
+        "q": "Et elektron (q = −e) bevæger sig ind i et magnetfelt B vinkelret på sin bevægelsesvej. Hvad sker der?",
+        "options": ["A) Elektronens fart aftager", "B) Elektronen bevæger sig i en ret linje", "C) Elektronen bevæger sig i en cirkel med konstant fart", "D) Elektronen accelereres parallelt med B", "E) Elektronen stopper"],
+        "correct": "C",
+        "explain": "Lorentz-kraften F = qv×B er altid vinkelret på v → ingen arbejde → fart konstant. Kraften er centripetal → cirkulær bevægelse. Radius: r = mv/(|q|B). For elektroner: meget lille radius pga. lille masse. Bruges i massespektrometer og cyklotroner.",
+    },
+    {
+        "emne": "Elektricitet",
+        "q": "Ohms lov gælder for en resistor. Fordobles spændingen U over resistoren, hvad sker med effektforbruget P?",
+        "options": ["A) P fordobles", "B) P firedobles", "C) P halveres", "D) P er uændret", "E) P øges med √2"],
+        "correct": "B",
+        "explain": "P = U²/R. Fordobles U: P_ny = (2U)²/R = 4U²/R = 4P. Kvadratisk sammenhæng! Alternativt: P = UI = U·(U/R) = U²/R. Vigtig i elinstallation: dobbelt spænding = fire gange varmeudvikling.",
+    },
+    {
+        "emne": "Elektricitet",
+        "q": "Hvad er den elektriske feltstyrke E midt imellem to parallelle plader (+Q og −Q) med areal A og afstand d?",
+        "options": ["A) E = Q/(ε₀A), rettet fra + til −", "B) E = Q·d/(ε₀A)", "C) E = 0 midt imellem", "D) E = kQ/d²", "E) E = Q/(2ε₀A) fra hver plade"],
+        "correct": "A",
+        "explain": "For parallelplader: E = σ/ε₀ = Q/(ε₀A), jævnt fordelt og rettet fra + til −. Feltet UDENFOR pladerne er (næsten) nul. Spænding: U = E·d = Qd/(ε₀A). Kapacitans: C = Q/U = ε₀A/d.",
+    },
+
+    # ── Bølger ────────────────────────────────────────────────────────────────────
+    {
+        "emne": "Bølger",
+        "q": "Et lys med λ = 500 nm går fra luft ind i glas med n = 1.5. Hvad sker med bølgelængde og frekvens?",
+        "options": ["A) Begge ændres", "B) Begge er uændret", "C) λ falder til 333 nm, f er uændret", "D) f falder, λ er uændret", "E) λ stiger, f falder"],
+        "correct": "C",
+        "explain": "f er bestemt af kilden og ændres ikke (hvad enten lys passerer grænse). λ = v/f, og v_glas = c/n = c/1.5. Ny λ = λ_luft/n = 500/1.5 = 333 nm. v og λ ændres — f bevares. Dette er analogt til lydbølger der passerer fra luft til vand.",
+    },
+    {
+        "emne": "Bølger",
+        "q": "En stående bølge på en streng (fasthæftet i begge ender, L = 60 cm) svinger i 3. harmoniske. Hvad er bølgelængden?",
+        "options": ["A) λ = 120 cm", "B) λ = 60 cm", "C) λ = 40 cm", "D) λ = 30 cm", "E) λ = 20 cm"],
+        "correct": "C",
+        "explain": "For n-te harmoniske: L = n·λ/2 → λ = 2L/n. N=3: λ = 2·60/3 = 40 cm. 1. harmoniske (grundtone): λ = 120 cm. 2. harmoniske: λ = 60 cm. 3. harmoniske: λ = 40 cm. Antallet af buer = n.",
+    },
+    {
+        "emne": "Bølger",
+        "q": "Youngs dobbeltspalteforsøg: afstanden mellem spalter fordobles (d→2d), alt andet uændret. Hvad sker med afstanden mellem maksima på skærmen?",
+        "options": ["A) Dobbelt afstand", "B) Halveret afstand", "C) Uændret", "D) Fire gange afstand", "E) √2 gange afstand"],
+        "correct": "B",
+        "explain": "y_m = mλL/d. Fordobles d: y_m' = mλL/(2d) = y_m/2. Tættere spalter → wider interferensmønster; bredere spalter → snævrere mønster. Omvendt proportionalt.",
+    },
+
+    # ── Atomfysik ─────────────────────────────────────────────────────────────────
+    {
+        "emne": "Atomfysik",
+        "q": "Hvad er halvlevetiden for et stof hvis efter 3 halvlevetider er 12.5% tilbage?",
+        "options": ["A) Dette er inkonsistent — det burde være 25%", "B) Det stemmer — 12.5% = (½)³ = ½³", "C) Der er gået 4 halvlevetider", "D) Afhænger af det specifikke stof", "E) T½ = 3 × den observerede tid"],
+        "correct": "B",
+        "explain": "N/N₀ = (½)^n, n = antal halvlevetider. (½)³ = 1/8 = 12.5%. Det stemmer perfekt med 3 halvlevetider. Den samlede tid er 3·T½. Eksempel: T½ = 10 år → 30 år → 12.5% tilbage.",
+    },
+    {
+        "emne": "Atomfysik",
+        "q": "En foton har energi E = 3 eV. Hvad er dens bølgelængde?",
+        "options": ["A) λ ≈ 100 nm (ultraviolet)", "B) λ ≈ 414 nm (violet synligt lys)", "C) λ ≈ 620 nm (rødt lys)", "D) λ ≈ 1000 nm (infrarødt)", "E) λ ≈ 0.1 nm (røntgen)"],
+        "correct": "B",
+        "explain": "λ = hc/E. E = 3 eV = 3·1.602×10⁻¹⁹ = 4.81×10⁻¹⁹ J. λ = (6.626×10⁻³⁴·3×10⁸)/(4.81×10⁻¹⁹) = 4.13×10⁻⁷ m ≈ 413 nm. Violet synligt lys (380-450 nm). Husk: synligt lys 400-700 nm, 3 eV ≈ violet.",
+    },
 ]
 
-# ── Emne-filter ────────────────────────────────────────────────────────────────
-EMNER = ["Alle"] + sorted(list({q["emne"] for q in QUESTIONS}))
-emne_filter = st.radio("Vis emne:", EMNER, horizontal=True, key="teori_emne")
+EKSAMENSTRAP = [
+    {
+        "trap": "Kelvin vs. Celsius i gasformler",
+        "fejl": "pV = nRT med T i Celsius → alt for småt resultat eller division med ca. 20 i stedet for 293.",
+        "ret": "T i formler er ALTID Kelvin. K = °C + 273.15. Typisk stuetemperatur: 20°C = 293.15 K.",
+        "emne": "Termodynamik",
+    },
+    {
+        "trap": "km/h vs. m/s i kinematik",
+        "fejl": "Indsæt 90 i SUVAT i stedet for 25 m/s → bremseafstand 11× for stor.",
+        "ret": "v [m/s] = v [km/h] / 3.6. Eksamen angiver gerne km/h. Tjek altid enheder FØR beregning.",
+        "emne": "Kinematik",
+    },
+    {
+        "trap": "Glemme rotationsenergi ved rulning",
+        "fejl": "Brug kun E_kin = ½mv² for en rullende bold/cylinder — ignorerer ½Iω².",
+        "ret": "Rulning: E_total = ½mv² + ½Iω² = ½mv²(1 + I/(mr²)). Kugle: faktor 7/5, cylinder: faktor 3/2.",
+        "emne": "Rotation",
+    },
+    {
+        "trap": "v_rms skalerer med √T, ikke T",
+        "fejl": "T fordobles → v_rms fordobles. Forkert! v_rms ∝ √T.",
+        "ret": "v_rms = √(3RT/M). T×4 → v_rms×2. T×2 → v_rms×√2 ≈ 1.41. Eksamen tester dette direkte.",
+        "emne": "Termodynamik",
+    },
+    {
+        "trap": "Centripetalkraft som 'ekstra kraft'",
+        "fejl": "Tegne centripetalkraft F_c som en selvstændig pil på kraftdiagrammet.",
+        "ret": "F_c = mv²/r er NETTOKRAFTEN mod centrum — summen af alle reelle kræfter. Ikke en ny kraft.",
+        "emne": "Dynamik",
+    },
+    {
+        "trap": "Bremseafstand ∝ v² (ikke v)",
+        "fejl": "Fordoblet hastighed → fordoblet bremseafstand.",
+        "ret": "s = v₀²/(2a) ∝ v₀². Fordoblet v₀ → firedoblet bremseafstand! Det er derfor 130 km/h er farligere end 90 km/h.",
+        "emne": "Kinematik",
+    },
+    {
+        "trap": "Statisk friktion er IKKE altid μ_s·N",
+        "fejl": "Sætte f = μ_s·N selvom legemet er i hvile under en lille kraft.",
+        "ret": "Statisk friktion matcher den påvirkte kraft: f = F_ydre (op til μ_s·N). Kun VED grænsen er f = μ_s·N.",
+        "emne": "Dynamik",
+    },
+    {
+        "trap": "Energi/effekt i kondensator: E = ½CU², ikke CU",
+        "fejl": "E = CU (mangler faktor ½).",
+        "ret": "E = ½CU² = Q²/(2C). Faktoren ½ skyldes gradvis opladning — parallelt med ½kx² (fjeder) og ½mv².",
+        "emne": "Elektricitet",
+    },
+    {
+        "trap": "Tidsudvidelse: bevægende ur GÅR LANGSOMT",
+        "fejl": "Tro at γ komprimerer (forkorter) den observerede tid.",
+        "ret": "Δt = γ·Δt₀ ≥ Δt₀. Stationær observatør måler LÆNGERE tid. Bevægende ure tikker langsommere.",
+        "emne": "Relativitetsteori",
+    },
+    {
+        "trap": "h_min for loop = 2.5r, ikke 2r",
+        "fejl": "h_min = 2r (sætte al energi til potentiel energi i toppen, glemme kinetisk energi i toppen).",
+        "ret": "I toppen kræves v_top ≥ √(gr) (N≥0). Energibevarelse: mgh = ½m(gr) + mg(2r) → h = 5r/2 = 2.5r.",
+        "emne": "Dynamik",
+    },
+]
 
-filtrerede = QUESTIONS if emne_filter == "Alle" else [q for q in QUESTIONS if q["emne"] == emne_filter]
+# ── Faner: Spørgsmål / Eksamenstrap ───────────────────────────────────────────
+tab_spg, tab_trap = st.tabs([f"🧠 Spørgsmål ({len(QUESTIONS)})", "⚠️ Eksamenstrap (top 10)"])
 
-# ── Session state til "Vis svar" ───────────────────────────────────────────────
-if "teori_revealed" not in st.session_state:
-    st.session_state["teori_revealed"] = set()
+with tab_spg:
+    EMNER = ["Alle"] + sorted(list({q["emne"] for q in QUESTIONS}))
+    emne_filter = st.radio("Vis emne:", EMNER, horizontal=True, key="teori_emne")
 
-n_revealed = sum(
-    1 for i, q in enumerate(filtrerede)
-    if f"{q['emne']}_{i}_{emne_filter}" in st.session_state["teori_revealed"]
-)
+    filtrerede = QUESTIONS if emne_filter == "Alle" else [q for q in QUESTIONS if q["emne"] == emne_filter]
 
-col_info, col_reset = st.columns([6, 1])
-col_info.markdown(f"**{len(filtrerede)} spørgsmål** — {n_revealed} svar åbnet")
-if col_reset.button("↺ Nulstil", use_container_width=True):
-    st.session_state["teori_revealed"] = set()
-    st.rerun()
+    if "teori_revealed" not in st.session_state:
+        st.session_state["teori_revealed"] = set()
 
-st.divider()
+    n_revealed = sum(
+        1 for i, q in enumerate(filtrerede)
+        if f"{q['emne']}_{i}_{emne_filter}" in st.session_state["teori_revealed"]
+    )
 
-# ── Spørgsmålskort ─────────────────────────────────────────────────────────────
-for i, q in enumerate(filtrerede):
-    q_id = f"{q['emne']}_{i}_{emne_filter}"
-    revealed = q_id in st.session_state["teori_revealed"]
+    col_info, col_reset = st.columns([6, 1])
+    col_info.markdown(f"**{len(filtrerede)} spørgsmål** — {n_revealed} svar åbnet")
+    if col_reset.button("↺ Nulstil", use_container_width=True):
+        st.session_state["teori_revealed"] = set()
+        st.rerun()
 
-    header = f"{'✅ ' if revealed else ''}{i+1}. **[{q['emne']}]** {q['q']}"
-    with st.expander(header, expanded=False):
-        for opt in q["options"]:
-            st.markdown(f"- {opt}")
+    st.divider()
 
-        st.divider()
-        if not revealed:
-            if st.button("Vis svar", key=f"teori_btn_{q_id}", type="primary"):
-                st.session_state["teori_revealed"].add(q_id)
-                st.rerun()
-        else:
-            correct_opt = next(
-                (o for o in q["options"] if o.startswith(q["correct"] + ")")),
-                q["correct"],
-            )
-            st.success(f"✅ **{correct_opt}**")
-            st.info(f"💡 {q['explain']}")
+    for i, q in enumerate(filtrerede):
+        q_id = f"{q['emne']}_{i}_{emne_filter}"
+        revealed = q_id in st.session_state["teori_revealed"]
+
+        header = f"{'✅ ' if revealed else ''}{i+1}. **[{q['emne']}]** {q['q']}"
+        with st.expander(header, expanded=False):
+            for opt in q["options"]:
+                st.markdown(f"- {opt}")
+
+            st.divider()
+            if not revealed:
+                if st.button("Vis svar", key=f"teori_btn_{q_id}", type="primary"):
+                    st.session_state["teori_revealed"].add(q_id)
+                    st.rerun()
+            else:
+                correct_opt = next(
+                    (o for o in q["options"] if o.startswith(q["correct"] + ")")),
+                    q["correct"],
+                )
+                st.success(f"✅ **{correct_opt}**")
+                st.info(f"💡 {q['explain']}")
+
+with tab_trap:
+    st.markdown("De **10 hyppigste fejl** på DTU 10060 eksamen. Læs dem aftenen før — 10 minutter der kan redde karakteren.")
+    st.divider()
+
+    TRAP_EMNE_FILTER = ["Alle"] + sorted(list({t["emne"] for t in EKSAMENSTRAP}))
+    trap_filter = st.radio("Emne:", TRAP_EMNE_FILTER, horizontal=True, key="trap_emne")
+    filtrerede_trap = EKSAMENSTRAP if trap_filter == "Alle" else [t for t in EKSAMENSTRAP if t["emne"] == trap_filter]
+
+    for t in filtrerede_trap:
+        with st.container(border=True):
+            st.markdown(f"**⚠️ {t['trap']}** `[{t['emne']}]`")
+            st.error(f"❌ **Typisk fejl:** {t['fejl']}")
+            st.success(f"✅ **Korrekt:** {t['ret']}")

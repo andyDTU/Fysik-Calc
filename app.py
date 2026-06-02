@@ -81,6 +81,12 @@ TILES = [
      "dimensionstjek · naturlige skalaer · Pi-grupper · Buckingham"),
     ("📏", "Skalering",         "pages/15_Skalering.py",
      "potenslov · T∝m^½ · Kepler · skaleringsanalyse"),
+    ("📋", "Formelblad",        "pages/16_Formelblad.py",
+     "officielt formelblad · konstanter · alle formler · links"),
+    ("⚖️", "Enhedsomregner",   "pages/17_Enheder.py",
+     "°C↔K · Pa↔atm · J↔eV · km/h↔m/s · RPM↔rad/s · grader↔rad"),
+    ("🔗", "Kombinationsopgaver", "pages/18_Kombinationer.py",
+     "to-trins opgaver · energi+kinematik · rotation+energi · gas+termo"),
 ]
 _SIDE_META = {t[1]: (t[0], t[2]) for t in TILES}
 _SIDE_ORDER = [t[1] for t in TILES]
