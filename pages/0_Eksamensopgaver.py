@@ -348,7 +348,7 @@ OPGAVER = [
         "værdier": "r=3.0 → h_min = 5·3.0/2 = 7.5 m  |  v_top_min = √(g·r) = √(9.82·3) = 5.43 m/s",
         "svar": "h_min = 7.5 m  (v_top_min = 5.43 m/s)",
         "tags": ["dynamik", "sløjfe", "loop", "energibevarelse", "minimum", "normalkraft", "centripetal"],
-        "page_key": None,
+        "page_key": "dynamik_v11",
     },
     {
         "år": "Variant", "nr": "V12",
@@ -358,7 +358,7 @@ OPGAVER = [
         "værdier": "v_rms(300K) = √(3·8.314·300/0.028) = √(267 964) = 518 m/s  |  v_rms(600K) = 518·√2 = 732 m/s",
         "svar": "v_rms(300K) ≈ 518 m/s, v_rms(600K) ≈ 732 m/s (faktor √2, ikke 2)",
         "tags": ["termodynamik", "molekylær", "vrms", "hastighed", "gas", "temperatur", "kvælstof"],
-        "page_key": None,
+        "page_key": "termodynamik_v12",
     },
     {
         "år": "Variant", "nr": "V13",
@@ -378,7 +378,7 @@ OPGAVER = [
         "værdier": "v' = √(2·9.82·0.12) = 1.533 m/s  |  v₀ = 1.010/0.010 · 1.533 = 155 m/s",
         "svar": "v₀ ≈ 155 m/s",
         "tags": ["kollisioner", "ballistic pendulum", "kuglestød", "uelastisk", "impulsbevarelse", "energibevarelse"],
-        "page_key": None,
+        "page_key": "kollisioner_v14",
     },
     {
         "år": "Variant", "nr": "V15",

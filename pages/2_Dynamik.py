@@ -13,6 +13,12 @@ st.divider()
 G = 9.82
 
 # Pre-fill from Eksamensopgaver guide
+if st.session_state.pop("example_dynamik_v11", None):
+    st.session_state["dyn_formel"] = "Normalkraft i sløjfe (top/bund)"
+    st.session_state["sl_beregn_mode"] = "h_min – minimum starthøjde (energibevarelse)"
+    st.session_state["sl_hmin_mode"] = "h_min – minimum starthøjde fra radius"
+    st.session_state["sl_r_hmin"] = 3.0
+
 if st.session_state.pop("example_dynamik_2024q14", None):
     st.session_state["dyn_formel"] = "Spænding og tøjning:  σ = F / A"
     st.session_state["dyn_spand_mode"] = "d – diameter af cirkulært tværsnit (given F og σ_max)"
@@ -355,7 +361,7 @@ Legeme i cirkulær bevægelse i lodret plan. Centripetalkraft = netto radialkraf
         "N – normalkraft (givet m, v, r)",
         "v – hastighed (givet N, m, r)",
         "h_min – minimum starthøjde (energibevarelse)",
-    ], horizontal=True)
+    ], horizontal=True, key="sl_beregn_mode")
     st.divider()
 
     if beregn_sl == "N – normalkraft (givet m, v, r)":
@@ -479,6 +485,11 @@ Legeme i cirkulær bevægelse i lodret plan. Centripetalkraft = netto radialkraf
                 else:
                     st.success("✅ Opretholdt kontakt i toppen.")
                 st.latex(rf"v_{{top}} = \sqrt{{2g(h-2r)}} = {v_top_N:.4g}\ \text{{m/s}},\quad N_{{top}} = \frac{{mv^2}}{{r}} - mg = {N_top_N:.4g}\ \text{{N}}")
+                ca_N, cb_N = st.columns(2)
+                if ca_N.button("📋 Gem v_top", key="gem_sl_vtop_N"):
+                    gem_resultat(v_top_N, "m/s", "v_top")
+                if cb_N.button("📋 Gem N_top", key="gem_sl_Ntop_N"):
+                    gem_resultat(N_top_N, "N", "N_top")
 
 elif formel == "Impuls:  p = m · v":
     st.latex(r"p = m \cdot v")

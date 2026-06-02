@@ -10,6 +10,12 @@ st.title("🌡️ Termodynamik")
 st.markdown("Ideel gaslov, varme, faseovergange og termodynamikkens love")
 st.divider()
 
+if st.session_state.pop("example_termodynamik_v12", None):
+    st.session_state["termo_formel"] = "Molekylær hastighed:  v_rms = √(3RT/M)"
+    st.session_state["vrms_gas"] = "N₂ (kvælstof)"
+    st.session_state["vrms_T"] = 300.0
+    st.session_state["vrms_M"] = 0.02801
+
 R = 8.314    # J/(mol·K)
 k_B = 1.381e-23
 
@@ -521,6 +527,8 @@ elif formel == "Molekylær hastighed:  v_rms = √(3RT/M)":
         ratio = v_rms2 / v_rms_val if v_rms_val > 0 else float("nan")
         st.success(f"**v_rms₂ = {v_rms2:.4g} m/s  →  faktor {ratio:.4g}×**")
         st.latex(rf"\frac{{v_{{rms,2}}}}{{v_{{rms,1}}}} = \sqrt{{\frac{{T_2/M_2}}{{T_1/M_1}}}} = \sqrt{{\frac{{{T2:.4g}/{M2:.5g}}}{{{T_vrms:.4g}/{M_vrms:.5g}}}}} = {ratio:.4g}")
+        if st.button("📋 Gem v_rms₂", key="gem_vrms2"):
+            gem_resultat(v_rms2, "m/s", "v_rms₂")
 
     if st.button("📋 Gem v_rms", key="gem_vrms"):
         gem_resultat(v_rms_val, "m/s", "v_rms")

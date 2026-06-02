@@ -1,11 +1,18 @@
 import streamlit as st
 import numpy as np
-from utils import show_sidebar_constants, show_resultat_sidebar, show_tips, formula_card_grid, breadcrumb
+from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips, formula_card_grid, breadcrumb
 
 st.set_page_config(page_title="Kollisioner", page_icon="💥", layout="wide")
 show_sidebar_constants()
 show_resultat_sidebar()
 breadcrumb("💥", "Kollisioner")
+
+if st.session_state.pop("example_kollisioner_v14", None):
+    st.session_state["kol_formel"] = "Kuglestød – bullet i klods (lodret):  v' = mv/(M+m)"
+    st.session_state["kb_mode"] = "v_i – kugles starthastighed"
+    st.session_state["kb_m2"] = 0.010
+    st.session_state["kb_M2"] = 1.0
+    st.session_state["kb_h2"] = 0.12
 st.title("💥 Kollisioner & Impulsbevarelse")
 st.markdown("Elastiske, uelastiske kollisioner og bevarelse af impuls — Lecture 10 (10060)")
 st.divider()
@@ -585,7 +592,7 @@ elif formel == "Kuglestød – bullet i klods (lodret):  v' = mv/(M+m)":
     st.divider()
 
     G_kol2 = 9.82
-    mode_kb = st.radio("Beregn:", ["h – maksimal højde", "v_i – kugles starthastighed", "m – kugles masse"], horizontal=True)
+    mode_kb = st.radio("Beregn:", ["h – maksimal højde", "v_i – kugles starthastighed", "m – kugles masse"], horizontal=True, key="kb_mode")
     st.divider()
 
     if mode_kb == "h – maksimal højde":

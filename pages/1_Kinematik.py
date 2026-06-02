@@ -80,11 +80,13 @@ if formel == "SUVAT – universal løser":
         known_vars  = [k for k in _SUVAT_KEY if k not in ukend_keys]
         vals = {}
         cols = st.columns(3)
-        defaults = {"s": 50.0, "v₀": 0.0, "v": 10.0, "a": 2.0, "t": 5.0}
+        defaults = {"s": 25.0, "v₀": 0.0, "v": 10.0, "a": 2.0, "t": 5.0}
         units    = {"s": "m", "v₀": "m/s", "v": "m/s", "a": "m/s²", "t": "s"}
         for i, k in enumerate(known_vars):
             label = [opt for opt in _SUVAT_VARS if opt.startswith(k)][0]
             vals[k] = cols[i].number_input(label, value=defaults[k], format="%.6g", key=f"suvat_{k}")
+
+        combo = tuple(sorted(ukend_keys))
 
         if st.button("Beregn de 2 ukendte", type="primary"):
             try:
@@ -94,8 +96,6 @@ if formel == "SUVAT – universal løser":
                 a  = vals.get("a")
                 t  = vals.get("t")
                 res = {}
-
-                combo = tuple(sorted(ukend_keys))
 
                 if combo == ("a", "s"):             # known: v₀, v, t
                     res["s"] = 0.5 * (v0 + v) * t
@@ -164,21 +164,29 @@ if formel == "SUVAT – universal løser":
                     st.error("Ukendt kombination – prøv en anden.")
                     st.stop()
 
-                for key, val in res.items():
-                    unit = units[key]
-                    st.success(f"**{key} = {val:.6g} {unit}**")
-                    if st.button(f"📋 Gem {key}", key=f"gem_suvat_{key}"):
-                        gem_resultat(val, unit, key)
-
-                with st.expander("Vis alle SUVAT-ligninger med indsatte værdier"):
-                    all_vals = {**vals, **res}
-                    sv, sv0, vv, av, tv = all_vals.get("s","?"), all_vals.get("v₀","?"), all_vals.get("v","?"), all_vals.get("a","?"), all_vals.get("t","?")
-                    if all(isinstance(x, (int, float)) for x in [sv, sv0, vv, av, tv]):
-                        st.latex(rf"v = v_0 + at: \quad {vv:.4g} = {sv0:.4g} + {av:.4g}\cdot{tv:.4g} = {sv0 + av*tv:.4g}")
-                        st.latex(rf"s = v_0 t + \tfrac{{1}}{{2}}at^2: \quad {sv:.4g} = {sv0:.4g}\cdot{tv:.4g} + \tfrac{{1}}{{2}}\cdot{av:.4g}\cdot{tv:.4g}^2 = {sv0*tv + 0.5*av*tv**2:.4g}")
-                        st.latex(rf"v^2 = v_0^2 + 2as: \quad {vv:.4g}^2 = {sv0:.4g}^2 + 2\cdot{av:.4g}\cdot{sv:.4g} \Rightarrow {vv**2:.4g} \approx {sv0**2 + 2*av*sv:.4g}")
+                st.session_state["suvat_results"] = {
+                    "res": res, "units": units, "combo": combo,
+                    "all_vals": {**vals, **res},
+                }
             except Exception as exc:
                 st.error(f"Beregningsfejl: {exc}")
+
+        # Vis persisterede resultater – overlever re-renders og input-ændringer
+        _stored = st.session_state.get("suvat_results")
+        if _stored and _stored.get("combo") == combo:
+            for key, val in _stored["res"].items():
+                unit = _stored["units"][key]
+                st.success(f"**{key} = {val:.6g} {unit}**")
+                if st.button(f"📋 Gem {key}", key=f"gem_suvat_{key}"):
+                    gem_resultat(val, unit, key)
+
+            with st.expander("Vis alle SUVAT-ligninger med indsatte værdier"):
+                all_vals = _stored["all_vals"]
+                sv, sv0, vv, av, tv = all_vals.get("s","?"), all_vals.get("v₀","?"), all_vals.get("v","?"), all_vals.get("a","?"), all_vals.get("t","?")
+                if all(isinstance(x, (int, float)) for x in [sv, sv0, vv, av, tv]):
+                    st.latex(rf"v = v_0 + at: \quad {vv:.4g} = {sv0:.4g} + {av:.4g}\cdot{tv:.4g} = {sv0 + av*tv:.4g}")
+                    st.latex(rf"s = v_0 t + \tfrac{{1}}{{2}}at^2: \quad {sv:.4g} = {sv0:.4g}\cdot{tv:.4g} + \tfrac{{1}}{{2}}\cdot{av:.4g}\cdot{tv:.4g}^2 = {sv0*tv + 0.5*av*tv**2:.4g}")
+                    st.latex(rf"v^2 = v_0^2 + 2as: \quad {vv:.4g}^2 = {sv0:.4g}^2 + 2\cdot{av:.4g}\cdot{sv:.4g} \Rightarrow {vv**2:.4g} \approx {sv0**2 + 2*av*sv:.4g}")
 
 # ── Uniform bevægelse ──────────────────────────────────────────────────────────
 elif formel == "Uniform bevægelse:  s = v · t":
