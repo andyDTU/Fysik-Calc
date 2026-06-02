@@ -77,6 +77,10 @@ TILES = [
      "gennemsnit · fejlpropagation · potenslov · regression"),
     ("🚀", "Relativitetsteori","pages/12_Relativitetsteori.py",
      "γ=1/√(1−v²/c²) · tidsudvidelse · E=γm₀c²"),
+    ("📐", "Dimensionsanalyse", "pages/14_Dimensionsanalyse.py",
+     "dimensionstjek · naturlige skalaer · Pi-grupper · Buckingham"),
+    ("📏", "Skalering",         "pages/15_Skalering.py",
+     "potenslov · T∝m^½ · Kepler · skaleringsanalyse"),
 ]
 _SIDE_META = {t[1]: (t[0], t[2]) for t in TILES}
 _SIDE_ORDER = [t[1] for t in TILES]

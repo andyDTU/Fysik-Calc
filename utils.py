@@ -286,4 +286,30 @@ FORMLER = [
     {"navn": "Relativistisk totalenergi:  E = γ · m₀c²",       "side": "Relativitetsteori", "fil": "pages/12_Relativitetsteori.py", "key": "rel_formel", "kw": "totalenergi E gamma m0 c2 hvileenergi",                                                       "vars": ["E", "γ", "m", "c"]},
     {"navn": "Relativistisk impuls:  p = γ · m₀ · v",          "side": "Relativitetsteori", "fil": "pages/12_Relativitetsteori.py", "key": "rel_formel", "kw": "relativistisk impuls p gamma m0 v",                                                           "vars": ["p", "γ", "m", "v"]},
     {"navn": "Energi–impuls relation:  E² = (pc)² + (m₀c²)²", "side": "Relativitetsteori", "fil": "pages/12_Relativitetsteori.py", "key": "rel_formel", "kw": "energi impuls relation E p c m0 foton",                                                       "vars": ["E", "p", "m", "c"]},
+    # ── Dimensionsanalyse ──
+    {
+        "navn": "Dimensionstjek",
+        "side": "Dimensionsanalyse",
+        "fil": "pages/14_Dimensionsanalyse.py",
+        "kw": "dimension analyse enhed M L T grundstørrelse homogen formel tjek",
+        "key": "dim_formel",
+        "vars": [],
+    },
+    {
+        "navn": "Naturlige skalaer",
+        "side": "Dimensionsanalyse",
+        "fil": "pages/14_Dimensionsanalyse.py",
+        "kw": "naturlig skala lambda tau pi-gruppe buckingham skalering model",
+        "key": "dim_formel",
+        "vars": [],
+    },
+    # ── Skalering ──
+    {
+        "navn": "Skaleringsanalyse",
+        "side": "Skalering",
+        "fil": "pages/15_Skalering.py",
+        "kw": "skalering potenslov fordobling faktor T sqrt m k Kepler",
+        "key": "skalering_formel",
+        "vars": ["m", "k", "L", "r", "v"],
+    },
 ]
