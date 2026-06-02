@@ -199,70 +199,152 @@ elif formel == "Sammenhæng lineær ↔ vinkelbevægelse":
 
 elif formel == "Inertimoment – standardlegemer":
     st.markdown("### Inertimomenter for standard legemer om symmetriaksen")
-
     st.latex(r"I = \int r^2\, dm")
 
     data = {
-        "Tynd ring (radius R)": (r"I = MR^2", "MR2"),
-        "Massiv skive/cylinder (radius R)": (r"I = \frac{1}{2}MR^2", "MR2_half"),
-        "Hul cylinder (R₁, R₂)": (r"I = \frac{1}{2}M(R_1^2+R_2^2)", "hollow_cyl"),
-        "Massiv kugle (radius R)": (r"I = \frac{2}{5}MR^2", "MR2_2_5"),
-        "Hul kugle (radius R)": (r"I = \frac{2}{3}MR^2", "MR2_2_3"),
-        "Tynd stav om centrum (længde L)": (r"I = \frac{1}{12}ML^2", "rod_center"),
-        "Tynd stav om ende (længde L)": (r"I = \frac{1}{3}ML^2", "rod_end"),
-        "Rektangulær plade om centrum": (r"I = \frac{1}{12}M(a^2+b^2)", "rect"),
+        "Tynd ring (radius R)":               (r"I = MR^2",                    "MR2",      1.0),
+        "Massiv skive/cylinder (radius R)":   (r"I = \frac{1}{2}MR^2",         "MR2_half", 0.5),
+        "Massiv kugle (radius R)":            (r"I = \frac{2}{5}MR^2",         "MR2_2_5",  0.4),
+        "Hul kugle (radius R)":               (r"I = \frac{2}{3}MR^2",         "MR2_2_3",  2/3),
+        "Tynd stav om centrum (længde L)":    (r"I = \frac{1}{12}ML^2",        "rod_center",1/12),
+        "Tynd stav om ende (længde L)":       (r"I = \frac{1}{3}ML^2",         "rod_end",   1/3),
+        "Hul cylinder (R₁, R₂)":             (r"I = \frac{1}{2}M(R_1^2+R_2^2)","hollow_cyl", None),
+        "Rektangulær plade om centrum":       (r"I = \frac{1}{12}M(a^2+b^2)",  "rect",      None),
     }
 
     legeme = st.selectbox("Vælg legeme:", list(data.keys()))
-    latex_f, key = data[legeme]
+    latex_f, key, factor = data[legeme]
     st.latex(latex_f)
+
+    is_simple = key not in ("hollow_cyl", "rect")
+    dim_label = "L – længde (m)" if "stav" in legeme else "R – radius (m)"
+    dim_short = "L" if "stav" in legeme else "R"
+
+    beregn_in = st.radio("Beregn:", (
+        ["I – inertimoment (kg·m²)", f"M – masse (kg)", f"{dim_short} – mål (m)"]
+        if is_simple else
+        ["I – inertimoment (kg·m²)", "M – masse (kg)"]
+    ), horizontal=True)
     st.divider()
 
-    M = st.number_input("M – masse (kg)", value=2.0, min_value=1e-12, format="%.6g")
+    if beregn_in == "I – inertimoment (kg·m²)":
+        M = st.number_input("M – masse (kg)", value=2.0, min_value=1e-12, format="%.6g", key="in_M_a")
+        if key == "hollow_cyl":
+            c1, c2 = st.columns(2)
+            R1 = c1.number_input("R₁ – indre radius (m)", value=0.2, min_value=0.0, format="%.6g")
+            R2 = c2.number_input("R₂ – ydre radius (m)", value=0.3, min_value=1e-12, format="%.6g")
+            I = 0.5 * M * (R1**2 + R2**2)
+        elif key == "rect":
+            c1, c2 = st.columns(2)
+            a = c1.number_input("a – bredde (m)", value=0.4, min_value=1e-12, format="%.6g")
+            b = c2.number_input("b – højde (m)", value=0.3, min_value=1e-12, format="%.6g")
+            I = (1/12) * M * (a**2 + b**2)
+        else:
+            dim = st.number_input(dim_label, value=0.3, min_value=1e-12, format="%.6g", key="in_dim_a")
+            I = factor * M * dim**2
+        st.success(f"**I = {I:.6g} kg·m²**")
+        if st.button("📋 Gem I", key="gem_in_I"):
+            gem_resultat(I, "kg·m²", "I")
 
-    if key == "MR2":
-        R = st.number_input("R – radius (m)", value=0.3, min_value=1e-12, format="%.6g")
-        I = M * R**2
-    elif key == "MR2_half":
-        R = st.number_input("R – radius (m)", value=0.3, min_value=1e-12, format="%.6g")
-        I = 0.5 * M * R**2
-    elif key == "hollow_cyl":
-        c1, c2 = st.columns(2)
-        R1 = c1.number_input("R₁ – indre radius (m)", value=0.2, min_value=0.0, format="%.6g")
-        R2 = c2.number_input("R₂ – ydre radius (m)", value=0.3, min_value=1e-12, format="%.6g")
-        I = 0.5 * M * (R1**2 + R2**2)
-    elif key == "MR2_2_5":
-        R = st.number_input("R – radius (m)", value=0.3, min_value=1e-12, format="%.6g")
-        I = 0.4 * M * R**2
-    elif key == "MR2_2_3":
-        R = st.number_input("R – radius (m)", value=0.3, min_value=1e-12, format="%.6g")
-        I = (2/3) * M * R**2
-    elif key == "rod_center":
-        L = st.number_input("L – længde (m)", value=1.0, min_value=1e-12, format="%.6g")
-        I = (1/12) * M * L**2
-    elif key == "rod_end":
-        L = st.number_input("L – længde (m)", value=1.0, min_value=1e-12, format="%.6g")
-        I = (1/3) * M * L**2
+    elif beregn_in == "M – masse (kg)":
+        I_in = st.number_input("I – inertimoment (kg·m²)", value=0.1, min_value=1e-12, format="%.6g", key="in_I_b")
+        if key == "hollow_cyl":
+            c1, c2 = st.columns(2)
+            R1 = c1.number_input("R₁ – indre radius (m)", value=0.2, min_value=0.0, format="%.6g")
+            R2 = c2.number_input("R₂ – ydre radius (m)", value=0.3, min_value=1e-12, format="%.6g")
+            M = 2 * I_in / (R1**2 + R2**2)
+        elif key == "rect":
+            c1, c2 = st.columns(2)
+            a = c1.number_input("a – bredde (m)", value=0.4, min_value=1e-12, format="%.6g")
+            b = c2.number_input("b – højde (m)", value=0.3, min_value=1e-12, format="%.6g")
+            M = 12 * I_in / (a**2 + b**2)
+        else:
+            dim = st.number_input(dim_label, value=0.3, min_value=1e-12, format="%.6g", key="in_dim_b")
+            M = I_in / (factor * dim**2)
+        st.success(f"**M = {M:.6g} kg**")
+        st.latex(rf"M = \frac{{I}}{{\text{{factor}} \cdot {dim_short}^2}} = {M:.6g}\ \text{{kg}}")
+        if st.button("📋 Gem M", key="gem_in_M"):
+            gem_resultat(M, "kg", "M")
+
     else:
-        c1, c2 = st.columns(2)
-        a = c1.number_input("a – bredde (m)", value=0.4, min_value=1e-12, format="%.6g")
-        b = c2.number_input("b – højde (m)", value=0.3, min_value=1e-12, format="%.6g")
-        I = (1/12) * M * (a**2 + b**2)
-
-    st.success(f"**I = {I:.6g} kg·m²**")
+        M   = st.number_input("M – masse (kg)", value=2.0, min_value=1e-12, format="%.6g", key="in_M_c")
+        I_in = st.number_input("I – inertimoment (kg·m²)", value=0.1, min_value=1e-12, format="%.6g", key="in_I_c")
+        dim_sq = I_in / (factor * M)
+        if dim_sq <= 0:
+            st.error("Ugyldig løsning")
+        else:
+            dim_val = np.sqrt(dim_sq)
+            st.success(f"**{dim_short} = {dim_val:.6g} m**")
+            st.latex(rf"{dim_short} = \sqrt{{\frac{{I}}{{\text{{factor}} \cdot M}}}} = \sqrt{{\frac{{{I_in:.6g}}}{{{factor:.4g} \cdot {M:.6g}}}}} = {dim_val:.6g}\ \text{{m}}")
+            if st.button(f"📋 Gem {dim_short}", key="gem_in_dim"):
+                gem_resultat(dim_val, "m", dim_short)
 
 elif formel == "Steiners sætning:  I = Icm + M·d²":
     st.latex(r"I = I_{cm} + M \cdot d^2")
     st.markdown("Inertimoment om en vilkårlig akse parallel med tyngdepunktsaksen.")
     st.divider()
 
-    c1, c2, c3 = st.columns(3)
-    Icm = c1.number_input("Icm – inertimoment om cm (kg·m²)", value=0.05, min_value=0.0, format="%.6g")
-    M   = c2.number_input("M – masse (kg)", value=2.0, min_value=1e-12, format="%.6g")
-    d   = c3.number_input("d – afstand fra cm til ny akse (m)", value=0.3, min_value=0.0, format="%.6g")
-    I = Icm + M * d**2
-    st.success(f"**I = {I:.6g} kg·m²**")
-    st.latex(rf"I = I_{{cm}} + Md^2 = {Icm:.6g} + {M:.6g} \cdot {d:.6g}^2 = {I:.6g}\ \text{{kg·m}}^2")
+    beregn_st = st.radio("Beregn:", [
+        "I – inertimoment om ny akse",
+        "Icm – inertimoment om cm",
+        "d – afstand fra cm til ny akse",
+        "M – masse",
+    ], horizontal=True)
+    st.divider()
+
+    if beregn_st == "I – inertimoment om ny akse":
+        c1, c2, c3 = st.columns(3)
+        Icm = c1.number_input("Icm (kg·m²)", value=0.05, min_value=0.0, format="%.6g", key="st_Icm_a")
+        M   = c2.number_input("M (kg)", value=2.0, min_value=1e-12, format="%.6g", key="st_M_a")
+        d   = c3.number_input("d (m)", value=0.3, min_value=0.0, format="%.6g", key="st_d_a")
+        I = Icm + M * d**2
+        st.success(f"**I = {I:.6g} kg·m²**")
+        st.latex(rf"I = I_{{cm}} + Md^2 = {Icm:.6g} + {M:.6g} \cdot {d:.6g}^2 = {I:.6g}\ \text{{kg·m}}^2")
+        if st.button("📋 Gem I", key="gem_st_I"):
+            gem_resultat(I, "kg·m²", "I")
+
+    elif beregn_st == "Icm – inertimoment om cm":
+        c1, c2, c3 = st.columns(3)
+        I   = c1.number_input("I – om ny akse (kg·m²)", value=0.23, min_value=0.0, format="%.6g", key="st_I_b")
+        M   = c2.number_input("M (kg)", value=2.0, min_value=1e-12, format="%.6g", key="st_M_b")
+        d   = c3.number_input("d (m)", value=0.3, min_value=0.0, format="%.6g", key="st_d_b")
+        Icm = I - M * d**2
+        if Icm < 0:
+            st.error("Icm < 0 – kontrollér værdier (I skal være større end M·d²)")
+        else:
+            st.success(f"**Icm = {Icm:.6g} kg·m²**")
+            st.latex(rf"I_{{cm}} = I - Md^2 = {I:.6g} - {M:.6g} \cdot {d:.6g}^2 = {Icm:.6g}\ \text{{kg·m}}^2")
+            if st.button("📋 Gem Icm", key="gem_st_Icm"):
+                gem_resultat(Icm, "kg·m²", "Icm")
+
+    elif beregn_st == "d – afstand fra cm til ny akse":
+        c1, c2, c3 = st.columns(3)
+        I   = c1.number_input("I – om ny akse (kg·m²)", value=0.23, min_value=0.0, format="%.6g", key="st_I_c")
+        Icm = c2.number_input("Icm (kg·m²)", value=0.05, min_value=0.0, format="%.6g", key="st_Icm_c")
+        M   = c3.number_input("M (kg)", value=2.0, min_value=1e-12, format="%.6g", key="st_M_c")
+        diff = I - Icm
+        if diff < 0:
+            st.error("I < Icm – ikke muligt (Steiners sætning kræver I ≥ Icm)")
+        else:
+            d = np.sqrt(diff / M)
+            st.success(f"**d = {d:.6g} m**")
+            st.latex(rf"d = \sqrt{{\frac{{I - I_{{cm}}}}{{M}}}} = \sqrt{{\frac{{{I:.6g} - {Icm:.6g}}}{{{M:.6g}}}}} = {d:.6g}\ \text{{m}}")
+            if st.button("📋 Gem d", key="gem_st_d"):
+                gem_resultat(d, "m", "d")
+
+    else:
+        c1, c2, c3 = st.columns(3)
+        I   = c1.number_input("I – om ny akse (kg·m²)", value=0.23, min_value=0.0, format="%.6g", key="st_I_d")
+        Icm = c2.number_input("Icm (kg·m²)", value=0.05, min_value=0.0, format="%.6g", key="st_Icm_d")
+        d   = c3.number_input("d (m)", value=0.3, min_value=1e-12, format="%.6g", key="st_d_d")
+        M = (I - Icm) / d**2
+        if M <= 0:
+            st.error("M ≤ 0 – kontrollér værdier (I skal være større end Icm)")
+        else:
+            st.success(f"**M = {M:.6g} kg**")
+            st.latex(rf"M = \frac{{I - I_{{cm}}}}{{d^2}} = \frac{{{I:.6g} - {Icm:.6g}}}{{{d:.6g}^2}} = {M:.6g}\ \text{{kg}}")
+            if st.button("📋 Gem M", key="gem_st_M"):
+                gem_resultat(M, "kg", "M")
 
 elif formel == "Rotationskinetisk energi:  K = ½·I·ω²":
     st.latex(r"K_{rot} = \frac{1}{2} I \omega^2")
@@ -516,24 +598,61 @@ elif formel == "Trisse + ophængt masse (Yo-Yo / Atwood med rotation)":
     st.markdown("Masse m ophængt i snor om trisse (radius R, inertimoment I). Snoren glider ikke.")
     st.divider()
 
-    c1, c2, c3 = st.columns(3)
-    m = c1.number_input("m – ophængt masse (kg)", value=2.0, min_value=1e-12, format="%.6g")
-    I_trisse = c2.number_input("I – trissens inertimoment (kg·m²)", value=0.5, min_value=1e-12, format="%.6g")
-    R = c3.number_input("R – trissens radius (m)", value=0.2, min_value=1e-12, format="%.6g")
+    beregn_tr = st.radio("Beregn:", [
+        "a, T, α – standard",
+        "m – ophængt masse fra a",
+        "I – trissens inertimoment fra a",
+    ], horizontal=True)
+    st.divider()
 
-    a = m * G / (m + I_trisse / R**2)
-    T = m * G * (I_trisse / R**2) / (m + I_trisse / R**2)
-    alpha_ang = a / R
-    omega_func = f"ω = √(2aΔy/R²)·R → ω² = 2aΔy/R²... brug ω=α·t"
+    if beregn_tr == "a, T, α – standard":
+        c1, c2, c3 = st.columns(3)
+        m        = c1.number_input("m – ophængt masse (kg)", value=2.0, min_value=1e-12, format="%.6g", key="tr_m_a")
+        I_trisse = c2.number_input("I – trissens inertimoment (kg·m²)", value=0.5, min_value=1e-12, format="%.6g", key="tr_I_a")
+        R        = c3.number_input("R – trissens radius (m)", value=0.2, min_value=1e-12, format="%.6g", key="tr_R_a")
+        g_tr     = st.number_input("g (m/s²)", value=G, format="%.6g", key="tr_g_a")
+        a = m * g_tr / (m + I_trisse / R**2)
+        T = m * g_tr * (I_trisse / R**2) / (m + I_trisse / R**2)
+        alpha_ang = a / R
+        st.success(f"**a = {a:.4g} m/s²**   **T = {T:.4g} N**   **α = {alpha_ang:.4g} rad/s²**")
+        st.latex(rf"a = \frac{{m\,g}}{{m + I/R^2}} = \frac{{{m:.4g}\cdot{g_tr:.4g}}}{{{m:.4g} + {I_trisse:.4g}/{R:.4g}^2}} = {a:.4g}\ \text{{m/s}}^2")
+        st.latex(rf"T = m(g-a) = {m:.4g} \cdot ({g_tr:.4g} - {a:.4g}) = {m*(g_tr-a):.4g}\ \text{{N}}")
+        st.latex(rf"\alpha = \frac{{a}}{{R}} = \frac{{{a:.4g}}}{{{R:.4g}}} = {alpha_ang:.4g}\ \text{{rad/s}}^2")
+        st.markdown("**Hastighed og vinkelhastighed efter fald Δy:**")
+        dy = st.number_input("Δy – faldet afstand (m)", value=1.0, min_value=0.0, format="%.6g")
+        v_end = np.sqrt(2 * a * dy)
+        omega_end = v_end / R
+        st.info(f"v = {v_end:.4g} m/s,   ω = {omega_end:.4g} rad/s   (efter {dy:.4g} m fald)")
 
-    st.success(f"**a = {a:.4g} m/s²**   **T = {T:.4g} N**   **α = {alpha_ang:.4g} rad/s²**")
-    st.latex(rf"a = \frac{{m\,g}}{{m + I/R^2}} = \frac{{{m:.4g}\cdot{G}}}{{{m:.4g} + {I_trisse:.4g}/{R:.4g}^2}} = {a:.4g}\ \text{{m/s}}^2")
-    st.latex(rf"T = m(g-a) = {m:.4g}({G} - {a:.4g}) = {m*(G-a):.4g}\ \text{{N (kontrol: T={T:.4g})}}")
-    st.latex(rf"\alpha = \frac{{a}}{{R}} = \frac{{{a:.4g}}}{{{R:.4g}}} = {alpha_ang:.4g}\ \text{{rad/s}}^2")
+    elif beregn_tr == "m – ophængt masse fra a":
+        st.markdown("Kendte: a, I, R, g → find **m**  via  m·g = a·(m + I/R²)  →  m = a·I/R² / (g − a)")
+        c1, c2, c3 = st.columns(3)
+        a_in     = c1.number_input("a – acceleration (m/s²)", value=3.0, min_value=1e-12, format="%.6g", key="tr_a_b")
+        I_trisse = c2.number_input("I – trissens inertimoment (kg·m²)", value=0.5, min_value=1e-12, format="%.6g", key="tr_I_b")
+        R        = c3.number_input("R – trissens radius (m)", value=0.2, min_value=1e-12, format="%.6g", key="tr_R_b")
+        g_tr     = st.number_input("g (m/s²)", value=G, format="%.6g", key="tr_g_b")
+        denom = g_tr - a_in
+        if abs(denom) < 1e-12 or denom <= 0:
+            st.error("g − a ≤ 0 – acceleration kan ikke overstige g")
+        else:
+            m = a_in * I_trisse / (R**2 * denom)
+            st.success(f"**m = {m:.6g} kg**")
+            st.latex(rf"m = \frac{{a \cdot I/R^2}}{{g - a}} = \frac{{{a_in:.4g} \cdot {I_trisse:.4g}/{R:.4g}^2}}{{{g_tr:.4g} - {a_in:.4g}}} = {m:.6g}\ \text{{kg}}")
+            if st.button("📋 Gem m", key="gem_tr_m"):
+                gem_resultat(m, "kg", "m")
 
-    st.markdown("**Hastighed og vinkelhastighed efter fald Δy:**")
-    dy = st.number_input("Δy – faldet afstand (m)", value=1.0, min_value=0.0, format="%.6g")
-    v_end = np.sqrt(2 * a * dy)
-    omega_end = v_end / R
-    st.info(f"v = {v_end:.4g} m/s,   ω = {omega_end:.4g} rad/s   (efter {dy:.4g} m fald)")
-    st.latex(rf"v = \sqrt{{2a\Delta y}} = \sqrt{{2\cdot{a:.4g}\cdot{dy:.4g}}} = {v_end:.4g}\ \text{{m/s}},\quad \omega = v/R = {omega_end:.4g}\ \text{{rad/s}}")
+    else:
+        st.markdown("Kendte: a, m, R, g → find **I**  via  I = R²·m·(g/a − 1)")
+        c1, c2, c3 = st.columns(3)
+        a_in = c1.number_input("a – acceleration (m/s²)", value=3.0, min_value=1e-12, format="%.6g", key="tr_a_c")
+        m    = c2.number_input("m – ophængt masse (kg)", value=2.0, min_value=1e-12, format="%.6g", key="tr_m_c")
+        R    = c3.number_input("R – trissens radius (m)", value=0.2, min_value=1e-12, format="%.6g", key="tr_R_c")
+        g_tr = st.number_input("g (m/s²)", value=G, format="%.6g", key="tr_g_c")
+        I_trisse = R**2 * m * (g_tr / a_in - 1)
+        if I_trisse <= 0:
+            st.error("I ≤ 0 – acceleration kan ikke overstige g")
+        else:
+            st.success(f"**I = {I_trisse:.6g} kg·m²**")
+            st.latex(rf"I = R^2 \cdot m \left(\frac{{g}}{{a}} - 1\right) = {R:.4g}^2 \cdot {m:.4g} \cdot \left(\frac{{{g_tr:.4g}}}{{{a_in:.4g}}} - 1\right) = {I_trisse:.6g}\ \text{{kg·m}}^2")
+            if st.button("📋 Gem I", key="gem_tr_I"):
+                gem_resultat(I_trisse, "kg·m²", "I")
