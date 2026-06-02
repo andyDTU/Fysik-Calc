@@ -83,25 +83,36 @@ _SIDE_ORDER = [t[1] for t in TILES]
 
 if valgte_syms:
     # ── Variabel-filter resultater ────────────────────────────────────────────
-    hits = [f for f in FORMLER
-            if all(sym in f.get("vars", []) for sym in valgte_syms)]
+    # Beregn match-score for hver formel (hvor mange valgte variable den bruger)
+    hits_scored = []
+    for f in FORMLER:
+        vars_in_formula = f.get("vars", [])
+        matched_vars = [sym for sym in valgte_syms if sym in vars_in_formula]
+        match_score = len(matched_vars)
+        if match_score > 0:
+            hits_scored.append((f, match_score, matched_vars))
+
+    # Sortér efter match-score (bedste først)
+    hits_scored.sort(key=lambda x: x[1], reverse=True)
+    hits = [f for f, _, _ in hits_scored]
 
     if not hits:
         st.warning(
-            f"Ingen formel bruger **alle** de valgte størrelser samtidigt. "
-            f"Prøv at fjerne én – måske bruger formlen kun to af dem."
+            f"Ingen formel bruger **nogen** af de valgte størrelser. "
+            f"Prøv med andre variable."
         )
     else:
-        st.markdown(f"**{len(hits)} formel(er) bruger: {', '.join(valgte_syms)}**")
+        st.markdown(f"**{len(hits)} formel(er) fundet – sorteret efter bedste match**")
         for side_navn in _SIDE_ORDER:
-            gruppe = [f for f in hits if f["side"] == side_navn]
+            gruppe = [(f, score, matched) for f, score, matched in hits_scored if f["side"] == side_navn]
             if not gruppe:
                 continue
             emoji = _SIDE_META[side_navn][0]
             st.markdown(f"#### {emoji} {side_navn}")
-            for f in gruppe:
+            for f, score, matched_vars in gruppe:
                 col1, col2 = st.columns([5, 1])
-                col1.markdown(f"**{f['navn']}**")
+                match_text = f" ({', '.join(matched_vars)})" if len(matched_vars) < len(valgte_syms) else ""
+                col1.markdown(f"**{f['navn']}**{match_text}")
                 if col2.button("→ Åbn", key=f"vf_{f['navn']}", use_container_width=True):
                     st.session_state[f["key"]] = f["navn"]
                     st.switch_page(f["fil"])
