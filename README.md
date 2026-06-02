@@ -49,11 +49,6 @@ cd Fysik-Calc
 ```
 *(Dette "går ind i" mappen)*
 
-```bash
-git checkout claude/busy-davinci-Su5Jz
-```
-*(Dette skifter til den nyeste version af appen)*
-
 ---
 
 ### Trin 4 – Installer afhængigheder
@@ -142,7 +137,7 @@ Du skal se `app.py` i listen. Ser du noget andet, er du i den forkerte mappe.
 
 **Trin 3 – Hent opdateringen:**
 ```bash
-git pull origin claude/busy-davinci-Su5Jz
+git pull origin main
 ```
 Du bør se noget tekst der slutter med "Already up to date." eller en liste af opdaterede filer.
 
