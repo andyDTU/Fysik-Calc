@@ -37,7 +37,7 @@ tab_var, tab_søg = st.tabs(["🔢 Hvad kender du?", "🔍 Søg på tekst"])
 with tab_søg:
     søg_tekst = st.text_input(
         "søg",
-        placeholder="fx 'centripetal', 'gaslov', 'kollision', 'v²'...",
+        placeholder="fx 'fjeder', 'doppler', 'fusion', 'bremser', 'henfald', 'rulning', 'curling'...",
         label_visibility="collapsed",
     )
 
@@ -155,4 +155,4 @@ else:
                 if st.button(f"Åbn {navn}", key=f"tile_{navn}", use_container_width=True):
                     st.switch_page(fil)
     st.markdown("")
-    st.info("💡 Brug fanerne øverst: vælg de størrelser du kender, eller søg på tekst.")
+    st.info("💡 **Tip:** Søg på fx 'bremser', 'curling', 'fusion', 'fjeder', 'henfald' — eller vælg variable du kender i fanen 🔢.")
