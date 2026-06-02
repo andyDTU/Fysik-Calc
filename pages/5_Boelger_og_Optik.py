@@ -1,5 +1,6 @@
 import streamlit as st
 import numpy as np
+import pandas as pd
 from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips, formula_card_grid, breadcrumb
 
 st.set_page_config(page_title="Bølger & Optik", page_icon="🌊", layout="wide")
@@ -26,6 +27,8 @@ _BOLGE_FORMULAS = [
     ("Brydningsindeks",     "n = c/v",                         "Lysets brydningsindeks:  n = c / v"),
     ("Lydintensitet / dB",  "β = 10·log₁₀(I/I₀)",            "Lydintensitet og dB:  β = 10·log₁₀(I/I₀)"),
     ("Slagfrekvens",        "f_beat = |f₁ − f₂|",             "Slagfrekvens (beats):  f_beat = |f₁ − f₂|"),
+    ("Stående bølger – matrix", "n×L → f (find harmonisk)", "Stående bølger – kombinationsmatrix"),
+    ("Linsformel – matrix",     "do×f → di (find billede)", "Linsformel – kombinationsmatrix"),
 ]
 formel = formula_card_grid(_BOLGE_FORMULAS, "bolge_formel")
 
@@ -39,6 +42,8 @@ BOLGE_TIPS = {
     "Stående bølger – streng/rør": "Streng (lukket-lukket): λ_n = 2L/n. Rør (åben-åben): samme. Åben-lukket: λ_n = 4L/(2n−1).",
     "Lydintensitet og dB:  β = 10·log₁₀(I/I₀)": "I₀ = 10⁻¹² W/m² (høretærskel). +10 dB = 10× intensitet. +3 dB ≈ 2×. Intensitet falder med 1/r².",
     "Slagfrekvens (beats):  f_beat = |f₁ − f₂|": "Når to nær-ens frekvenser mødes høres svingninger med f_beat = |f₁−f₂|. Bruges til at stemme instrumenter.",
+    "Stående bølger – kombinationsmatrix": "Find hvilke kombinationer af harmonisk (n) og længde (L) giver en bestemt resonansfrekvens. Typisk eksamensformat.",
+    "Linsformel – kombinationsmatrix": "Find hvilke (genstandsafstand, brændvidde)-kombinationer giver en ønsket billedafstand. Bruges til linse-identifikationsopgaver.",
 }
 show_tips(formel, BOLGE_TIPS)
 st.divider()
@@ -594,3 +599,98 @@ elif formel == "Slagfrekvens (beats):  f_beat = |f₁ − f₂|":
         if f2_low < 0:
             st.info(f"f₂ = {f2_low:.4g} Hz er negativ — kun f₂ = {f2_high:.4g} Hz er fysisk mulig.")
         st.info("Instrumentstemning: Reducer f_beat → 0 ved at justere instrumentet. Når f_beat = 0 er instrumentet stemt.")
+
+elif formel == "Stående bølger – kombinationsmatrix":
+    st.latex(r"f_n = n \cdot \frac{v}{2L}")
+    st.info("Gælder for streng (fast-fast) og rør åbent i begge ender")
+    st.divider()
+    v_bolge = st.number_input("v – bølgehastighed (m/s)", value=340.0, format="%.6g", key="sb_mat_v")
+    f_target = st.number_input("Mål-frekvens (Hz)", value=440.0, format="%.6g", key="sb_mat_ft")
+    tol = st.number_input("Tolerance ± (Hz)", value=10.0, format="%.6g", key="sb_mat_tol")
+    c1, c2, c3 = st.columns(3)
+    L_min = c1.number_input("L min (m)", value=0.2, format="%.6g", key="sb_mat_lmin")
+    L_max = c2.number_input("L max (m)", value=3.0, format="%.6g", key="sb_mat_lmax")
+    L_steps = c3.number_input("L antal trin", value=8, min_value=2, step=1, key="sb_mat_lsteps")
+    L_vals = np.linspace(L_min, L_max, int(L_steps))
+    n_vals = range(1, 9)
+    rows = [f"n={n}" for n in n_vals]
+    cols = [f"L={L:.2f}m" for L in L_vals]
+    data = {}
+    for L, col in zip(L_vals, cols):
+        col_data = []
+        for n in n_vals:
+            f_n = n * v_bolge / (2 * L)
+            col_data.append(f"{f_n:.1f} Hz")
+        data[col] = col_data
+    df = pd.DataFrame(data, index=rows)
+
+    def style_sb(val):
+        try:
+            f_val = float(val.replace(" Hz", ""))
+            if abs(f_val - f_target) <= tol:
+                return "background-color: #d4edda"
+        except Exception:
+            pass
+        return ""
+
+    styled = df.style.applymap(style_sb)
+    st.dataframe(styled, use_container_width=True)
+    matches = []
+    for L, col in zip(L_vals, cols):
+        for n in n_vals:
+            f_n = n * v_bolge / (2 * L)
+            if abs(f_n - f_target) <= tol:
+                matches.append(f"n={n}, L={L:.2f}m → f={f_n:.1f} Hz")
+    if matches:
+        st.success("Matches fundet:")
+        for m in matches:
+            st.write(f"- {m}")
+    else:
+        st.info("Ingen matches inden for tolerancen.")
+
+elif formel == "Linsformel – kombinationsmatrix":
+    st.latex(r"\frac{1}{f} = \frac{1}{d_o} + \frac{1}{d_i} \Rightarrow d_i = \frac{1}{\frac{1}{f}-\frac{1}{d_o}}")
+    st.info("Positiv di = reelt billede (samme side som lys ud). Negativ = virtuelt.")
+    st.divider()
+    di_target = st.number_input("Mål-billedafstand di (m)", value=0.3, format="%.6g", key="lin_mat_di")
+    tol = st.number_input("Tolerance ± (m)", value=0.05, format="%.6g", key="lin_mat_tol")
+    c1, c2, c3 = st.columns(3)
+    do_min = c1.number_input("do min (m)", value=0.1, format="%.6g", key="lin_mat_domin")
+    do_max = c2.number_input("do max (m)", value=2.0, format="%.6g", key="lin_mat_domax")
+    do_steps = c3.number_input("do antal trin", value=8, min_value=2, step=1, key="lin_mat_dosteps")
+    c1, c2, c3 = st.columns(3)
+    f_min = c1.number_input("f min (m)", value=0.05, format="%.6g", key="lin_mat_fmin")
+    f_max = c2.number_input("f max (m)", value=0.5, format="%.6g", key="lin_mat_fmax")
+    f_steps = c3.number_input("f antal trin", value=8, min_value=2, step=1, key="lin_mat_fsteps")
+    do_vals = np.linspace(do_min, do_max, int(do_steps))
+    f_vals = np.linspace(f_min, f_max, int(f_steps))
+    rows = [f"do={do:.2f}m" for do in do_vals]
+    cols = [f"f={f:.2f}m" for f in f_vals]
+    data = {}
+    for f_v, col in zip(f_vals, cols):
+        col_data = []
+        for do in do_vals:
+            denom = 1/f_v - 1/do
+            if abs(denom) < 1e-9:
+                col_data.append("∞")
+            else:
+                di = 1 / denom
+                col_data.append(f"{di:.3f} m")
+        data[col] = col_data
+    df = pd.DataFrame(data, index=rows)
+
+    def style_lin(val):
+        if val == "∞":
+            return ""
+        try:
+            di_val = float(val.replace(" m", ""))
+            if abs(di_val - di_target) <= tol:
+                return "background-color: #d4edda"
+            if di_val < 0:
+                return "background-color: #f8d7da"
+        except Exception:
+            pass
+        return ""
+
+    styled = df.style.applymap(style_lin)
+    st.dataframe(styled, use_container_width=True)

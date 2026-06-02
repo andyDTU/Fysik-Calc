@@ -1,5 +1,6 @@
 import streamlit as st
 import numpy as np
+import pandas as pd
 from utils import show_sidebar_constants, show_resultat_sidebar, show_tips, formula_card_grid, breadcrumb
 
 st.set_page_config(page_title="Elektricitet", page_icon="⚡", layout="wide")
@@ -21,6 +22,7 @@ _ELEK_FORMULAS = [
     ("Kondensator",            "Q = C · U",                   "Kondensator:  Q = C · U"),
     ("Energi i kondensator",   "E = ½·C·U²",                 "Energi i kondensator:  E = ½ · C · U²"),
     ("RC-kredsløb",            "τ = R · C",                   "RC-kredsløb:  τ = R · C"),
+    ("RC – kombinationsmatrix", "R×C → τ (find tidskonstant)", "RC – kombinationsmatrix"),
     ("RL-kredsløb",            "τ = L / R",                   "RL-kredsløb:  τ = L / R"),
     ("Coulombs lov",           "F = k·q₁q₂/r²",              "Coulombs lov:  F = k · q₁ · q₂ / r²"),
     ("Elektrisk felt",         "E = F/q = k·Q/r²",           "Elektrisk felt:  E = F / q = k · Q / r²"),
@@ -41,6 +43,7 @@ ELEK_TIPS = {
     "RC-kredsløb:  τ = R · C": "τ = R·C = tidskonstant. Efter tid τ er kondensatoren 63% ladet / 37% afladet.",
     "Coulombs lov:  F = k · q₁ · q₂ / r²": "k = 8.988×10⁹ N·m²/C². Positiv F = frastødning, negativ = tiltrækning.",
     "Lorentzkraft:  F = q · v · B": "F = qvB·sin(θ). θ er vinklen mellem v og B. Retning: højrehåndsregel (eller venstrehånd for elektroner).",
+    "RC – kombinationsmatrix": "Find hvilke (R, C)-kombinationer giver en bestemt tidskonstant τ = R·C. Identificér kredsløb fra τ-krav.",
 }
 show_tips(formel, ELEK_TIPS)
 st.divider()
@@ -239,6 +242,60 @@ elif formel == "RC-kredsløb:  τ = R · C":
 
     E_c = 0.5 * C * V0**2
     st.caption(f"Energi lagret ved fuld opladning: E = ½CV₀² = {E_c:.6g} J")
+
+elif formel == "RC – kombinationsmatrix":
+    st.latex(r"\tau = R \cdot C")
+    st.divider()
+    tau_target = st.number_input("Mål-τ (s)", value=0.01, format="%.6g", key="rc_mat_tau")
+    tol = st.number_input("Tolerance ± (s)", value=0.001, format="%.6g", key="rc_mat_tol")
+    R_scale_lbl = st.radio("R-enhed:", ["Ω", "kΩ", "MΩ"], horizontal=True, key="rc_mat_ru")
+    scale_R = {"Ω": 1, "kΩ": 1e3, "MΩ": 1e6}[R_scale_lbl]
+    C_scale_lbl = st.radio("C-enhed:", ["F", "mF", "μF", "nF"], horizontal=True, key="rc_mat_cu")
+    scale_C = {"F": 1, "mF": 1e-3, "μF": 1e-6, "nF": 1e-9}[C_scale_lbl]
+    c1, c2, c3 = st.columns(3)
+    R_min = c1.number_input(f"R min ({R_scale_lbl})", value=1.0, format="%.6g", key="rc_mat_rmin")
+    R_max = c2.number_input(f"R max ({R_scale_lbl})", value=100.0, format="%.6g", key="rc_mat_rmax")
+    R_steps = c3.number_input("R antal trin", value=8, min_value=2, step=1, key="rc_mat_rsteps")
+    c1, c2, c3 = st.columns(3)
+    C_min = c1.number_input(f"C min ({C_scale_lbl})", value=1.0, format="%.6g", key="rc_mat_cmin")
+    C_max = c2.number_input(f"C max ({C_scale_lbl})", value=1000.0, format="%.6g", key="rc_mat_cmax")
+    C_steps = c3.number_input("C antal trin", value=8, min_value=2, step=1, key="rc_mat_csteps")
+    R_vals = np.linspace(R_min, R_max, int(R_steps)) * scale_R
+    C_vals = np.linspace(C_min, C_max, int(C_steps)) * scale_C
+    rows = [f"R={R/scale_R:.1f} {R_scale_lbl}" for R in R_vals]
+    cols = [f"C={C/scale_C:.1f} {C_scale_lbl}" for C in C_vals]
+    data = {}
+    for C, col in zip(C_vals, cols):
+        col_data = []
+        for R in R_vals:
+            tau = R * C
+            col_data.append(f"{tau:.4g} s")
+        data[col] = col_data
+    df = pd.DataFrame(data, index=rows)
+
+    def style_rc(val):
+        try:
+            tau_val = float(val.replace(" s", ""))
+            if abs(tau_val - tau_target) <= tol:
+                return "background-color: #d4edda"
+        except Exception:
+            pass
+        return ""
+
+    styled = df.style.applymap(style_rc)
+    st.dataframe(styled, use_container_width=True)
+    matches = []
+    for R, row in zip(R_vals, rows):
+        for C, col in zip(C_vals, cols):
+            tau = R * C
+            if abs(tau - tau_target) <= tol:
+                matches.append(f"{row}, {col} → τ={tau:.4g} s")
+    if matches:
+        st.success("Matches fundet:")
+        for m in matches:
+            st.write(f"- {m}")
+    else:
+        st.info("Ingen matches inden for tolerancen.")
 
 elif formel == "RL-kredsløb:  τ = L / R":
     st.latex(r"\tau = \frac{L}{R}")

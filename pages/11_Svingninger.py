@@ -1,5 +1,6 @@
 import streamlit as st
 import numpy as np
+import pandas as pd
 from utils import show_sidebar_constants, show_resultat_sidebar, gem_resultat, show_tips, formula_card_grid, breadcrumb
 
 st.set_page_config(page_title="Svingninger", page_icon="〰️", layout="wide")
@@ -23,6 +24,7 @@ _SVING_FORMULAS = [
     ("Fjedre serie/parallel","k_s = k₁k₂/(k₁+k₂)",          "Fjedre serie/parallel"),
     ("Tvungen svingning",    "A(ω) = F₀/m / √(…)",          "Tvungen svingning og resonans"),
     ("Q-faktor",             "Q = ω₀/(2γ)",                  "Q-faktor og resonansbredde"),
+    ("Kombinationsmatrix", "m×k → T  |  L → T", "Kombinationsmatrix – svingninger"),
 ]
 formel = formula_card_grid(_SVING_FORMULAS, "sving_formel")
 
@@ -37,6 +39,7 @@ SVING_TIPS = {
     "Fjedre serie/parallel": "Serie: svagere end svageste fjeder. Parallel: stivere end stiveste. T ændres fordi k_eff ændres.",
     "Tvungen svingning og resonans": "Resonans ved ω_drive ≈ ω₀. Amplitude divergerer hvis b → 0. Q angiver skarphed af resonanstoppen.",
     "Q-faktor og resonansbredde": "Høj Q → smal resonanspik, langsom energitab. Q = ω₀m/b = ω₀/(2γ). Halveffekt-båndbredde Δω = ω₀/Q.",
+    "Kombinationsmatrix – svingninger": "Identificér hvilke (m,k)- eller L-kombinationer der giver en given periode. Samme mønster som eksamensopgaver med 'Hvilken kombination passer?'",
 }
 show_tips(formel, SVING_TIPS)
 st.divider()
@@ -381,3 +384,91 @@ elif formel == "Q-faktor og resonansbredde":
     st.latex(rf"Q = \frac{{\omega_0}}{{2\gamma}} = \frac{{{omega0_q:.4g}}}{{2 \cdot {gamma_q:.4g}}} = {Q_q:.4g}")
     st.caption(f"Energien halveret efter {np.log(2)/gamma_q:.4g} s  |  Amplitude halveret efter {np.log(2)/(gamma_q):.4g} s × 2 = {2*np.log(2)/gamma_q:.4g} s")
     gem_resultat(Q_q, "", "Q")
+
+elif formel == "Kombinationsmatrix – svingninger":
+    mode = st.radio("Systemtype:", ["Fjedermasse – T = 2π√(m/k)", "Simpelt pendul – T = 2π√(L/g)"], horizontal=True, key="sving_mat_mode")
+    st.divider()
+
+    if mode == "Fjedermasse – T = 2π√(m/k)":
+        st.latex(r"T = 2\pi\sqrt{\frac{m}{k}}")
+        c1, c2 = st.columns(2)
+        T_target = c1.number_input("Mål-periode T (s)", value=1.0, min_value=1e-12, format="%.6g", key="sving_mat_T_target")
+        tol = c2.number_input("Tolerance ±", value=0.1, min_value=0.0, format="%.6g", key="sving_mat_tol")
+        st.divider()
+        mc1, mc2, mc3 = st.columns(3)
+        m_min  = mc1.number_input("m_min (kg)", value=0.1, min_value=1e-12, format="%.6g", key="sving_mat_m_min")
+        m_max  = mc2.number_input("m_max (kg)", value=2.0, min_value=1e-12, format="%.6g", key="sving_mat_m_max")
+        m_steps = int(mc3.number_input("m – antal trin", value=6, min_value=2, max_value=50, step=1, key="sving_mat_m_steps"))
+        kc1, kc2, kc3 = st.columns(3)
+        k_min  = kc1.number_input("k_min (N/m)", value=10.0, min_value=1e-12, format="%.6g", key="sving_mat_k_min")
+        k_max  = kc2.number_input("k_max (N/m)", value=500.0, min_value=1e-12, format="%.6g", key="sving_mat_k_max")
+        k_steps = int(kc3.number_input("k – antal trin", value=6, min_value=2, max_value=50, step=1, key="sving_mat_k_steps"))
+
+        m_vals = np.linspace(m_min, m_max, m_steps)
+        k_vals = np.linspace(k_min, k_max, k_steps)
+
+        row_labels = [f"m={mv:.3g} kg" for mv in m_vals]
+        col_labels = [f"k={kv:.3g} N/m" for kv in k_vals]
+
+        data = {}
+        for kv, clabel in zip(k_vals, col_labels):
+            col_data = []
+            for mv in m_vals:
+                T_calc = 2 * np.pi * np.sqrt(mv / kv)
+                col_data.append(f"{T_calc:.3f}")
+            data[clabel] = col_data
+
+        df = pd.DataFrame(data, index=row_labels)
+
+        def _style_fjeder(val):
+            try:
+                T_calc = float(val)
+            except ValueError:
+                return "background-color: white"
+            if abs(T_calc - T_target) <= tol:
+                return "background-color: #d4edda"
+            return "background-color: white"
+
+        styled = df.style.applymap(_style_fjeder)
+        st.dataframe(styled, use_container_width=True)
+
+        matches = 0
+        for kv in k_vals:
+            for mv in m_vals:
+                T_calc = 2 * np.pi * np.sqrt(mv / kv)
+                if abs(T_calc - T_target) <= tol:
+                    matches += 1
+        st.caption(f"Antal match (grønne celler): **{matches}** ud af {m_steps * k_steps}")
+
+    else:
+        st.latex(r"T = 2\pi\sqrt{\frac{L}{g}}")
+        st.info(f"g = {G} m/s²  (DTU standard)")
+        c1, c2 = st.columns(2)
+        T_target = c1.number_input("Mål-periode T (s)", value=1.0, min_value=1e-12, format="%.6g", key="sving_mat_pend_T_target")
+        tol = c2.number_input("Tolerance ±", value=0.1, min_value=0.0, format="%.6g", key="sving_mat_pend_tol")
+        st.divider()
+        lc1, lc2, lc3 = st.columns(3)
+        L_min   = lc1.number_input("L_min (m)", value=0.1, min_value=1e-12, format="%.6g", key="sving_mat_L_min")
+        L_max   = lc2.number_input("L_max (m)", value=3.0, min_value=1e-12, format="%.6g", key="sving_mat_L_max")
+        L_steps = int(lc3.number_input("L – antal trin", value=10, min_value=2, max_value=100, step=1, key="sving_mat_L_steps"))
+
+        L_vals = np.linspace(L_min, L_max, L_steps)
+        T_vals = [2 * np.pi * np.sqrt(Lv / G) for Lv in L_vals]
+
+        row_labels = [f"L={Lv:.3g} m" for Lv in L_vals]
+        df = pd.DataFrame({"T (s)": [f"{Tv:.3f}" for Tv in T_vals]}, index=row_labels)
+
+        def _style_pend(val):
+            try:
+                T_calc = float(val)
+            except ValueError:
+                return "background-color: white"
+            if abs(T_calc - T_target) <= tol:
+                return "background-color: #d4edda"
+            return "background-color: white"
+
+        styled = df.style.applymap(_style_pend)
+        st.dataframe(styled, use_container_width=True)
+
+        matches = sum(1 for Tv in T_vals if abs(Tv - T_target) <= tol)
+        st.caption(f"Antal match (grønne celler): **{matches}** ud af {L_steps}")

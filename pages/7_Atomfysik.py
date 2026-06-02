@@ -1,5 +1,6 @@
 import streamlit as st
 import numpy as np
+import pandas as pd
 from utils import show_sidebar_constants, show_resultat_sidebar, show_tips, formula_card_grid, breadcrumb
 
 st.set_page_config(page_title="Atomfysik & Kvantemekanik", page_icon="☢️", layout="wide")
@@ -27,6 +28,8 @@ _ATOM_FORMULAS = [
     ("Bohrs model",          "En = −13.6 eV/n²",             "Bohrs model – hydrogenspektret"),
     ("Fotoelektrisk effekt", "Ek = hf − φ",                  "Fotoelektrisk effekt"),
     ("Compton-spredning",    "Δλ = (h/mₑc)(1−cosθ)",         "Compton-spredning"),
+    ("Henfaldstabel", "T½ × t → N/N₀ %", "Henfaldstabel – T½ × tid"),
+    ("Bohr – overgangstabel", "alle n→m λ (nm)", "Bohr – overgangstabel"),
 ]
 formel = formula_card_grid(_ATOM_FORMULAS, "atom_formel")
 
@@ -38,6 +41,8 @@ ATOM_TIPS = {
     "de Broglie bølgelængde:  λ = h / (m·v)": "λ = h/(mv) = h/p. Partikler viser bølgeegenskaber. Gælder for elektroner, neutroner, etc.",
     "Fotoelektrisk effekt": "E_k = hf − φ. φ = arbejdsfunktion (J eller eV). Ingen elektroner hvis f < f_grænse.",
     "Bohrs model – hydrogenspektret": "E_n = −13.6 eV/n². Foton udsendes: ΔE = hf = E_i − E_f. n=1 er grundtilstand.",
+    "Henfaldstabel – T½ × tid": "Identificér hvilke (T½, tid)-kombinationer der giver en bestemt rest-fraktion. Typisk eksamensformat: 'Hvilken prøve har X% tilbage efter Y år?'",
+    "Bohr – overgangstabel": "Overblik over alle hydrogen-overgange. Lyman (n₁=1): UV. Balmer (n₁=2): synligt lys. Paschen (n₁=3): IR.",
 }
 show_tips(formel, ATOM_TIPS)
 st.divider()
@@ -341,3 +346,132 @@ elif formel == "Compton-spredning":
     with st.expander("Vis udregning"):
         st.latex(rf"\Delta\lambda = \frac{{h}}{{m_e c}}(1-\cos\theta) = {lam_C:.4g} \cdot (1-\cos({theta:.4g}°)) = {dlam:.4g}\ \text{{m}}")
         st.latex(rf"\lambda_{{ud}} = \lambda_{{ind}} + \Delta\lambda = {lam_in:.4g} + {dlam:.4g} = {lam_out:.4g}\ \text{{m}}")
+
+elif formel == "Henfaldstabel – T½ × tid":
+    st.latex(r"\frac{N}{N_0} = \left(\frac{1}{2}\right)^{t/T_{1/2}}")
+    enhed = st.radio("Tidsenhed:", ["sekunder (s)", "minutter (min)", "timer (h)", "dage (d)", "år (år)"], horizontal=True, key="atom_mat_enhed")
+    multipliers = {
+        "sekunder (s)": 1,
+        "minutter (min)": 60,
+        "timer (h)": 3600,
+        "dage (d)": 86400,
+        "år (år)": 365.25 * 86400,
+    }
+    mult = multipliers[enhed]
+    st.divider()
+    c1, c2 = st.columns(2)
+    frac_target = c1.number_input("Målrest (%)", value=10.0, min_value=0.0, max_value=100.0, format="%.4g", key="atom_mat_frac_target")
+    tol_frac = c2.number_input("Tolerance ±%", value=5.0, min_value=0.0, format="%.4g", key="atom_mat_tol_frac")
+    st.divider()
+    tc1, tc2, tc3 = st.columns(3)
+    T_min   = tc1.number_input(f"T½_min ({enhed})", value=1.0, min_value=1e-12, format="%.6g", key="atom_mat_T_min")
+    T_max   = tc2.number_input(f"T½_max ({enhed})", value=20.0, min_value=1e-12, format="%.6g", key="atom_mat_T_max")
+    T_steps = int(tc3.number_input("T½ – antal trin", value=8, min_value=2, max_value=50, step=1, key="atom_mat_T_steps"))
+    tmc1, tmc2, tmc3 = st.columns(3)
+    t_min   = tmc1.number_input(f"t_min ({enhed})", value=1.0, min_value=1e-12, format="%.6g", key="atom_mat_t_min")
+    t_max   = tmc2.number_input(f"t_max ({enhed})", value=50.0, min_value=1e-12, format="%.6g", key="atom_mat_t_max")
+    t_steps = int(tmc3.number_input("t – antal trin", value=8, min_value=2, max_value=50, step=1, key="atom_mat_t_steps"))
+
+    T_half_vals = np.linspace(T_min, T_max, T_steps)
+    t_vals = np.linspace(t_min, t_max, t_steps)
+
+    row_labels = [f"T½={Tv:.3g} {enhed}" for Tv in T_half_vals]
+    col_labels = [f"t={tv:.3g} {enhed}" for tv in t_vals]
+
+    cell_data = {}
+    for tv, clabel in zip(t_vals, col_labels):
+        col_data = []
+        for Thv in T_half_vals:
+            frac_val = (0.5 ** (tv / Thv)) * 100
+            col_data.append(f"{frac_val:.1f}%")
+        cell_data[clabel] = col_data
+
+    df_henfald = pd.DataFrame(cell_data, index=row_labels)
+
+    def _style_henfald(val):
+        try:
+            cell_val = float(val.replace("%", ""))
+        except ValueError:
+            return "background-color: white"
+        if abs(cell_val - frac_target) <= tol_frac:
+            return "background-color: #d4edda"
+        return "background-color: white"
+
+    styled_henfald = df_henfald.style.applymap(_style_henfald)
+    st.dataframe(styled_henfald, use_container_width=True)
+
+    matches_h = 0
+    for tv in t_vals:
+        for Thv in T_half_vals:
+            frac_val = (0.5 ** (tv / Thv)) * 100
+            if abs(frac_val - frac_target) <= tol_frac:
+                matches_h += 1
+    st.caption(f"Antal match (grønne celler): **{matches_h}** ud af {T_steps * t_steps}")
+
+elif formel == "Bohr – overgangstabel":
+    Z = st.number_input("Z – atomnummer", value=1, min_value=1, step=1, key="atom_mat_Z")
+    n_max = st.slider("Vis niveauer n =", min_value=2, max_value=8, value=6, key="atom_mat_n_max")
+    st.divider()
+
+    eV_J = 1.602e-19
+
+    n1_vals = list(range(1, n_max))
+    n2_vals = list(range(2, n_max + 1))
+
+    row_labels_bohr = [f"n₁={n1}" for n1 in n1_vals]
+    col_labels_bohr = [f"n₂={n2}" for n2 in n2_vals]
+
+    cell_matrix = {}
+    for n2, clabel in zip(n2_vals, col_labels_bohr):
+        col_data = []
+        for n1 in n1_vals:
+            if n2 > n1:
+                E1_eV = -13.6 * Z**2 / n1**2
+                E2_eV = -13.6 * Z**2 / n2**2
+                dE_J = abs(E2_eV - E1_eV) * eV_J
+                lam_nm = h * c / dE_J * 1e9
+                col_data.append(f"{lam_nm:.0f} nm")
+            else:
+                col_data.append("—")
+        cell_matrix[clabel] = col_data
+
+    df_bohr = pd.DataFrame(cell_matrix, index=row_labels_bohr)
+
+    def _style_bohr(val):
+        if val == "—":
+            return "background-color: white"
+        try:
+            lam_nm_val = float(val.replace(" nm", ""))
+        except ValueError:
+            return "background-color: white"
+        if lam_nm_val < 380:
+            return "background-color: #fff9c4"
+        elif lam_nm_val <= 700:
+            return "background-color: #d4edda"
+        else:
+            return "background-color: #cce5ff"
+
+    styled_bohr = df_bohr.style.applymap(_style_bohr)
+    st.dataframe(styled_bohr, use_container_width=True)
+
+    st.markdown(
+        "**Farve-legende:**  "
+        ":yellow_heart: Gul = UV (λ < 380 nm)  |  "
+        ":green_heart: Grøn = Synligt lys (380–700 nm)  |  "
+        ":blue_heart: Blå = IR (λ > 700 nm)"
+    )
+    st.divider()
+
+    st.markdown("**Vis specifik overgang:**")
+    tc1, tc2 = st.columns(2)
+    n1_sel = tc1.number_input("n₁ (nedre niveau)", value=2, min_value=1, step=1, key="atom_mat_n1_sel")
+    n2_sel = tc2.number_input("n₂ (øvre niveau)", value=3, min_value=2, step=1, key="atom_mat_n2_sel")
+    if n2_sel > n1_sel:
+        E1_sel = -13.6 * Z**2 / n1_sel**2
+        E2_sel = -13.6 * Z**2 / n2_sel**2
+        dE_sel_eV = abs(E2_sel - E1_sel)
+        dE_sel_J  = dE_sel_eV * eV_J
+        lam_sel_nm = h * c / dE_sel_J * 1e9
+        st.success(f"n{n1_sel}→n{n2_sel}: ΔE = {dE_sel_eV:.4f} eV  |  λ = {lam_sel_nm:.2f} nm")
+    else:
+        st.warning("n₂ skal være større end n₁")
