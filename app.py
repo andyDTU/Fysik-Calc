@@ -87,18 +87,19 @@ _SIDE_ORDER = [t[1] for t in TILES]
 
 if valgte_syms:
     # ── Variabel-filter resultater ────────────────────────────────────────────
-    # Beregn match-score for hver formel (hvor mange valgte variable den bruger)
     hits_scored = []
     for f in FORMLER:
         vars_in_formula = f.get("vars", [])
         matched_vars = [sym for sym in valgte_syms if sym in vars_in_formula]
         match_score = len(matched_vars)
         if match_score > 0:
-            hits_scored.append((f, match_score, matched_vars))
+            # Ratio: andel af formlens variable der er valgt → højere = mere specifik match
+            ratio = match_score / len(vars_in_formula) if vars_in_formula else 0
+            hits_scored.append((f, match_score, matched_vars, ratio))
 
-    # Sortér efter match-score (bedste først)
-    hits_scored.sort(key=lambda x: x[1], reverse=True)
-    hits = [f for f, _, _ in hits_scored]
+    # Sortér: primært antal matchede variable, sekundært ratio (specificitet)
+    hits_scored.sort(key=lambda x: (x[1], x[3]), reverse=True)
+    hits = [f for f, _, _, _ in hits_scored]
 
     if not hits:
         st.warning(
@@ -108,7 +109,7 @@ if valgte_syms:
     else:
         st.markdown(f"**{len(hits)} formel(er) fundet – sorteret efter bedste match**")
         for side_navn in _SIDE_ORDER:
-            gruppe = [(f, score, matched) for f, score, matched in hits_scored if f["side"] == side_navn]
+            gruppe = [(f, score, matched) for f, score, matched, _ in hits_scored if f["side"] == side_navn]
             if not gruppe:
                 continue
             emoji = _SIDE_META[side_navn][0]
