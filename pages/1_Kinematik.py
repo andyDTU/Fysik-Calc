@@ -27,6 +27,7 @@ if st.session_state.pop("example_kinematik_2025q4", None):
     st.session_state["kin_ja2_t"] = 2.0
 
 _KIN_FORMULAS = [
+    ("SUVAT – universal",   "giv 3 → find 2 ukendte",         "SUVAT – universal løser"),
     ("Uniform bevægelse",   "s = v · t",                      "Uniform bevægelse:  s = v · t"),
     ("Jævnt acc. (1)",      "v = v₀ + a · t",                 "Jævnt accelereret (1):  v = v₀ + a · t"),
     ("Jævnt acc. (2)",      "s = v₀·t + ½·a·t²",             "Jævnt accelereret (2):  s = v₀·t + ½·a·t²"),
@@ -43,6 +44,7 @@ _KIN_FORMULAS = [
 formel = formula_card_grid(_KIN_FORMULAS, "kin_formel")
 
 KIN_TIPS = {
+    "SUVAT – universal løser": "Angiv præcis 3 kendte størrelser fra {s, v₀, v, a, t}. Systemet finder automatisk de 2 ukendte via de relevante kinematik-ligninger.",
     "Uniform bevægelse:  s = v · t": "Bruges ved konstant fart (acceleration = 0). Husk: s er tilbagelagt strækning.",
     "Jævnt accelereret (1):  v = v₀ + a · t": "Find slut- eller starthastighed. Brug a = −g = −9.82 m/s² ved frit fald.",
     "Jævnt accelereret (2):  s = v₀·t + ½·a·t²": "Find strækning eller tid. Sæt v₀ = 0 ved start fra ro. Diskriminant < 0 → ingen reel løsning.",
@@ -59,8 +61,127 @@ KIN_TIPS = {
 show_tips(formel, KIN_TIPS)
 st.divider()
 
+# ── SUVAT – universal løser ────────────────────────────────────────────────────
+if formel == "SUVAT – universal løser":
+    st.latex(r"v = v_0 + at \quad s = v_0 t + \tfrac{1}{2}at^2 \quad v^2 = v_0^2 + 2as \quad s = \tfrac{1}{2}(v_0+v)t")
+    st.markdown("Vælg de **2 ukendte** variable. Indtast de 3 kendte, og klik **Beregn**.")
+    st.divider()
+
+    _SUVAT_VARS = ["s – strækning (m)", "v₀ – starthastighed (m/s)", "v – sluthastighed (m/s)", "a – acceleration (m/s²)", "t – tid (s)"]
+    _SUVAT_KEY  = ["s", "v₀", "v", "a", "t"]
+
+    ukend = st.multiselect("Vælg præcis **2 ukendte**:", _SUVAT_VARS, max_selections=2,
+                           placeholder="Klik og vælg 2 ukendte variable...", key="suvat_ukend")
+
+    if len(ukend) != 2:
+        st.info("Vælg præcis 2 ukendte variable herover for at aktivere beregneren.")
+    else:
+        ukend_keys = {opt.split(" – ")[0].strip() for opt in ukend}
+        known_vars  = [k for k in _SUVAT_KEY if k not in ukend_keys]
+        vals = {}
+        cols = st.columns(3)
+        defaults = {"s": 50.0, "v₀": 0.0, "v": 10.0, "a": 2.0, "t": 5.0}
+        units    = {"s": "m", "v₀": "m/s", "v": "m/s", "a": "m/s²", "t": "s"}
+        for i, k in enumerate(known_vars):
+            label = [opt for opt in _SUVAT_VARS if opt.startswith(k)][0]
+            vals[k] = cols[i].number_input(label, value=defaults[k], format="%.6g", key=f"suvat_{k}")
+
+        if st.button("Beregn de 2 ukendte", type="primary"):
+            try:
+                s  = vals.get("s")
+                v0 = vals.get("v₀")
+                v  = vals.get("v")
+                a  = vals.get("a")
+                t  = vals.get("t")
+                res = {}
+
+                combo = tuple(sorted(ukend_keys))
+
+                if combo == ("a", "s"):             # known: v₀, v, t
+                    res["s"] = 0.5 * (v0 + v) * t
+                    res["a"] = (v - v0) / t
+                elif combo == ("a", "v"):            # known: s, v₀, t
+                    res["v"] = 2*s/t - v0
+                    res["a"] = (res["v"] - v0) / t
+                elif combo == ("a", "v₀"):           # known: s, v, t
+                    res["v₀"] = 2*s/t - v
+                    res["a"]  = (v - res["v₀"]) / t
+                elif combo == ("s", "t"):            # known: v₀, v, a
+                    if abs(a) < 1e-15:
+                        st.error("a = 0 → uniform bevægelse, t er ubestemt fra disse variable. Brug s = ½(v₀+v)t.")
+                        st.stop()
+                    res["t"] = (v - v0) / a
+                    res["s"] = v0*res["t"] + 0.5*a*res["t"]**2
+                elif combo == ("s", "v"):            # known: v₀, a, t
+                    res["v"] = v0 + a*t
+                    res["s"] = v0*t + 0.5*a*t**2
+                elif combo == ("s", "v₀"):           # known: v, a, t
+                    res["v₀"] = v - a*t
+                    res["s"]  = v*t - 0.5*a*t**2
+                elif combo == ("a", "t"):            # known: s, v₀, v
+                    denom = v + v0
+                    if abs(denom) < 1e-15:
+                        st.error("v + v₀ = 0 → t er ubestemt herfra. Vælg en anden kombination.")
+                        st.stop()
+                    res["t"] = 2*s / denom
+                    dv = v - v0
+                    res["a"] = dv / res["t"] if abs(res["t"]) > 1e-15 else 0.0
+                elif combo == ("t", "v"):            # known: s, v₀, a
+                    disc = v0**2 + 2*a*s
+                    if disc < 0:
+                        st.error(f"Diskriminant = {disc:.4g} < 0: ingen reel løsning.")
+                        st.stop()
+                    if abs(a) < 1e-15:
+                        if abs(v0) < 1e-15:
+                            st.error("a=0 og v₀=0 → s=0 men s≠0. Ingen løsning.")
+                            st.stop()
+                        res["t"] = s / v0
+                        res["v"] = v0
+                    else:
+                        res["t"] = (-v0 + np.sqrt(disc)) / a
+                        if res["t"] < 0:
+                            res["t"] = (-v0 - np.sqrt(disc)) / a
+                        res["v"] = v0 + a*res["t"]
+                elif combo == ("t", "v₀"):           # known: s, v, a
+                    disc = v**2 - 2*a*s
+                    if disc < 0:
+                        st.error(f"Diskriminant = {disc:.4g} < 0: ingen reel løsning.")
+                        st.stop()
+                    if abs(a) < 1e-15:
+                        res["v₀"] = v
+                        res["t"]  = s / v if abs(v) > 1e-15 else float("nan")
+                    else:
+                        v0_calc = np.sqrt(max(disc, 0))
+                        res["v₀"] = v0_calc
+                        res["t"]  = (v - v0_calc) / a
+                        if res["t"] < 0:
+                            res["v₀"] = -v0_calc
+                            res["t"]  = (v - res["v₀"]) / a
+                elif combo == ("v", "v₀"):           # known: s, a, t
+                    res["v₀"] = (s - 0.5*a*t**2) / t if abs(t) > 1e-15 else float("nan")
+                    res["v"]  = res["v₀"] + a*t
+                else:
+                    st.error("Ukendt kombination – prøv en anden.")
+                    st.stop()
+
+                for key, val in res.items():
+                    unit = units[key]
+                    st.success(f"**{key} = {val:.6g} {unit}**")
+                    if st.button(f"📋 Gem {key}", key=f"gem_suvat_{key}"):
+                        gem_resultat(val, unit, key)
+
+                with st.expander("Vis alle SUVAT-ligninger med indsatte værdier"):
+                    all_vals = {**vals, **res}
+                    sv, sv0, vv, av, tv = all_vals.get("s","?"), all_vals.get("v₀","?"), all_vals.get("v","?"), all_vals.get("a","?"), all_vals.get("t","?")
+                    if all(isinstance(x, (int, float)) for x in [sv, sv0, vv, av, tv]):
+                        st.latex(rf"v = v_0 + at: \quad {vv:.4g} = {sv0:.4g} + {av:.4g}\cdot{tv:.4g} = {sv0 + av*tv:.4g}")
+                        st.latex(rf"s = v_0 t + \tfrac{{1}}{{2}}at^2: \quad {sv:.4g} = {sv0:.4g}\cdot{tv:.4g} + \tfrac{{1}}{{2}}\cdot{av:.4g}\cdot{tv:.4g}^2 = {sv0*tv + 0.5*av*tv**2:.4g}")
+                        st.latex(rf"v^2 = v_0^2 + 2as: \quad {vv:.4g}^2 = {sv0:.4g}^2 + 2\cdot{av:.4g}\cdot{sv:.4g} \Rightarrow {vv**2:.4g} \approx {sv0**2 + 2*av*sv:.4g}")
+            except Exception as exc:
+                st.error(f"Beregningsfejl: {exc}")
+
 # ── Uniform bevægelse ──────────────────────────────────────────────────────────
-if formel == "Uniform bevægelse:  s = v · t":
+elif formel == "Uniform bevægelse:  s = v · t":
     st.latex(r"s = v \cdot t")
     beregn = st.radio("Beregn:", ["s – strækning (m)", "v – hastighed (m/s)", "t – tid (s)"], horizontal=True)
     st.divider()

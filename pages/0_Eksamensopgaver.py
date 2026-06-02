@@ -239,10 +239,111 @@ OPGAVER = [
         "tags": ["relativitetsteori", "lorentz", "gamma", "elektron", "kinetisk energi", "MeV"],
         "page_key": None,
     },
+    # ── Variationer – find anden variabel ────────────────────────────────────────
+    {
+        "år": "Variant", "nr": "V1",
+        "titel": "SUVAT – find startfart fra bremsestrækning",
+        "tekst": "Bil bremser med a = −8.0 m/s² og standser (v = 0) efter s = 45 m. Hvad var startfarten v₀?",
+        "modul": "🏃 Kinematik", "formel": "SUVAT – universal løser  (kendte: s, v, a  →  find v₀, t)",
+        "værdier": "s=45, v=0, a=−8.0  →  v₀² = v² − 2as = 0 + 2·8·45 = 720  →  v₀ = 26.8 m/s",
+        "svar": "v₀ ≈ 26.8 m/s  (≈ 97 km/h)",
+        "tags": ["kinematik", "suvat", "bremsning", "startfart", "strækning", "acceleration"],
+        "page_key": None,
+    },
+    {
+        "år": "Variant", "nr": "V2",
+        "titel": "SUVAT – find acceleration fra t og s",
+        "tekst": "Raket starter fra ro (v₀=0) og tilbagelægger s=1200 m på t=10 s. Find acceleration.",
+        "modul": "🏃 Kinematik", "formel": "SUVAT – universal løser  (kendte: s, v₀, t  →  find v, a)",
+        "værdier": "s=1200, v₀=0, t=10  →  a = 2s/t² = 2·1200/100 = 24 m/s²  →  v = at = 240 m/s",
+        "svar": "a = 24 m/s²,  v = 240 m/s",
+        "tags": ["kinematik", "suvat", "acceleration", "raket", "strækning", "tid"],
+        "page_key": None,
+    },
+    {
+        "år": "Variant", "nr": "V3",
+        "titel": "Pendul – find g fra periode og længde",
+        "tekst": "Pendul med L=0.80 m måles til T=1.80 s. Find den lokale tyngdeacceleration g.",
+        "modul": "〰️ Svingninger", "formel": "Simpelt pendul: g = L·(2π/T)²",
+        "værdier": "g = 0.80 · (2π/1.80)² = 0.80 · 12.18 = 9.74 m/s²",
+        "svar": "g ≈ 9.74 m/s²  (lidt lavere end 9.82 – fx ved ækvator eller i et andet land)",
+        "tags": ["svingninger", "pendul", "tyngde", "g", "periode", "eksperiment"],
+        "page_key": None,
+    },
+    {
+        "år": "Variant", "nr": "V4",
+        "titel": "Pendul på Månen – find periode",
+        "tekst": "Samme pendul L=1.0 m er på Månen (g_M=1.62 m/s²). Hvad er perioden?",
+        "modul": "〰️ Svingninger", "formel": "Simpelt pendul: T = 2π√(L/g)",
+        "værdier": "T = 2π√(1.0/1.62) = 2π·0.786 = 4.94 s  (≈ 2.5× længere end på Jorden)",
+        "svar": "T ≈ 4.94 s",
+        "tags": ["svingninger", "pendul", "månen", "tyngde", "periode", "planet"],
+        "page_key": None,
+    },
+    {
+        "år": "Variant", "nr": "V5",
+        "titel": "Fjeder – find fjederkonstant fra periode",
+        "tekst": "Masse m=0.50 kg svinger med T=0.40 s. Hvad er fjederkonstanten k?",
+        "modul": "〰️ Svingninger", "formel": "Fjedermasse: k = m·(2π/T)²",
+        "værdier": "k = 0.50 · (2π/0.40)² = 0.50 · 246.7 = 123.4 N/m",
+        "svar": "k ≈ 123 N/m",
+        "tags": ["svingninger", "fjeder", "fjederkonstant", "periode", "masse", "fjedermasse"],
+        "page_key": None,
+    },
+    {
+        "år": "Variant", "nr": "V6",
+        "titel": "Radioaktivt henfald – find T½ fra data",
+        "tekst": "Aktivitet falder fra A₀ = 8000 Bq til A = 500 Bq på t = 60 min. Find halvvejstiden T½.",
+        "modul": "☢️ Atomfysik", "formel": "Henfald: T½ = t·ln(2)/ln(A₀/A)",
+        "værdier": "A/A₀ = 500/8000 = 1/16 = (½)⁴  →  4 halvvejstider → T½ = 60/4 = 15 min",
+        "svar": "T½ = 15 min",
+        "tags": ["atomfysik", "henfald", "halvvejstid", "aktivitet", "eksponentiel", "t½"],
+        "page_key": None,
+    },
+    {
+        "år": "Variant", "nr": "V7",
+        "titel": "Skråt kast – find startfart fra rækkevidde",
+        "tekst": "Projektil affyret med θ=30° lander x=80 m væk (h₀=0). Find v₀.",
+        "modul": "🏃 Kinematik", "formel": "Skråt kast: v₀ = √(x·g/sin(2θ))",
+        "værdier": "v₀² = x·g/sin(2·30°) = 80·9.82/sin(60°) = 785.6/0.866 = 906.9  →  v₀ = 30.1 m/s",
+        "svar": "v₀ ≈ 30.1 m/s",
+        "tags": ["kinematik", "skråt kast", "projektil", "startfart", "rækkevidde", "vinkel"],
+        "page_key": None,
+    },
+    {
+        "år": "Variant", "nr": "V8",
+        "titel": "RC-kredsløb – find R fra tidskonstant",
+        "tekst": "RC-kredsløb med C=47 μF lader op med τ=2.35 ms. Find modstanden R.",
+        "modul": "⚡ Elektricitet", "formel": "RC-kredsløb: R = τ/C",
+        "værdier": "R = 2.35e-3 / 47e-6 = 50 Ω",
+        "svar": "R = 50 Ω",
+        "tags": ["elektricitet", "rc", "modstand", "tidskonstant", "kondensator", "opladning"],
+        "page_key": None,
+    },
+    {
+        "år": "Variant", "nr": "V9",
+        "titel": "Kollision – find fart efter uelastisk kollision",
+        "tekst": "Vogn 1: m₁=2 kg, v₁=6 m/s. Vogn 2: m₂=3 kg, v₂=0. De klæber sammen. Find v_fælles.",
+        "modul": "💥 Kollisioner", "formel": "Fuldstændig uelastisk: v = (m₁v₁+m₂v₂)/(m₁+m₂)",
+        "værdier": "v = (2·6 + 3·0)/(2+3) = 12/5 = 2.4 m/s",
+        "svar": "v = 2.4 m/s",
+        "tags": ["kollisioner", "uelastisk", "impuls", "bevarelse", "fart", "masse"],
+        "page_key": None,
+    },
+    {
+        "år": "Variant", "nr": "V10",
+        "titel": "Energibevarelse – find maks. højde fra fart",
+        "tekst": "Kugle kastes op med v₀=15 m/s fra h₀=2 m. Find den maksimale højde.",
+        "modul": "🔋 Energi", "formel": "Energibevarelse: h_max = h₀ + v₀²/(2g)",
+        "værdier": "h_max = 2 + 15²/(2·9.82) = 2 + 225/19.64 = 2 + 11.46 = 13.46 m",
+        "svar": "h_max ≈ 13.5 m",
+        "tags": ["energi", "energibevarelse", "kinetisk", "potentiel", "højde", "fart", "kast"],
+        "page_key": None,
+    },
 ]
 
 # ── Filtrering ─────────────────────────────────────────────────────────────────
-år_filter = st.radio("Vis:", ["Alle", "2024", "2025"], horizontal=True)
+år_filter = st.radio("Vis:", ["Alle", "2024", "2025", "Variant"], horizontal=True)
 
 def matcher(opgave, søgeord, år):
     if år != "Alle" and opgave["år"] != år:
@@ -260,7 +361,7 @@ st.divider()
 
 # ── Opgave-kort ───────────────────────────────────────────────────────────────
 for opgave in filtrerede:
-    farve = "🟡" if opgave["år"] == "2024" else "🟢"
+    farve = "🟡" if opgave["år"] == "2024" else ("🔵" if opgave["år"] == "Variant" else "🟢")
     with st.expander(f"{farve} **{opgave['år']} {opgave['nr']}** – {opgave['titel']}"):
         col1, col2 = st.columns([2, 1])
         with col1:
@@ -286,6 +387,7 @@ with st.expander("📚 Hurtig formeloversigt – hvad beregner hvilken side?"):
     st.markdown("""
 | Opgavetype | Side | Formel |
 |------------|------|--------|
+| Giv 3 kendte → find 2 ukendte (s,v₀,v,a,t) | 🏃 Kinematik | SUVAT – universal løser |
 | Postion/hastighed/tid | 🏃 Kinematik | Uniform / Jævnt acc. (1)-(3) |
 | Kastet lodret op + tid | 🏃 Kinematik | Jævnt acc. (2): s=v₀t+½at² |
 | Skrå kast rækkevidde/højde | 🏃 Kinematik | Kastebevægelse (skråt kast) |
@@ -300,6 +402,7 @@ with st.expander("📚 Hurtig formeloversigt – hvad beregner hvilken side?"):
 | Kollision (elastisk/uelastisk) | 💥 Kollisioner | Vælg type |
 | Gaslov, varme | 🌡️ Termodynamik | pV=nRT / Q=mcΔT |
 | Bølgelængde, frekvens | 🌊 Bølger | v=fλ |
+| Find g fra pendul-måling | 〰️ Svingninger | Simpelt pendul: g = L(2π/T)² |
 | Radioaktivt henfald | ☢️ Atomfysik | Henfald / Halvvejstid |
 | Gennemsnit, standardafvigelse | 📏 Usikkerhed | Gennemsnit og stdafv. |
 | Fejlpropagation specifik formel | 📏 Usikkerhed | Fejlpropagation – generel (numerisk) |

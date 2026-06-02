@@ -30,7 +30,7 @@ formel = formula_card_grid(_SVING_FORMULAS, "sving_formel")
 
 SVING_TIPS = {
     "Fjedermasse:  T = 2π√(m/k)": "T afhænger ikke af amplitude. Stivere fjeder (stor k) → kortere periode.",
-    "Simpelt pendul:  T = 2π√(L/g)": "Gælder kun for små vinkler (< ~15°). T afhænger ikke af masse!",
+    "Simpelt pendul:  T = 2π√(L/g)": "Gælder kun for små vinkler (< ~15°). T afhænger ikke af masse! Find g: mål T og L → g = L(2π/T)². Brugt på Månen: g = 1.62 m/s².",
     "Vinkelfrekvens:  ω = √(k/m)": "ω = 2πf = 2π/T. Enhed: rad/s. ω² = k/m for fjedermasse-system.",
     "Bevægelsesligning:  x(t) = A·cos(ωt + φ)": "v(t) = −Aω·sin(ωt+φ), a(t) = −Aω²·cos(ωt+φ). Max fart ved x=0, max acc. ved x=±A.",
     "Energi i svingning:  E = ½·k·A²": "E = ½kA² = konstant. Ved x=0: alt er kinetisk. Ved x=±A: alt er potentielt.",
@@ -77,22 +77,39 @@ if formel == "Fjedermasse:  T = 2π√(m/k)":
 
 elif formel == "Simpelt pendul:  T = 2π√(L/g)":
     st.latex(r"T = 2\pi\sqrt{\frac{L}{g}}")
-    st.info(f"g = {G} m/s²  (DTU standard)")
-    beregn = st.radio("Beregn:", ["T – periode (s)", "L – pendullængde (m)"], horizontal=True)
+    beregn = st.radio("Beregn:", ["T – periode (s)", "L – pendullængde (m)", "g – tyngdeacceleration (m/s²)"], horizontal=True)
     st.divider()
 
     if beregn == "T – periode (s)":
-        L = st.number_input("L – pendullængde (m)", value=1.0, min_value=1e-12, format="%.6g")
-        T = 2 * np.pi * np.sqrt(L / G)
+        c1, c2 = st.columns(2)
+        L = c1.number_input("L – pendullængde (m)", value=1.0, min_value=1e-12, format="%.6g")
+        g = c2.number_input("g – tyngdeacceleration (m/s²)", value=G, min_value=1e-6, format="%.6g")
+        T = 2 * np.pi * np.sqrt(L / g)
         f = 1 / T
         st.success(f"**T = {T:.6g} s**   (f = {f:.6g} Hz)")
-        st.latex(rf"T = 2\pi\sqrt{{\frac{{{L:.6g}}}{{{G}}}}} = {T:.6g}\ \text{{s}}")
-        st.caption("Gælder for små udsving (θ < ~15°). For større vinkler tilføjes korrektionstled.")
-    else:
-        T = st.number_input("T – periode (s)", value=2.0, min_value=1e-12, format="%.6g")
-        L = G * (T / (2 * np.pi))**2
+        st.latex(rf"T = 2\pi\sqrt{{\frac{{{L:.6g}}}{{{g:.6g}}}}} = {T:.6g}\ \text{{s}}")
+        st.caption("Gælder for små udsving (θ < ~15°). Sæt g = 1.62 m/s² for Månen, g = 3.72 m/s² for Mars.")
+        if st.button("📋 Gem T", key="gem_sving_pend_T"):
+            gem_resultat(T, "s", "T")
+    elif beregn == "L – pendullængde (m)":
+        c1, c2 = st.columns(2)
+        T = c1.number_input("T – periode (s)", value=2.0, min_value=1e-12, format="%.6g")
+        g = c2.number_input("g – tyngdeacceleration (m/s²)", value=G, min_value=1e-6, format="%.6g")
+        L = g * (T / (2 * np.pi))**2
         st.success(f"**L = {L:.6g} m**")
-        st.latex(rf"L = g\left(\frac{{T}}{{2\pi}}\right)^2 = {G} \cdot \left(\frac{{{T:.6g}}}{{2\pi}}\right)^2 = {L:.6g}\ \text{{m}}")
+        st.latex(rf"L = g\left(\frac{{T}}{{2\pi}}\right)^2 = {g:.6g}\left(\frac{{{T:.6g}}}{{2\pi}}\right)^2 = {L:.6g}\ \text{{m}}")
+        if st.button("📋 Gem L", key="gem_sving_pend_L"):
+            gem_resultat(L, "m", "L")
+    else:
+        c1, c2 = st.columns(2)
+        T = c1.number_input("T – periode (s)", value=2.0, min_value=1e-12, format="%.6g")
+        L = c2.number_input("L – pendullængde (m)", value=1.0, min_value=1e-12, format="%.6g")
+        g = L * (2 * np.pi / T)**2
+        st.success(f"**g = {g:.6g} m/s²**")
+        st.latex(rf"g = L\left(\frac{{2\pi}}{{T}}\right)^2 = {L:.6g}\left(\frac{{2\pi}}{{{T:.6g}}}\right)^2 = {g:.6g}\ \text{{m/s}}^2")
+        st.caption("Bruges til eksperimentel bestemmelse af g fra pendulmålinger.")
+        if st.button("📋 Gem g", key="gem_sving_pend_g"):
+            gem_resultat(g, "m/s²", "g")
 
 elif formel == "Vinkelfrekvens:  ω = √(k/m)":
     st.latex(r"\omega = \sqrt{\frac{k}{m}} = \frac{2\pi}{T} = 2\pi f")

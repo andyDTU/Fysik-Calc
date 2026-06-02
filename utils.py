@@ -124,6 +124,7 @@ def breadcrumb(page_emoji, page_name):
 
 FORMLER = [
     # ── Kinematik ──
+    {"navn": "SUVAT – universal løser",                               "side": "Kinematik",    "fil": "pages/1_Kinematik.py",        "key": "kin_formel",   "kw": "suvat universal løser give tre kendte find ukendte startfart bremsning bremse acceleration strækning kinematik s v0 v a t stopafstand bremseafstand bremsestrækning",  "vars": ["s", "v₀", "v", "a", "t"]},
     {"navn": "Uniform bevægelse:  s = v · t",                   "side": "Kinematik",    "fil": "pages/1_Kinematik.py",        "key": "kin_formel",   "kw": "uniform bevægelse konstant hastighed s v t",                                                      "vars": ["s", "v", "t"]},
     {"navn": "Jævnt accelereret (1):  v = v₀ + a · t",         "side": "Kinematik",    "fil": "pages/1_Kinematik.py",        "key": "kin_formel",   "kw": "kinematik acceleration hastighed tid v v0 a t bremse bremser bremsning opbremsning accelererer decelererer hvornår stopper ankommer curling isen glidning",   "vars": ["v", "v₀", "a", "t"]},
     {"navn": "Jævnt accelereret (2):  s = v₀·t + ½·a·t²",     "side": "Kinematik",    "fil": "pages/1_Kinematik.py",        "key": "kin_formel",   "kw": "strækning position s v0 a t kinematik frit fald bremse bremser bremseafstand hvor langt faldtid stopper",  "vars": ["s", "v₀", "a", "t"]},
