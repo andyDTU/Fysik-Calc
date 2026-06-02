@@ -340,6 +340,66 @@ OPGAVER = [
         "tags": ["energi", "energibevarelse", "kinetisk", "potentiel", "højde", "fart", "kast"],
         "page_key": None,
     },
+    {
+        "år": "Variant", "nr": "V11",
+        "titel": "Loop-the-loop – minimum starthøjde",
+        "tekst": "En klods startets fra hvile i højde h og glider ned en friktionsfri bane ind i en lodret sløjfe med radius r = 3.0 m. Find den mindste h for at klodsen gennemfører sløjfen.",
+        "modul": "💪 Dynamik", "formel": "Normalkraft i sløjfe → h_min = 5r/2",
+        "værdier": "r=3.0 → h_min = 5·3.0/2 = 7.5 m  |  v_top_min = √(g·r) = √(9.82·3) = 5.43 m/s",
+        "svar": "h_min = 7.5 m  (v_top_min = 5.43 m/s)",
+        "tags": ["dynamik", "sløjfe", "loop", "energibevarelse", "minimum", "normalkraft", "centripetal"],
+        "page_key": None,
+    },
+    {
+        "år": "Variant", "nr": "V12",
+        "titel": "Molekylær hastighed – v_rms ved temperaturfordobling",
+        "tekst": "N₂-gas (M=0.028 kg/mol) ved T₁=300 K. (a) Find v_rms. (b) T fordobles til 600 K – hvad sker med v_rms?",
+        "modul": "🌡️ Termodynamik", "formel": "Molekylær hastighed: v_rms = √(3RT/M)",
+        "værdier": "v_rms(300K) = √(3·8.314·300/0.028) = √(267 964) = 518 m/s  |  v_rms(600K) = 518·√2 = 732 m/s",
+        "svar": "v_rms(300K) ≈ 518 m/s, v_rms(600K) ≈ 732 m/s (faktor √2, ikke 2)",
+        "tags": ["termodynamik", "molekylær", "vrms", "hastighed", "gas", "temperatur", "kvælstof"],
+        "page_key": None,
+    },
+    {
+        "år": "Variant", "nr": "V13",
+        "titel": "Ladet partikel – cirkulær bane i magnetfelt",
+        "tekst": "Elektron (m=9.11×10⁻³¹ kg, q=1.6×10⁻¹⁹ C) accelereres gennem U=500 V og sendes ind i B=0.05 T. Find radius af cirkelbanen.",
+        "modul": "⚡ Elektricitet", "formel": "qU=½mv² → v, så qvB=mv²/r → r=mv/(qB)",
+        "værdier": "v=√(2qU/m)=√(2·1.6e-19·500/9.11e-31)=1.326e7 m/s  |  r=mv/(qB)=9.11e-31·1.326e7/(1.6e-19·0.05)=0.00151 m≈1.5 mm",
+        "svar": "r ≈ 1.5 mm",
+        "tags": ["elektricitet", "lorentz", "magnetfelt", "elektron", "radius", "cirkulær", "accelereret"],
+        "page_key": None,
+    },
+    {
+        "år": "Variant", "nr": "V14",
+        "titel": "Kuglestød (ballistic pendulum) – find kugles startfart",
+        "tekst": "Kugle m=10 g skydes vandret ind i hængende klods M=1 kg. Klodsen svinger og stiger h=12 cm. Find kugles startfart v₀.",
+        "modul": "💥 Kollisioner", "formel": "Kuglestød lodret → v_i = (M+m)/m · √(2gh)",
+        "værdier": "v' = √(2·9.82·0.12) = 1.533 m/s  |  v₀ = 1.010/0.010 · 1.533 = 155 m/s",
+        "svar": "v₀ ≈ 155 m/s",
+        "tags": ["kollisioner", "ballistic pendulum", "kuglestød", "uelastisk", "impulsbevarelse", "energibevarelse"],
+        "page_key": None,
+    },
+    {
+        "år": "Variant", "nr": "V15",
+        "titel": "Gaslov – hvad sker med v_rms ved isokorm opvarmning?",
+        "tekst": "Beholder med idealgas. T stiger fra 300 K til 1200 K (konstant volumen). Med hvilken faktor ændres v_rms?",
+        "modul": "🌡️ Termodynamik", "formel": "Molekylær hastighed: v_rms ∝ √T",
+        "værdier": "T-ratio = 1200/300 = 4  →  v_rms-ratio = √4 = 2",
+        "svar": "v_rms fordobles (faktor 2) — T firdobles men v_rms ∝ √T",
+        "tags": ["termodynamik", "gas", "vrms", "isokorm", "temperatur", "molekylær", "skalering"],
+        "page_key": None,
+    },
+    {
+        "år": "Variant", "nr": "V16",
+        "titel": "Newton's 3. lov – lastbil rammer personbil",
+        "tekst": "Lastbil (5000 kg, 60 km/h) rammer parkeret personbil (1000 kg). Hvilken kraft virker på personbilen sammenlignet med kraften på lastbilen?",
+        "modul": "💪 Dynamik", "formel": "Newtons 3. lov: F₁₂ = −F₂₁",
+        "værdier": "Krafterne er identiske i størrelse (N3L). Personbil: a = F/1000, lastbil: a = F/5000 → personbil accelererer 5× mere.",
+        "svar": "Præcis samme kraft, men personbilens acceleration er 5× større pga. lavere masse.",
+        "tags": ["dynamik", "newton", "3. lov", "kollision", "lastbil", "personbil", "acceleration", "kraft"],
+        "page_key": None,
+    },
 ]
 
 # ── Filtrering ─────────────────────────────────────────────────────────────────
@@ -401,6 +461,8 @@ with st.expander("📚 Hurtig formeloversigt – hvad beregner hvilken side?"):
 | Ohm's lov, kredsløb | ⚡ Elektricitet | Ohms lov / Serie/Parallelkobling |
 | Kollision (elastisk/uelastisk) | 💥 Kollisioner | Vælg type |
 | Gaslov, varme | 🌡️ Termodynamik | pV=nRT / Q=mcΔT |
+| Molekylær hastighed v_rms | 🌡️ Termodynamik | v_rms = √(3RT/M) — skalerer med √T |
+| Loop-the-loop minimum starthøjde | 💪 Dynamik | Normalkraft i sløjfe → h_min = 5r/2 |
 | Bølgelængde, frekvens | 🌊 Bølger | v=fλ |
 | Find g fra pendul-måling | 〰️ Svingninger | Simpelt pendul: g = L(2π/T)² |
 | Radioaktivt henfald | ☢️ Atomfysik | Henfald / Halvvejstid |

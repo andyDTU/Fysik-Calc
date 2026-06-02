@@ -85,7 +85,7 @@ DYN_TIPS = {
     "Tyngdekraft:  G = m · g": "Tyngdekraft virker altid nedad. G = m·g = vægt i Newton.",
     "Friktion:  f = μ · N": "Statisk friktion (μs) er større end kinetisk (μk). Friktionskraft modvirker bevægelse.",
     "Centripetalkraft:  Fc = m · v² / r": "Centripetalkraft peger mod centrum. Den er en nettokraft, ikke en ekstra kraft.",
-    "Normalkraft i sløjfe (top/bund)": "Top: N = mv²/r − mg (mindst). Bund: N = mv²/r + mg (størst). Minimum v ved top: √(gr).",
+    "Normalkraft i sløjfe (top/bund)": "Top: N = mv²/r − mg (mindst). Bund: N = mv²/r + mg (størst). Minimum v ved top: √(gr). Minimum starthøjde for at gennemføre løkke: h_min = 5r/2.",
     "Gravitationsloven:  F = G·m₁·m₂ / r²": "G = 6.674×10⁻¹¹ N·m²/kg². r er centrumsafstanden. Orbital­hastighed: v = √(GM/r).",
     "Impuls:  p = m · v": "Impuls bevares i isolerede systemer. p er en vektor (retning vigtig).",
     "Impulsmomentloven:  F · Δt = Δp": "Bruges ved støde/slag: stor kraft i kort tid giver stor impulsændring.",
@@ -354,6 +354,7 @@ Legeme i cirkulær bevægelse i lodret plan. Centripetalkraft = netto radialkraf
     beregn_sl = st.radio("Beregn:", [
         "N – normalkraft (givet m, v, r)",
         "v – hastighed (givet N, m, r)",
+        "h_min – minimum starthøjde (energibevarelse)",
     ], horizontal=True)
     st.divider()
 
@@ -384,7 +385,7 @@ Legeme i cirkulær bevægelse i lodret plan. Centripetalkraft = netto radialkraf
             st.latex(rf"N_{{top}} = F_c - mg = {Fc:.4g} - {m:.4g}\cdot{G} = {N_top:.4g}\ \text{{N}}")
             st.latex(rf"v_{{min}} = \sqrt{{gr}} = \sqrt{{{G}\cdot{r:.4g}}} = {v_min:.4g}\ \text{{m/s}}")
 
-    else:
+    elif beregn_sl == "v – hastighed (givet N, m, r)":
         position = st.radio("Position:", ["Bund  (N = mg + mv²/r)", "Top  (N = mv²/r − mg)"], horizontal=True)
         c1, c2, c3 = st.columns(3)
         N_in = c1.number_input("N – normalkraft (N)", value=15.0, min_value=0.0, format="%.6g", key="sl_N_b")
@@ -408,6 +409,76 @@ Legeme i cirkulær bevægelse i lodret plan. Centripetalkraft = netto radialkraf
             st.info(f"Minimum hastighed i top: v_min = √(g·r) = {v_min:.4g} m/s")
             if st.button("📋 Gem v", key="gem_sl_v"):
                 gem_resultat(v, "m/s", "v")
+
+    elif beregn_sl == "h_min – minimum starthøjde (energibevarelse)":
+        st.latex(r"h_{min} = \frac{5}{2} r \qquad v_{top} = \sqrt{g r} \qquad v_{start} = \sqrt{2g\!\left(h - 2r\right)}")
+        st.info("Uden friktion. Betingelse: N ≥ 0 i toppen ↔ v_top ≥ √(gr) ↔ h ≥ 5r/2.")
+        st.divider()
+        mode_hmin = st.radio("Beregn:", [
+            "h_min – minimum starthøjde fra radius",
+            "v_top – hastighed i top (givet h og r)",
+            "Hvad er N i top? (givet h og r)",
+        ], horizontal=True, key="sl_hmin_mode")
+        st.divider()
+
+        if mode_hmin == "h_min – minimum starthøjde fra radius":
+            c1, c2 = st.columns(2)
+            r_h  = c1.number_input("r – sløjferadius (m)", value=2.0, min_value=1e-6, format="%.6g", key="sl_r_hmin")
+            g_h  = c2.number_input("g (m/s²)", value=G, format="%.6g", key="sl_g_hmin")
+            h_min_val = 2.5 * r_h
+            v_top_min = np.sqrt(g_h * r_h)
+            col1, col2 = st.columns(2)
+            col1.success(f"**h_min = 5r/2 = {h_min_val:.4g} m**")
+            col2.success(f"**v_top_min = √(gr) = {v_top_min:.4g} m/s**")
+            st.latex(rf"h_{{min}} = \frac{{5}}{{2}} r = \frac{{5}}{{2}} \cdot {r_h:.4g} = {h_min_val:.4g}\ \text{{m}}")
+            st.latex(rf"v_{{top,min}} = \sqrt{{gr}} = \sqrt{{{g_h:.4g}\cdot{r_h:.4g}}} = {v_top_min:.4g}\ \text{{m/s}}")
+            st.caption("Udledning: h = r/2 + 2r = 5r/2 via ½mv² = ½m(gr) + mg(2r)")
+            if st.button("📋 Gem h_min", key="gem_sl_hmin"):
+                gem_resultat(h_min_val, "m", "h_min")
+
+        elif mode_hmin == "v_top – hastighed i top (givet h og r)":
+            c1, c2, c3 = st.columns(3)
+            h_val = c1.number_input("h – starthøjde (m)", value=5.0, min_value=0.0, format="%.6g", key="sl_h_vtop")
+            r_val = c2.number_input("r – sløjferadius (m)", value=2.0, min_value=1e-6, format="%.6g", key="sl_r_vtop")
+            g_val = c3.number_input("g (m/s²)", value=G, format="%.6g", key="sl_g_vtop")
+            ke_top = h_val - 2 * r_val
+            if ke_top < 0:
+                st.error(f"h = {h_val:.4g} m < 2r = {2*r_val:.4g} m: legemet når ikke toppen.")
+            else:
+                v_top_val = np.sqrt(2 * g_val * ke_top)
+                v_min_val = np.sqrt(g_val * r_val)
+                col1, col2 = st.columns(2)
+                col1.success(f"**v_top = {v_top_val:.4g} m/s**")
+                if v_top_val >= v_min_val:
+                    col2.success(f"✅ v_top ≥ v_min ({v_min_val:.4g} m/s) – kontakt opretholdt")
+                else:
+                    col2.error(f"❌ v_top = {v_top_val:.4g} < v_min = {v_min_val:.4g} m/s – mister kontakt!")
+                st.latex(rf"v_{{top}} = \sqrt{{2g(h - 2r)}} = \sqrt{{2 \cdot {g_val:.4g}({h_val:.4g}-2\cdot{r_val:.4g})}} = {v_top_val:.4g}\ \text{{m/s}}")
+                if st.button("📋 Gem v_top", key="gem_sl_vtop"):
+                    gem_resultat(v_top_val, "m/s", "v_top")
+
+        else:
+            c1, c2, c3, c4 = st.columns(4)
+            h_N  = c1.number_input("h – starthøjde (m)", value=5.0, min_value=0.0, format="%.6g", key="sl_h_N")
+            r_N  = c2.number_input("r – sløjferadius (m)", value=2.0, min_value=1e-6, format="%.6g", key="sl_r_N")
+            m_N  = c3.number_input("m – masse (kg)", value=1.0, min_value=1e-12, format="%.6g", key="sl_m_N")
+            g_N  = c4.number_input("g (m/s²)", value=G, format="%.6g", key="sl_g_N")
+            ke_N = h_N - 2 * r_N
+            if ke_N < 0:
+                st.error(f"h < 2r: legemet når ikke toppen.")
+            else:
+                v_top_N = np.sqrt(2 * g_N * ke_N)
+                N_top_N = m_N * v_top_N**2 / r_N - m_N * g_N
+                col1, col2, col3 = st.columns(3)
+                col1.metric("v_top", f"{v_top_N:.4g} m/s")
+                col2.metric("N_top", f"{N_top_N:.4g} N")
+                h_min_N = 2.5 * r_N
+                col3.metric("h_min krævet", f"{h_min_N:.4g} m")
+                if N_top_N < 0:
+                    st.error("❌ Negativt N: mister kontakt i toppen. Øg starthøjden.")
+                else:
+                    st.success("✅ Opretholdt kontakt i toppen.")
+                st.latex(rf"v_{{top}} = \sqrt{{2g(h-2r)}} = {v_top_N:.4g}\ \text{{m/s}},\quad N_{{top}} = \frac{{mv^2}}{{r}} - mg = {N_top_N:.4g}\ \text{{N}}")
 
 elif formel == "Impuls:  p = m · v":
     st.latex(r"p = m \cdot v")

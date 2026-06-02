@@ -27,6 +27,7 @@ _TERMO_FORMULAS = [
     ("Carnot-virkningsgrad", "η = 1 − Tk/Tv",                "Carnot-virkningsgrad:  η = 1 − Tk/Tv"),
     ("Termisk udvidelse",    "ΔL = α·L₀·ΔT",                 "Termisk udvidelse"),
     ("Varmledning",          "Q/t = k·A·ΔT/L",               "Varmledning:  Q/t = k·A·ΔT/L"),
+    ("Molekylær hastighed",  "v_rms = √(3RT/M)",              "Molekylær hastighed:  v_rms = √(3RT/M)"),
 ]
 formel = formula_card_grid(_TERMO_FORMULAS, "termo_formel")
 
@@ -41,6 +42,7 @@ TERMO_TIPS = {
     "Entropi:  ΔS = Q_rev / T": "Isoterm: ΔS = Q/T = nR·ln(V₂/V₁). Isobar: ΔS = nCp·ln(T₂/T₁). Adiabatisk: ΔS = 0. Isochor: ΔS = nCv·ln(T₂/T₁).",
     "Carnot-virkningsgrad:  η = 1 − Tk/Tv": "η = 1 − Tk/Tv. Absolut temperatur! Max. virkningsgrad for enhver varmemaskine.",
     "Varmledning:  Q/t = k·A·ΔT/L": "k = varmeledningsevne (W/(m·K)). Fouriers lov. Stationær tilstand: samme Q/t hele vejen igennem.",
+    "Molekylær hastighed:  v_rms = √(3RT/M)": "v_rms = √(3RT/M). M i kg/mol (fx N₂: M=0.028 kg/mol). Hvis T fordobles → v_rms øges med √2 ≈ 1.41, IKKE med 2.",
 }
 show_tips(formel, TERMO_TIPS)
 st.divider()
@@ -476,6 +478,52 @@ elif formel == "Varmledning:  Q/t = k·A·ΔT/L":
         k_vl = P_vl * L_vl / (A_vl * dT_vl)
         st.success(f"**k = {k_vl:.4g} W/(m·K)**")
         st.latex(rf"k = \frac{{(Q/t)\cdot L}}{{A\cdot\Delta T}} = {k_vl:.4g}\ \text{{W/(m·K)}}")
+
+elif formel == "Molekylær hastighed:  v_rms = √(3RT/M)":
+    st.latex(r"v_{rms} = \sqrt{\frac{3RT}{M}} \qquad v_{avg} = \sqrt{\frac{8RT}{\pi M}} \qquad v_p = \sqrt{\frac{2RT}{M}}")
+    st.info(f"R = {R} J/(mol·K).  M = molarmasse i **kg/mol** (fx N₂ = 0.028, O₂ = 0.032, He = 0.004, H₂ = 0.002 kg/mol)")
+    st.divider()
+
+    GAS_PRESETS = {
+        "Brugerdefineret": None,
+        "N₂ (kvælstof)": 0.02801,
+        "O₂ (ilt)": 0.03200,
+        "H₂ (hydrogen)": 0.00202,
+        "He (helium)": 0.00400,
+        "CO₂": 0.04401,
+        "Ar (argon)": 0.03995,
+        "H₂O (damp)": 0.01802,
+    }
+    col_p, col_T = st.columns(2)
+    gas_choice = col_p.selectbox("Gas (preset):", list(GAS_PRESETS.keys()), key="vrms_gas")
+    M_default = GAS_PRESETS[gas_choice] if GAS_PRESETS[gas_choice] else 0.02801
+    M_vrms = col_p.number_input("M – molarmasse (kg/mol)", value=M_default, min_value=1e-6, format="%.5g", key="vrms_M")
+    T_vrms = col_T.number_input("T – temperatur (K)", value=293.15, min_value=0.01, format="%.6g", key="vrms_T")
+
+    v_rms_val = np.sqrt(3 * R * T_vrms / M_vrms)
+    v_avg_val = np.sqrt(8 * R * T_vrms / (np.pi * M_vrms))
+    v_p_val   = np.sqrt(2 * R * T_vrms / M_vrms)
+
+    col1, col2, col3 = st.columns(3)
+    col1.success(f"**v_rms = {v_rms_val:.4g} m/s**")
+    col2.metric("v_avg (middel)", f"{v_avg_val:.4g} m/s")
+    col3.metric("v_p (hyppigst)", f"{v_p_val:.4g} m/s")
+
+    st.latex(rf"v_{{rms}} = \sqrt{{\frac{{3 \cdot {R} \cdot {T_vrms:.4g}}}{{{M_vrms:.5g}}}}} = {v_rms_val:.4g}\ \text{{m/s}}")
+
+    st.markdown("**Skaleringsregel:** Hvis T fordobles → v_rms øges med faktor **√2 ≈ 1.41**  (IKKE 2!)  Hyppig eksamens­fælde.")
+
+    with st.expander("Hvad sker med v_rms når T eller M ændres?"):
+        c1s, c2s = st.columns(2)
+        T2 = c1s.number_input("Ny T₂ (K)", value=T_vrms * 2, min_value=0.01, format="%.6g", key="vrms_T2")
+        M2 = c2s.number_input("Ny M₂ (kg/mol)", value=M_vrms, min_value=1e-6, format="%.5g", key="vrms_M2")
+        v_rms2 = np.sqrt(3 * R * T2 / M2)
+        ratio = v_rms2 / v_rms_val if v_rms_val > 0 else float("nan")
+        st.success(f"**v_rms₂ = {v_rms2:.4g} m/s  →  faktor {ratio:.4g}×**")
+        st.latex(rf"\frac{{v_{{rms,2}}}}{{v_{{rms,1}}}} = \sqrt{{\frac{{T_2/M_2}}{{T_1/M_1}}}} = \sqrt{{\frac{{{T2:.4g}/{M2:.5g}}}{{{T_vrms:.4g}/{M_vrms:.5g}}}}} = {ratio:.4g}")
+
+    if st.button("📋 Gem v_rms", key="gem_vrms"):
+        gem_resultat(v_rms_val, "m/s", "v_rms")
 
 elif formel == "Termisk udvidelse":
     st.latex(r"\Delta L = \alpha \cdot L_0 \cdot \Delta T \qquad \Delta V = \beta \cdot V_0 \cdot \Delta T")

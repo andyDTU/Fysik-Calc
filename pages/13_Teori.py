@@ -443,6 +443,51 @@ QUESTIONS = [
         "correct": "C",
         "explain": "Ek ∝ v². Ny Ek = ½m(3v)² = 9·½mv² = 9·Ek. Husk: i kollisioner og trafiksikkerhed er dette kritisk — tredoblet hastighed = ni gange så meget kinetisk energi der skal absorberes.",
     },
+    # ── Dynamik: sløjfe og Newton ────────────────────────────────────────────────
+    {
+        "emne": "Dynamik",
+        "q": "En lille klods starter fra hvile i højen h og ruller ned en friktionsfri bane ind i en lodret cirkulær sløjfe med radius r. Hvad er den mindste h for at klodsen gennemfører sløjfen?",
+        "options": ["A) h = r", "B) h = 2r", "C) h = 2.5r", "D) h = 3r", "E) h = 5r"],
+        "correct": "C",
+        "explain": "I toppen kræves N ≥ 0, dvs. mv²/r ≥ mg → v_top ≥ √(gr). Energibevarelse: mgh = ½mv_top² + mg(2r) = ½mgr + 2mgr = (5/2)mgr → h_min = 5r/2 = 2.5r.",
+    },
+    {
+        "emne": "Dynamik",
+        "q": "En lastbil (5000 kg) kører ind i en personbil (1000 kg). Ifølge Newtons 3. lov: hvad er størelsesforholdet mellem kraften lastbilen udøver på personbilen og kraften personbilen udøver på lastbilen?",
+        "options": ["A) 5:1 (lastbilen er tungere)", "B) 1:5 (personbilen oplever 5× mere)", "C) 1:1 (lige store og modsatrettede)", "D) Afhænger af hastighederne", "E) Afhænger af kollisionens varighed"],
+        "correct": "C",
+        "explain": "Newtons 3. lov: F₁₂ = −F₂₁ altid. Krafterne er altid ens store. Det er accelerationerne der er ulige: a = F/m, så personbilen (1000 kg) accelererer 5× så meget som lastbilen (5000 kg). Mange forveksler kraft og acceleration.",
+    },
+    # ── Termodynamik ─────────────────────────────────────────────────────────────
+    {
+        "emne": "Termodynamik",
+        "q": "Et ideelt gas i et lukket beholder opvarmes fra 300 K til 1200 K (volumen konstant). Hvad sker med den kvadratiske middelhastighed v_rms af molekylerne?",
+        "options": ["A) Fordobles — T er 4× større", "B) Firdobles — T er 4× større", "C) Øges med faktor 2 — T er 4× større, v_rms ∝ √T", "D) Øges med faktor √2", "E) Er uændret — volumen er konstant"],
+        "correct": "C",
+        "explain": "v_rms = √(3RT/M) ∝ √T. T øges med faktor 4 (fra 300 til 1200 K) → v_rms øges med √4 = 2. Dette er den klassiske eksamens­fælde: T fordobles → v_rms øges med √2, T firdobles → v_rms fordobles.",
+    },
+    {
+        "emne": "Termodynamik",
+        "q": "Idealgas gennemgår en adiabatisk kompression. Hvad gælder for temperatur og indre energi?",
+        "options": ["A) T stiger, ΔU = Q = 0", "B) T stiger, ΔU = −W (W < 0 når gas komprimeres)", "C) T falder, da ingen varme tilføres", "D) T er uændret — adiabatisk", "E) ΔU = 0 uanset hvad"],
+        "correct": "B",
+        "explain": "Adiabatisk: Q = 0. 1. termodynamikslov: ΔU = Q − W = 0 − W = −W. Når gas komprimeres udføres arbejde PÅ gassen, dvs. W < 0 (gassen udfører negativt arbejde), og ΔU = −W > 0 → temperaturen stiger.",
+    },
+    # ── Kollisioner / Bølger ──────────────────────────────────────────────────────
+    {
+        "emne": "Kollisioner",
+        "q": "En kugle (masse m) bevæger sig med fart v og støder ind i en identisk kugle (masse m) der hviler. Stødet er ELASTISK og centralt. Hvad sker der?",
+        "options": ["A) Begge bevæger sig videre med v/2", "B) Den første standser, den anden bevæger sig videre med v", "C) Begge bevæger sig med v i vinkel 45°", "D) Den første bouncer tilbage med −v", "E) Ingen bevægelse — impuls annulleres"],
+        "correct": "B",
+        "explain": "Elastisk 1D med m₁=m₂: v₁' = (m₁−m₂)v/(m₁+m₂) = 0, v₂' = 2m₁v/(m₁+m₂) = v. Den første standser FULDSTÆNDIGT og overfører ALT impuls og AL kinetisk energi til den anden. Se fx Newton's vugge.",
+    },
+    {
+        "emne": "Bølger",
+        "q": "En ambulance kører mod dig med f=800 Hz. Hvad hører du sammenlignet med 800 Hz?",
+        "options": ["A) Lavere frekvens — bølgerne trækkes ud", "B) Præcis 800 Hz — du er stationær", "C) Højere frekvens — bølgerne komprimeres foran kilden", "D) Afhænger af ambulancens masse", "E) Kun amplituden ændres, ikke frekvensen"],
+        "correct": "C",
+        "explain": "Doppler-effekt: f' = f·v/(v−v_s) > f når kilden nærmer sig (v_s > 0). Bølgefronterne 'presses' sammen foran kilden → kortere bølgelængde → højere frekvens. Når ambulancen er passeret: f' = f·v/(v+v_s) < f → lavere frekvens.",
+    },
 ]
 
 # ── Emne-filter ────────────────────────────────────────────────────────────────
