@@ -189,28 +189,83 @@ elif formel == "Doppler-effekt":
 """)
     st.divider()
 
-    c1, c2 = st.columns(2)
-    f_kilde = c1.number_input("f – kildefrekvens (Hz)", value=440.0, format="%.6g")
-    v_lyd   = c2.number_input("v – lydhastighed (m/s)", value=343.0, format="%.6g")
+    beregn_dop = st.radio("Beregn:", [
+        "f' – observeret frekvens",
+        "f – kildefrekvens",
+        "v_kilde – kildehastighed",
+    ], horizontal=True)
+    st.divider()
 
-    c3, c4 = st.columns(2)
-    v_obs   = c3.number_input("v_obs – observatørhastighed (m/s)", value=0.0, format="%.6g")
-    v_kilde = c4.number_input("v_kilde – kildehastighed (m/s)", value=30.0, format="%.6g")
+    v_lyd = st.number_input("v – lydhastighed (m/s)", value=343.0, format="%.6g", key="dop_v")
+    obs_mod   = st.checkbox("Observatør bevæger sig MOD kilden", value=False, key="dop_obs")
+    kilde_mod = st.checkbox("Kilde bevæger sig MOD observatøren", value=True, key="dop_kilde")
 
-    obs_mod = st.checkbox("Observatør bevæger sig MOD kilden", value=False)
-    kilde_mod = st.checkbox("Kilde bevæger sig MOD observatøren", value=True)
+    if beregn_dop == "f' – observeret frekvens":
+        c1, c2, c3 = st.columns(3)
+        f_kilde = c1.number_input("f – kildefrekvens (Hz)", value=440.0, format="%.6g", key="dop_f_a")
+        v_obs   = c2.number_input("v_obs (m/s)", value=0.0, format="%.6g", key="dop_vobs_a")
+        v_kilde = c3.number_input("v_kilde (m/s)", value=30.0, format="%.6g", key="dop_vk_a")
 
-    v_obs_sign   = v_obs if obs_mod else -v_obs
-    v_kilde_sign = v_kilde if not kilde_mod else -v_kilde
+        v_obs_sign   = v_obs if obs_mod else -v_obs
+        v_kilde_sign = v_kilde if not kilde_mod else -v_kilde
+        denom = v_lyd + v_kilde_sign
+        if abs(denom) < 1e-12:
+            st.error("Nævner = 0 – ugyldigt scenarie.")
+        else:
+            f_prime = f_kilde * (v_lyd + v_obs_sign) / denom
+            st.success(f"**f' = {f_prime:.4g} Hz**")
+            delta = f_prime - f_kilde
+            st.markdown(f"Frekvensforskydning: {delta:+.4g} Hz  ({'rødforskydn.' if delta < 0 else 'blåforskydn.'})")
+            st.latex(rf"f' = {f_kilde:.4g} \cdot \frac{{{v_lyd:.4g} + ({v_obs_sign:.4g})}}{{{v_lyd:.4g} + ({v_kilde_sign:.4g})}} = {f_prime:.4g}\ \text{{Hz}}")
 
-    denom = v_lyd + v_kilde_sign
-    if abs(denom) < 1e-12:
-        st.error("Nævner = 0 – ugyldigt scenarie.")
+    elif beregn_dop == "f – kildefrekvens":
+        st.markdown("Kendte: f', v, v_obs, v_kilde → find **f**")
+        c1, c2, c3 = st.columns(3)
+        f_prime = c1.number_input("f' – observeret frekvens (Hz)", value=480.0, format="%.6g", key="dop_fp_b")
+        v_obs   = c2.number_input("v_obs (m/s)", value=0.0, format="%.6g", key="dop_vobs_b")
+        v_kilde = c3.number_input("v_kilde (m/s)", value=30.0, format="%.6g", key="dop_vk_b")
+
+        v_obs_sign   = v_obs if obs_mod else -v_obs
+        v_kilde_sign = v_kilde if not kilde_mod else -v_kilde
+        num = v_lyd + v_obs_sign
+        denom = v_lyd + v_kilde_sign
+        if abs(num) < 1e-12:
+            st.error("Tæller = 0 – ugyldigt scenarie.")
+        else:
+            f_kilde = f_prime * denom / num
+            st.success(f"**f = {f_kilde:.4g} Hz**")
+            st.latex(rf"f = f' \cdot \frac{{v + v_{{kilde\,sign}}}}{{v + v_{{obs\,sign}}}} = {f_prime:.4g} \cdot \frac{{{denom:.4g}}}{{{num:.4g}}} = {f_kilde:.4g}\ \text{{Hz}}")
+            if st.button("📋 Gem f", key="gem_dop_f"):
+                from utils import gem_resultat as _gem; _gem(f_kilde, "Hz", "f")
+
     else:
-        f_prime = f_kilde * (v_lyd + v_obs_sign) / denom
-        st.success(f"**f' = {f_prime:.4g} Hz**")
-        delta = f_prime - f_kilde
-        st.markdown(f"Frekvensforskydning: {delta:+.4g} Hz  ({'rød­forskydn.' if delta < 0 else 'blåforskydn.'})")
+        st.markdown("Kendte: f', f, v, v_obs → find **v_kilde**  via  v_kilde = v·(f/f' − 1) + v_obs·f/f'")
+        c1, c2, c3 = st.columns(3)
+        f_prime = c1.number_input("f' – observeret frekvens (Hz)", value=480.0, format="%.6g", key="dop_fp_c")
+        f_kilde = c2.number_input("f – kildefrekvens (Hz)", value=440.0, format="%.6g", key="dop_f_c")
+        v_obs   = c3.number_input("v_obs (m/s)", value=0.0, format="%.6g", key="dop_vobs_c")
+
+        v_obs_sign = v_obs if obs_mod else -v_obs
+        if abs(f_prime) < 1e-12:
+            st.error("f' = 0 – ugyldigt")
+        else:
+            # f' = f*(v + v_obs_sign)/(v - v_kilde_sign_if_mod)
+            # With kilde_mod: v_kilde_sign = -v_kilde → denom = v - v_kilde
+            # f'*(v - v_kilde) = f*(v + v_obs_sign)
+            # v_kilde = v - f*(v + v_obs_sign)/f'  (when kilde moves toward obs)
+            num_calc = v_lyd + v_obs_sign
+            denom_target = f_prime / f_kilde
+            # denom = v + v_kilde_sign → v_kilde_sign = denom_target*v + v_kilde_sign...
+            # v_kilde_sign = f*(v+v_obs_sign)/f' - v
+            v_kilde_sign_calc = f_kilde * num_calc / f_prime - v_lyd
+            # v_kilde_sign = -v_kilde if kilde_mod, else +v_kilde
+            v_kilde_result = -v_kilde_sign_calc if kilde_mod else v_kilde_sign_calc
+            st.success(f"**v_kilde = {v_kilde_result:.4g} m/s**")
+            direction = "mod observatøren" if kilde_mod else "fra observatøren"
+            st.info(f"Positiv v_kilde = kilde bevæger sig {direction}")
+            st.latex(rf"v_{{kilde}} = {v_kilde_result:.4g}\ \text{{m/s}}")
+            if st.button("📋 Gem v_kilde", key="gem_dop_vk"):
+                from utils import gem_resultat as _gem; _gem(v_kilde_result, "m/s", "v_kilde")
 
 elif formel == "Dobbeltspalte (Young):  d·sin(θ) = n·λ":
     st.latex(r"d \cdot \sin\theta = n \cdot \lambda \qquad \tan\theta \approx \frac{y}{L}")

@@ -493,23 +493,75 @@ elif formel == "Termisk udvidelse":
 """)
 
     if type_ == "Lineær udvidelse (ΔL)":
-        c1, c2, c3 = st.columns(3)
-        alpha = c1.number_input("α – lineær udvidelseskoeff. (10⁻⁶ K⁻¹)", value=12.0, format="%.6g")
-        L0    = c2.number_input("L₀ – originallængde (m)", value=10.0, format="%.6g")
-        dT    = c3.number_input("ΔT – temperaturændring (K)", value=100.0, format="%.6g")
-        dL = (alpha * 1e-6) * L0 * dT
-        L_ny = L0 + dL
-        st.success(f"**ΔL = {dL:.6g} m  →  ny længde: {L_ny:.6g} m**")
-        st.latex(rf"\Delta L = \alpha L_0 \Delta T = {alpha:.6g} \times 10^{{-6}} \cdot {L0:.6g} \cdot {dT:.6g} = {dL:.6g}\ \text{{m}}")
+        beregn_tu = st.radio("Beregn:", ["ΔL – forlængelse (m)", "α – udvidelseskoeff. (10⁻⁶ K⁻¹)", "L₀ – originallængde (m)", "ΔT – temperaturændring (K)"], horizontal=True, key="tu_lin_mode")
+        st.divider()
+
+        if beregn_tu == "ΔL – forlængelse (m)":
+            c1, c2, c3 = st.columns(3)
+            alpha = c1.number_input("α (10⁻⁶ K⁻¹)", value=12.0, format="%.6g", key="tu_a_a")
+            L0    = c2.number_input("L₀ (m)", value=10.0, format="%.6g", key="tu_L_a")
+            dT    = c3.number_input("ΔT (K)", value=100.0, format="%.6g", key="tu_dT_a")
+            dL = (alpha * 1e-6) * L0 * dT
+            st.success(f"**ΔL = {dL:.6g} m  →  ny længde: {L0+dL:.6g} m**")
+            st.latex(rf"\Delta L = \alpha L_0 \Delta T = {alpha:.6g}\times10^{{-6}} \cdot {L0:.6g} \cdot {dT:.6g} = {dL:.6g}\ \text{{m}}")
+
+        elif beregn_tu == "α – udvidelseskoeff. (10⁻⁶ K⁻¹)":
+            c1, c2, c3 = st.columns(3)
+            dL = c1.number_input("ΔL (m)", value=0.012, format="%.6g", key="tu_dL_b")
+            L0 = c2.number_input("L₀ (m)", value=10.0, min_value=1e-12, format="%.6g", key="tu_L_b")
+            dT = c3.number_input("ΔT (K)", value=100.0, min_value=1e-12, format="%.6g", key="tu_dT_b")
+            alpha_val = dL / (L0 * dT) * 1e6
+            st.success(f"**α = {alpha_val:.6g} × 10⁻⁶ K⁻¹**")
+            st.latex(rf"\alpha = \frac{{\Delta L}}{{L_0 \Delta T}} = \frac{{{dL:.6g}}}{{{L0:.6g} \cdot {dT:.6g}}} = {alpha_val:.6g} \times 10^{{-6}}\ \text{{K}}^{{-1}}")
+
+        elif beregn_tu == "L₀ – originallængde (m)":
+            c1, c2, c3 = st.columns(3)
+            dL    = c1.number_input("ΔL (m)", value=0.012, format="%.6g", key="tu_dL_c")
+            alpha = c2.number_input("α (10⁻⁶ K⁻¹)", value=12.0, min_value=1e-12, format="%.6g", key="tu_a_c")
+            dT    = c3.number_input("ΔT (K)", value=100.0, min_value=1e-12, format="%.6g", key="tu_dT_c")
+            L0 = dL / ((alpha * 1e-6) * dT)
+            st.success(f"**L₀ = {L0:.6g} m**")
+            st.latex(rf"L_0 = \frac{{\Delta L}}{{\alpha \Delta T}} = \frac{{{dL:.6g}}}{{{alpha:.6g}\times10^{{-6}} \cdot {dT:.6g}}} = {L0:.6g}\ \text{{m}}")
+
+        else:
+            c1, c2, c3 = st.columns(3)
+            dL    = c1.number_input("ΔL (m)", value=0.012, format="%.6g", key="tu_dL_d")
+            alpha = c2.number_input("α (10⁻⁶ K⁻¹)", value=12.0, min_value=1e-12, format="%.6g", key="tu_a_d")
+            L0    = c3.number_input("L₀ (m)", value=10.0, min_value=1e-12, format="%.6g", key="tu_L_d")
+            dT = dL / ((alpha * 1e-6) * L0)
+            st.success(f"**ΔT = {dT:.6g} K**")
+            st.latex(rf"\Delta T = \frac{{\Delta L}}{{\alpha L_0}} = \frac{{{dL:.6g}}}{{{alpha:.6g}\times10^{{-6}} \cdot {L0:.6g}}} = {dT:.6g}\ \text{{K}}")
+
     else:
-        c1, c2, c3 = st.columns(3)
-        beta = c1.number_input("β – volumetrisk udvidelseskoeff. (10⁻⁶ K⁻¹)", value=36.0, format="%.6g")
-        V0   = c2.number_input("V₀ – originalvolumen (m³)", value=0.001, format="%.6g")
-        dT   = c3.number_input("ΔT – temperaturændring (K)", value=100.0, format="%.6g")
-        dV = (beta * 1e-6) * V0 * dT
-        V_ny = V0 + dV
-        st.success(f"**ΔV = {dV:.6g} m³  →  nyt volumen: {V_ny:.6g} m³**")
-        st.latex(rf"\Delta V = \beta V_0 \Delta T = {beta:.6g} \times 10^{{-6}} \cdot {V0:.6g} \cdot {dT:.6g} = {dV:.6g}\ \text{{m}}^3")
+        beregn_tv = st.radio("Beregn:", ["ΔV – volumenændring (m³)", "β – udvidelseskoeff. (10⁻⁶ K⁻¹)", "ΔT – temperaturændring (K)"], horizontal=True, key="tu_vol_mode")
+        st.divider()
+
+        if beregn_tv == "ΔV – volumenændring (m³)":
+            c1, c2, c3 = st.columns(3)
+            beta = c1.number_input("β (10⁻⁶ K⁻¹)", value=36.0, format="%.6g", key="tv_b_a")
+            V0   = c2.number_input("V₀ (m³)", value=0.001, format="%.6g", key="tv_V_a")
+            dT   = c3.number_input("ΔT (K)", value=100.0, format="%.6g", key="tv_dT_a")
+            dV = (beta * 1e-6) * V0 * dT
+            st.success(f"**ΔV = {dV:.6g} m³  →  nyt volumen: {V0+dV:.6g} m³**")
+            st.latex(rf"\Delta V = \beta V_0 \Delta T = {beta:.6g}\times10^{{-6}} \cdot {V0:.6g} \cdot {dT:.6g} = {dV:.6g}\ \text{{m}}^3")
+
+        elif beregn_tv == "β – udvidelseskoeff. (10⁻⁶ K⁻¹)":
+            c1, c2, c3 = st.columns(3)
+            dV = c1.number_input("ΔV (m³)", value=3.6e-6, format="%.6g", key="tv_dV_b")
+            V0 = c2.number_input("V₀ (m³)", value=0.001, min_value=1e-20, format="%.6g", key="tv_V_b")
+            dT = c3.number_input("ΔT (K)", value=100.0, min_value=1e-12, format="%.6g", key="tv_dT_b")
+            beta_val = dV / (V0 * dT) * 1e6
+            st.success(f"**β = {beta_val:.6g} × 10⁻⁶ K⁻¹**")
+            st.latex(rf"\beta = \frac{{\Delta V}}{{V_0 \Delta T}} = {beta_val:.6g} \times 10^{{-6}}\ \text{{K}}^{{-1}}")
+
+        else:
+            c1, c2, c3 = st.columns(3)
+            dV   = c1.number_input("ΔV (m³)", value=3.6e-6, format="%.6g", key="tv_dV_c")
+            beta = c2.number_input("β (10⁻⁶ K⁻¹)", value=36.0, min_value=1e-12, format="%.6g", key="tv_b_c")
+            V0   = c3.number_input("V₀ (m³)", value=0.001, min_value=1e-20, format="%.6g", key="tv_V_c")
+            dT = dV / ((beta * 1e-6) * V0)
+            st.success(f"**ΔT = {dT:.6g} K**")
+            st.latex(rf"\Delta T = \frac{{\Delta V}}{{\beta V_0}} = {dT:.6g}\ \text{{K}}")
 
 elif formel == "Intern energi idealgas:  U = (f/2)·n·R·T":
     st.latex(r"U = \frac{f}{2} n R T \qquad \Delta U = n C_v \Delta T \qquad C_v = \frac{f}{2}R")
