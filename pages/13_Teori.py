@@ -362,6 +362,87 @@ QUESTIONS = [
         "correct": "B",
         "explain": "E₀ = m₀c² er hvileenergien. Totalenergi: E = γm₀c². Kinetisk energi: Ek = (γ−1)m₀c². For v = 0: γ = 1 → E = m₀c². Proton: E₀ ≈ 938 MeV.",
     },
+
+    # ── Dimensionsanalyse ──────────────────────────────────────────────────────
+    {
+        "emne": "Dimensionsanalyse",
+        "q": "Hvilken af følgende størrelser er dimensionsløs?",
+        "options": ["A) v²/g  [= L]", "B) v/√(gL)  [= 1]", "C) gL/v  [= LT⁻¹]", "D) v·t  [= L]", "E) F/m  [= LT⁻²]"],
+        "correct": "B",
+        "explain": "v/√(gL): [LT⁻¹]/√[LT⁻²·L] = [LT⁻¹]/[LT⁻¹] = [1]. Dette er Froude-tallet — bruges i bølge- og skibs­hydrodynamik. De andre giver enheder L, LT⁻¹ osv.",
+    },
+    {
+        "emne": "Dimensionsanalyse",
+        "q": "En model har variablerne F [MLT⁻²], m [M], L [L] og t [T]. Hvor mange dimensionsløse Pi-grupper giver Buckinghams teorem?",
+        "options": ["A) 0", "B) 1", "C) 2", "D) 3", "E) 4"],
+        "correct": "B",
+        "explain": "Π = n − k = 4 variable − 3 grunddimensioner (M, L, T) = 1 Pi-gruppe. For eksempel Π = F·t²/(m·L) = [MLT⁻²·T²/(M·L)] = [1] ✓.",
+    },
+    {
+        "emne": "Dimensionsanalyse",
+        "q": "Er formlen E = ½mv² dimensionshomogen? (E = energi [ML²T⁻²], m = masse [M], v = hastighed [LT⁻¹])",
+        "options": ["A) Nej — [M·L²T⁻²] ≠ [M·LT⁻¹]", "B) Nej — dimensionerne matcher kun halvt", "C) Ja — [M·(LT⁻¹)²] = [ML²T⁻²] ✓", "D) Nej — konstanten ½ ødelægger homogeniteten", "E) Kun hvis man inkluderer c²"],
+        "correct": "C",
+        "explain": "[½mv²] = [M·(LT⁻¹)²] = [ML²T⁻²] = [energi]. Konstanter (½, 2π, ln2 osv.) er dimensionsløse og påvirker ikke dimensionstjekket. Formlen er korrekt dimensioneret.",
+    },
+    {
+        "emne": "Dimensionsanalyse",
+        "q": "I modellen for en penduls periode T = f(m, L, g) — hvad forudsiger dimensionsanalyse?",
+        "options": ["A) T = konstant·m/√(Lg)", "B) T = konstant·√(L/g)  (uafhængig af m)", "C) T = konstant·L/g", "D) T = konstant·m·√(L/g)", "E) T = konstant·g/L"],
+        "correct": "B",
+        "explain": "T [T] fra m [M], L [L], g [LT⁻²]: T ∝ mᵃ·Lᵇ·gᶜ. M: a=0, L: b+c=0, T: −2c=1 → c=−½, b=½. Altså T ∝ √(L/g) — masse indgår slet ikke! Det bekræftes af den eksakte formel T=2π√(L/g).",
+    },
+    {
+        "emne": "Dimensionsanalyse",
+        "q": "Hvad er dimensionen af Plancks konstant h, givet at E = h·f (E: energi, f: frekvens)?",
+        "options": ["A) [ML²T⁻²]  (energi)", "B) [ML²T⁻¹]  (energi × tid)", "C) [MLT⁻¹]  (impuls)", "D) [ML²T⁻³]  (effekt)", "E) [T]  (tid)"],
+        "correct": "B",
+        "explain": "[h] = [E]/[f] = [ML²T⁻²]/[T⁻¹] = [ML²T⁻¹]. Samme dimension som impulsmoment (L=Iω) og virkning (action). h = 6.626×10⁻³⁴ J·s.",
+    },
+
+    # ── Skalering ──────────────────────────────────────────────────────────────
+    {
+        "emne": "Skalering",
+        "q": "Fjedermasse-systemet T = 2π√(m/k). Hvis massen fordobles, hvad sker med perioden T?",
+        "options": ["A) T fordobles (×2)", "B) T øges med faktor √2 ≈ 1.41", "C) T ændres ikke", "D) T halveres (÷2)", "E) T øges med faktor 4"],
+        "correct": "B",
+        "explain": "T ∝ √m. Fordobles m → T_ny = 2π√(2m/k) = √2·T_gammel. Generelt: T ∝ mⁿ, n=½. Kun kvadratroden af masse-ændringen overføres til perioden.",
+    },
+    {
+        "emne": "Skalering",
+        "q": "Keplers 3. lov: T² ∝ r³. En planet flyttes til tre gange sin nuværende afstand fra Solen. Hvad sker med dens omløbstid?",
+        "options": ["A) T tredobles (×3)", "B) T øges med faktor 3² = 9", "C) T øges med faktor 3^(3/2) = 3√3 ≈ 5.20", "D) T øges med faktor √3 ≈ 1.73", "E) T ændres ikke"],
+        "correct": "C",
+        "explain": "T ∝ r^(3/2). Ny T = T_gammel·3^(3/2) = T·3·√3 ≈ 5.20·T. Jordmånen vs. jordbanen: r_jord ≈ 390× r_måne → T_jord ≈ 390^1.5 ≈ 7700× T_måne ≈ 365 dage ✓",
+    },
+    {
+        "emne": "Skalering",
+        "q": "Coulombs lov: F ∝ 1/r². To ladninger flyttes til det dobbelte af hinanden. Hvad sker med kraften?",
+        "options": ["A) F halveres (×½)", "B) F falder til ¼", "C) F fordobles", "D) F ændres ikke", "E) F firedobles"],
+        "correct": "B",
+        "explain": "F ∝ r⁻². Ny F = F·(2r)⁻²/r⁻² = F·1/4. Eksponent er −2, så faktor 2 i r giver faktor 2⁻² = ¼ i F. Samme logik gælder tyngdekraften og elektrisk felt.",
+    },
+    {
+        "emne": "Skalering",
+        "q": "En satellit i lav kredsløb har v ∝ r^(-1/2) (v = √(GM/r)). Hvis radius fordobles, hvad sker med orbital­hastigheden?",
+        "options": ["A) v fordobles", "B) v halveres", "C) v falder til v/√2 ≈ 0.71v", "D) v ændres ikke", "E) v øges med √2"],
+        "correct": "C",
+        "explain": "v ∝ r^(−½). Ny v = v·(2r)^(−½)/r^(−½) = v/√2 ≈ 0.71v. Bemærk: større kredsløb → lavere hastighed, men længere omløbstid. ISS har r≈6770 km, v≈7.7 km/s.",
+    },
+    {
+        "emne": "Skalering",
+        "q": "Elektrisk modstand: R = ρL/A. Hvis en leder gøres dobbelt så lang OG dobbelt så tyk i radius, hvad sker med R?",
+        "options": ["A) R fordobles", "B) R halveres", "C) R ændres ikke", "D) R firedobles", "E) R falder til R/4"],
+        "correct": "B",
+        "explain": "A = πr² → fordobles r → A firedobles. R_ny = ρ·(2L)/(4A) = ½·(ρL/A) = R/2. Længde giver faktor 2 op, tværsnit (∝r²) giver faktor 4 ned → netto faktor ½.",
+    },
+    {
+        "emne": "Skalering",
+        "q": "Kinetisk energi Ek = ½mv². Hvis hastigheden tredobles (og massen er uændret), hvad sker med Ek?",
+        "options": ["A) Ek tredobles", "B) Ek øges med faktor 6", "C) Ek øges med faktor 9", "D) Ek øges med faktor √3", "E) Ek fordobles"],
+        "correct": "C",
+        "explain": "Ek ∝ v². Ny Ek = ½m(3v)² = 9·½mv² = 9·Ek. Husk: i kollisioner og trafiksikkerhed er dette kritisk — tredoblet hastighed = ni gange så meget kinetisk energi der skal absorberes.",
+    },
 ]
 
 # ── Emne-filter ────────────────────────────────────────────────────────────────
