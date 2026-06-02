@@ -24,6 +24,7 @@ _DYN_GROUPS = [
         ("Newtons 2. lov",       "F = m · a",                     "Newtons 2. lov:  F = m · a"),
         ("Tyngdekraft",          "G = m · g",                     "Tyngdekraft:  G = m · g"),
         ("Friktion",             "f = μ · N",                     "Friktion:  f = μ · N"),
+        ("μ fra v-t-graf",       "μ = |a|/g = |Δv/Δt|/g",        "Friktion fra v-t-graf:  μ = |Δv/Δt| / g"),
         ("Centripetalkraft",     "Fc = m·v²/r",                   "Centripetalkraft:  Fc = m · v² / r"),
         ("Normalkraft i sløjfe", "top: N=mv²/r−mg",               "Normalkraft i sløjfe (top/bund)"),
         ("Gravitationsloven",    "F = G·m₁·m₂/r²",               "Gravitationsloven:  F = G·m₁·m₂ / r²"),
@@ -197,6 +198,40 @@ elif formel == "Friktion:  f = μ · N":
         st.latex(rf"N = \frac{{f}}{{\mu}} = \frac{{{f:.6g}}}{{{mu:.6g}}} = {N:.6g}\ \text{{N}}")
         if st.button("📋 Gem N", key="gem_dyn_frikt_N"):
             gem_resultat(N, "N", "N")
+
+elif formel == "Friktion fra v-t-graf:  μ = |Δv/Δt| / g":
+    st.latex(r"\mu_k = \frac{|a|}{g} = \frac{|\Delta v|}{\Delta t \cdot g}")
+    st.markdown(
+        "Aflæs to punkter på den **lineære decelerationsfase** i v-t-grafen. "
+        "Kun friktion virker (vandret flade, ingen andre kræfter). "
+        "Da f = μk·mg = m·|a|, fås direkte **μk = |a|/g**."
+    )
+    st.divider()
+
+    c1, c2, c3, c4 = st.columns(4)
+    v1_vt = c1.number_input("v₁ – hastighed ved t₁ (m/s)", value=2.0, format="%.6g", key="vt_v1")
+    t1_vt = c2.number_input("t₁ – tidspunkt (s)", value=5.0, format="%.6g", key="vt_t1")
+    v2_vt = c3.number_input("v₂ – hastighed ved t₂ (m/s)", value=0.0, format="%.6g", key="vt_v2")
+    t2_vt = c4.number_input("t₂ – tidspunkt (s)", value=23.0, format="%.6g", key="vt_t2")
+
+    dt = t2_vt - t1_vt
+    if abs(dt) < 1e-9:
+        st.error("t₁ og t₂ må ikke være ens.")
+    else:
+        a_vt  = (v2_vt - v1_vt) / dt
+        mu_vt = abs(a_vt) / G
+        col1, col2 = st.columns(2)
+        col1.metric("Deceleration |a|", f"{abs(a_vt):.4g} m/s²")
+        col2.metric("μk", f"{mu_vt:.4g}")
+        st.success(f"**μk = {mu_vt:.4g}**")
+        st.latex(
+            rf"a = \frac{{\Delta v}}{{\Delta t}} = \frac{{{v2_vt:.4g} - {v1_vt:.4g}}}{{{t2_vt:.4g} - {t1_vt:.4g}}} = {a_vt:.4g}\ \text{{m/s}}^2"
+        )
+        st.latex(
+            rf"\mu_k = \frac{{|a|}}{{g}} = \frac{{{abs(a_vt):.4g}}}{{{G}}} = {mu_vt:.4g}"
+        )
+        if st.button("📋 Gem μk", key="gem_vt_mu"):
+            gem_resultat(mu_vt, "", "μk")
 
 elif formel == "Centripetalkraft:  Fc = m · v² / r":
     st.latex(r"F_c = \frac{m \cdot v^2}{r} = m \cdot \omega^2 \cdot r")
