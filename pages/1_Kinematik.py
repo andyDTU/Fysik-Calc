@@ -576,7 +576,7 @@ elif formel == "Kastebevægelse (skråt kast)":
 # ── Skråt kast – kombinationsmatrix ────────────────────────────────────────────
 elif formel == "Skråt kast – kombinationsmatrix":
     st.latex(r"x = \frac{v_0^2\sin(2\theta)}{g} \qquad h_{max} = \frac{v_0^2\sin^2\!\theta}{2g} \qquad t = \frac{2v_0\sin\theta}{g}")
-    st.markdown("Generer en tabel over **alle kombinationer** af v₀ og θ. Angiv et mål-x for at markere hvilke kast der rammer det punkt.")
+    st.markdown("Generer en tabel over **alle kombinationer** af v₀ og θ. Brug **Find match** til at identificere kastet fra en graf.")
     st.divider()
 
     c1, c2, c3 = st.columns(3)
@@ -584,9 +584,28 @@ elif formel == "Skråt kast – kombinationsmatrix":
     theta_str = c2.text_input("θ-værdier (grader), komma-adskilt", value="40, 50, 60", key="kin_mat_th")
     g_mat     = c3.number_input("g (m/s²)", value=9.82, min_value=0.001, format="%.6g", key="kin_mat_g")
 
-    c4, c5 = st.columns(2)
-    target_x = c4.number_input("Mål-landingspunkt x (m)  (0 = ingen markering)", value=10.0, min_value=0.0, format="%.4g", key="kin_mat_tx")
-    tol      = c5.number_input("Tolerance ± (m)", value=0.2, min_value=0.0, format="%.4g", key="kin_mat_tol")
+    st.divider()
+    match_mode = st.radio("Find match:", [
+        "Ingen filter",
+        "📍 Landingspunkt x  (y = 0)",
+        "📍 Punkt på banen  (x, y)",
+        "📏 Maksimalhøjde  h_max",
+    ], horizontal=True, key="kin_mat_mode")
+
+    tol = st.number_input("Tolerance ±", value=0.3, min_value=0.0, format="%.4g", key="kin_mat_tol",
+                          help="Bruges af alle match-modes. Enhed: m")
+
+    target_x = target_y = h_min = h_max_filt = 0.0
+    if match_mode == "📍 Landingspunkt x  (y = 0)":
+        target_x = st.number_input("Mål-x – landingspunkt (m)", value=10.7, min_value=0.0, format="%.4g", key="kin_mat_tx")
+    elif match_mode == "📍 Punkt på banen  (x, y)":
+        c_px, c_py = st.columns(2)
+        target_x = c_px.number_input("x – vandret afstand (m)", value=8.0, min_value=0.0, format="%.4g", key="kin_mat_px")
+        target_y = c_py.number_input("y – højde i det punkt (m)", value=3.0, min_value=0.0, format="%.4g", key="kin_mat_py")
+    elif match_mode == "📏 Maksimalhøjde  h_max":
+        c_h1, c_h2 = st.columns(2)
+        h_min      = c_h1.number_input("h_max mindst (m)", value=4.0, min_value=0.0, format="%.4g", key="kin_mat_hmin")
+        h_max_filt = c_h2.number_input("h_max højest (m, 0 = ingen øvre grænse)", value=5.0, min_value=0.0, format="%.4g", key="kin_mat_hmax")
 
     try:
         v0_list    = [float(v.strip()) for v in v0_str.split(",") if v.strip()]
@@ -604,35 +623,52 @@ elif formel == "Skråt kast – kombinationsmatrix":
     matches = []
     for v0v in v0_list:
         for thv in theta_list:
-            th_r  = np.radians(thv)
-            x_r   = v0v**2 * np.sin(2 * th_r) / g_mat
-            h_r   = v0v**2 * np.sin(th_r)**2  / (2 * g_mat)
-            t_r   = 2 * v0v * np.sin(th_r)    / g_mat
-            hit   = target_x > 0 and abs(x_r - target_x) <= tol
+            th_r = np.radians(thv)
+            x_r  = v0v**2 * np.sin(2 * th_r) / g_mat
+            h_r  = v0v**2 * np.sin(th_r)**2  / (2 * g_mat)
+            t_r  = 2 * v0v * np.sin(th_r)    / g_mat
+
+            if match_mode == "📍 Landingspunkt x  (y = 0)":
+                hit = abs(x_r - target_x) <= tol
+            elif match_mode == "📍 Punkt på banen  (x, y)":
+                # Baneformel: y_calc = x*tanθ − g*x²/(2*v₀²*cos²θ)
+                y_calc = target_x * np.tan(th_r) - g_mat * target_x**2 / (2 * v0v**2 * np.cos(th_r)**2)
+                hit = (target_x <= x_r) and (abs(y_calc - target_y) <= tol)
+            elif match_mode == "📏 Maksimalhøjde  h_max":
+                hit = (h_r >= h_min - tol) and (h_max_filt == 0 or h_r <= h_max_filt + tol)
+            else:
+                hit = False
+
             rows.append((v0v, thv, x_r, h_r, t_r, hit))
             if hit:
                 matches.append((v0v, thv, x_r, h_r))
 
-    # Markdown-tabel med fremhævning via ✓
+    # Markdown-tabel
     header = "| v₀ (m/s) | θ (°) | x_max (m) | h_max (m) | t_land (s) | Match |"
     sep    = "|----------|-------|-----------|-----------|------------|-------|"
     lines  = [header, sep]
     for v0v, thv, x_r, h_r, t_r, hit in rows:
         mark = "**✓**" if hit else ""
-        row_str = f"| {'**'+str(v0v)+'**' if hit else v0v} | {'**'+str(thv)+'°**' if hit else str(thv)+'°'} | {'**'+f'{x_r:.3f}'+'**' if hit else f'{x_r:.3f}'} | {'**'+f'{h_r:.3f}'+'**' if hit else f'{h_r:.3f}'} | {t_r:.3f} | {mark} |"
+        bold = lambda s: f"**{s}**" if hit else str(s)
+        row_str = f"| {bold(v0v)} | {bold(str(thv)+'°')} | {bold(f'{x_r:.3f}')} | {bold(f'{h_r:.3f}')} | {t_r:.3f} | {mark} |"
         lines.append(row_str)
     st.markdown("\n".join(lines))
 
     if matches:
+        mode_label = {
+            "📍 Landingspunkt x  (y = 0)": f"lander ved x ≈ {target_x:.4g} m",
+            "📍 Punkt på banen  (x, y)":   f"passerer gennem ({target_x:.4g}, {target_y:.4g}) m",
+            "📏 Maksimalhøjde  h_max":      f"har h_max i [{h_min:.4g}–{h_max_filt:.4g}] m",
+        }.get(match_mode, "")
         st.success(
-            "Kast der rammer x ≈ {:.4g} m (±{:.4g}):  ".format(target_x, tol)
-            + "  |  ".join(f"**v₀={v0v} m/s, θ={thv}°** → x={x_r:.3f} m, h_max={h_r:.3f} m"
-                           for v0v, thv, x_r, h_r in matches)
+            f"Kast der {mode_label}:  " +
+            "  |  ".join(f"**v₀={v0v} m/s, θ={thv}°** → x={x_r:.3f} m, h={h_r:.3f} m"
+                         for v0v, thv, x_r, h_r in matches)
         )
-        if len(matches) > 1:
-            st.info("Flere kombinationer matcher. Brug h_max til at skelne: højere θ → højere bane trods samme rækkevidde.")
-    elif target_x > 0:
-        st.warning(f"Ingen kombinationer rammer x ≈ {target_x:.4g} m inden for ±{tol:.4g} m. Prøv at øge tolerancen.")
+        if len(matches) > 1 and match_mode == "📍 Landingspunkt x  (y = 0)":
+            st.info("Flere kast matcher samme landingspunkt. Skift til **'Punkt på banen'** eller **'Maksimalhøjde'** for at skelne dem.")
+    elif match_mode != "Ingen filter":
+        st.warning("Ingen kombinationer matcher. Prøv at øge tolerancen eller justér filterværdierne.")
 
     st.caption("Tip: sin(2·40°) = sin(2·50°) ≈ 0.985 → 40° og 50° giver altid samme rækkevidde med samme v₀, men forskellig højde.")
 
