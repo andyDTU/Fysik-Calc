@@ -407,7 +407,7 @@ elif formel == "Eksplosion / udskydning":
     st.markdown("Impuls bevares. Starter systemet i ro, er den samlede impuls = 0 efterfølgende.")
     st.divider()
 
-    beregn = st.radio("Beregn:", ["v₂' – hastighed af del 2", "v₁' – hastighed af del 1", "m₁ – masse af del 1"], horizontal=True)
+    beregn = st.radio("Beregn:", ["v₂' – hastighed af del 2", "v₁' – hastighed af del 1", "m₁ – masse af del 1", "Energifordeling – givet E_total og masser"], horizontal=True)
     st.divider()
 
     if beregn == "v₂' – hastighed af del 2":
@@ -439,7 +439,7 @@ elif formel == "Eksplosion / udskydning":
         if st.button("📋 Gem v₁'", key="gem_eksp_v1"):
             gem_resultat(abs(v1p), "m/s", "|v₁'|")
 
-    else:
+    elif beregn == "m₁ – masse af del 1":
         c1, c2, c3 = st.columns(3)
         v1p = c1.number_input("v₁' (m/s)", value=-2.0, format="%.6g")
         m2  = c2.number_input("m₂ (kg)", value=1.0, min_value=1e-12, format="%.6g")
@@ -449,6 +449,56 @@ elif formel == "Eksplosion / udskydning":
         else:
             m1 = -m2 * v2p / v1p
             st.success(f"**m₁ = {m1:.6g} kg**")
+
+    else:
+        st.markdown("**Givet total frigivet energi** (fx fra fusion/spaltning) → find KE-fordeling og hastigheder.")
+        st.latex(r"KE_1 = E \cdot \frac{m_2}{m_1+m_2} \qquad KE_2 = E \cdot \frac{m_1}{m_1+m_2}")
+        st.info("Den lettere partikel får altid den større andel af energien.")
+        st.divider()
+
+        e_unit = st.radio("Energienhed:", ["Joule (J)", "MeV (1 MeV = 1.602×10⁻¹³ J)", "eV (1 eV = 1.602×10⁻¹⁹ J)"], horizontal=True, key="eksp_eunit")
+        c1, c2, c3 = st.columns(3)
+        E_raw = c1.number_input("E_total – frigivet energi", value=17.6, min_value=0.0, format="%.6g", key="eksp_E")
+        m1    = c2.number_input("m₁ – masse af del 1 (kg  eller  u)", value=4.0, min_value=1e-30, format="%.6g", key="eksp_ef_m1")
+        m2    = c3.number_input("m₂ – masse af del 2 (samme enhed)", value=1.0, min_value=1e-30, format="%.6g", key="eksp_ef_m2")
+
+        if "MeV" in e_unit:
+            E_J = E_raw * 1.602e-13
+            e_label = f"{E_raw:.4g} MeV"
+        elif "eV" in e_unit:
+            E_J = E_raw * 1.602e-19
+            e_label = f"{E_raw:.4g} eV"
+        else:
+            E_J = E_raw
+            e_label = f"{E_raw:.4g} J"
+
+        M = m1 + m2
+        KE1_frac = m2 / M
+        KE2_frac = m1 / M
+        KE1_J = E_J * KE1_frac
+        KE2_J = E_J * KE2_frac
+
+        if "MeV" in e_unit:
+            KE1_disp = f"{KE1_J/1.602e-13:.4g} MeV  ({KE1_frac*100:.2f}%)"
+            KE2_disp = f"{KE2_J/1.602e-13:.4g} MeV  ({KE2_frac*100:.2f}%)"
+        elif "eV" in e_unit:
+            KE1_disp = f"{KE1_J/1.602e-19:.4g} eV  ({KE1_frac*100:.2f}%)"
+            KE2_disp = f"{KE2_J/1.602e-19:.4g} eV  ({KE2_frac*100:.2f}%)"
+        else:
+            KE1_disp = f"{KE1_J:.4g} J  ({KE1_frac*100:.2f}%)"
+            KE2_disp = f"{KE2_J:.4g} J  ({KE2_frac*100:.2f}%)"
+
+        col1, col2 = st.columns(2)
+        col1.success(f"**KE₁ (m₁) = {KE1_disp}**")
+        col2.success(f"**KE₂ (m₂) = {KE2_disp}**")
+
+        st.latex(rf"KE_1 = E \cdot \frac{{m_2}}{{m_1+m_2}} = {e_label} \cdot \frac{{{m2:.4g}}}{{{M:.4g}}} = {KE1_frac*100:.2f}\%")
+        st.latex(rf"KE_2 = E \cdot \frac{{m_1}}{{m_1+m_2}} = {e_label} \cdot \frac{{{m1:.4g}}}{{{M:.4g}}} = {KE2_frac*100:.2f}\%")
+
+        st.markdown("**Hastigheder** (masser i kg — ellers kun procenter):")
+        v1_mag = np.sqrt(2 * KE1_J / m1) if KE1_J > 0 else 0
+        v2_mag = np.sqrt(2 * KE2_J / m2) if KE2_J > 0 else 0
+        st.info(f"|v₁| = √(2·KE₁/m₁) = {v1_mag:.4g} m/s   |v₂| = √(2·KE₂/m₂) = {v2_mag:.4g} m/s  (gælder kun hvis masse er i kg)")
 
 elif formel == "Massemidtpunkt og -hastighed":
     st.latex(r"x_{cm} = \frac{\sum m_i x_i}{\sum m_i} \qquad v_{cm} = \frac{\sum m_i v_i}{\sum m_i}")
