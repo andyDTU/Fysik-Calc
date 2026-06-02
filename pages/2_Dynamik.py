@@ -30,6 +30,7 @@ _DYN_GROUPS = [
         ("Kraftmoment",          "τ = F · l",                     "Kraftmoment:  τ = F · l"),
         ("Statisk ligevægt",     "ΣF=0,  Στ=0",                   "Statisk ligevægt:  ΣF = 0 og Στ = 0"),
         ("To-snors ophæng",      "T₁=mg·cosθ₂/sin(θ₁+θ₂)",       "To-snors ophæng:  T₁ og T₂"),
+        ("To-klods system",      "a_CM = F_ext / M_total",         "To-klods system:  CM-acceleration"),
     ]),
     ("🏃 Mekanik & Bevægelse", [
         ("Impuls",               "p = m · v",                     "Impuls:  p = m · v"),
@@ -1180,3 +1181,64 @@ elif formel == "To-snors ophæng:  T₁ og T₂":
             gem_resultat(T1, "N", "T₁")
         if col_g2.button("📋 Gem T₂", key="gem_T2_snor"):
             gem_resultat(T2, "N", "T₂")
+
+elif formel == "To-klods system:  CM-acceleration":
+    st.latex(r"a_\text{CM} = \frac{F_\text{ekstern}}{M_\text{total}}")
+    st.markdown(
+        "Klods **m₁** (øverste) og **m₂** (nederste) på **glat** underlag. "
+        "Vandret kraft **F** trækkes i øverste klods. Friktion *mellem* klodserne er en intern kraft "
+        "og påvirker **ikke** massemidtpunktets acceleration."
+    )
+    st.info("💡 Nøgleindsigt: a_CM afhænger kun af den *ydre* kraft og den *samlede* masse, "
+            "uanset om klodserne glider på hinanden eller ej.")
+    st.divider()
+
+    c1, c2, c3, c4, c5 = st.columns(5)
+    m1_tk = c1.number_input("m₁ – øverste klods (kg)", value=1.0, min_value=1e-9, format="%.6g", key="tk_m1")
+    m2_tk = c2.number_input("m₂ – nederste klods (kg)", value=1.0, min_value=1e-9, format="%.6g", key="tk_m2")
+    F_tk  = c3.number_input("F – vandret kraft på m₁ (N)", value=20.0, format="%.6g", key="tk_F")
+    mu_s  = c4.number_input("μₛ – statisk friktionskoeff.", value=0.80, min_value=0.0, format="%.6g", key="tk_mus")
+    mu_k  = c5.number_input("μₖ – kinetisk friktionskoeff.", value=0.50, min_value=0.0, format="%.6g", key="tk_muk")
+
+    M_tot = m1_tk + m2_tk
+    a_cm = F_tk / M_tot
+
+    # Glidningstest: hvis de bevæger sig SAMMEN, kræver det friktion = m2*a_cm på m2
+    f_needed = m2_tk * a_cm          # friktionskraft der skal til for at m2 følger med
+    f_max_s  = mu_s * m2_tk * G      # maks. statisk friktion (normalkraft = m2*g)
+    glider   = f_needed > f_max_s
+
+    st.divider()
+    col1, col2, col3 = st.columns(3)
+    col1.metric("a_CM", f"{a_cm:.4g} m/s²")
+    col2.metric("Krævet friktion (m₂·a_CM)", f"{f_needed:.4g} N")
+    col3.metric("Maks. statisk friktion", f"{f_max_s:.4g} N")
+
+    if glider:
+        f_kin = mu_k * m2_tk * G
+        a1 = (F_tk - f_kin) / m1_tk
+        a2 = f_kin / m2_tk
+        st.error(
+            f"**Klodserne GLIDER på hinanden** (krævet friktion {f_needed:.4g} N > μₛ·m₂g = {f_max_s:.4g} N). "
+            f"Kinetisk friktion = {f_kin:.4g} N."
+        )
+        col_a, col_b, col_c = st.columns(3)
+        col_a.metric("a₁ (øverste)", f"{a1:.4g} m/s²")
+        col_b.metric("a₂ (nederste)", f"{a2:.4g} m/s²")
+        col_c.metric("a_CM = F/M_total", f"{a_cm:.4g} m/s²", delta="uændret!")
+        st.latex(
+            rf"a_1 = \frac{{F - \mu_k m_2 g}}{{m_1}} = \frac{{{F_tk:.4g} - {f_kin:.4g}}}{{{m1_tk:.4g}}} = {a1:.4g}\ \text{{m/s}}^2"
+        )
+        st.latex(
+            rf"a_2 = \frac{{\mu_k m_2 g}}{{m_2}} = \frac{{{f_kin:.4g}}}{{{m2_tk:.4g}}} = {a2:.4g}\ \text{{m/s}}^2"
+        )
+    else:
+        st.success(
+            f"**Klodserne bevæger sig SAMMEN** (krævet friktion {f_needed:.4g} N ≤ μₛ·m₂g = {f_max_s:.4g} N)."
+        )
+
+    st.latex(
+        rf"a_{{\text{{CM}}}} = \frac{{F}}{{m_1 + m_2}} = \frac{{{F_tk:.4g}}}{{{m1_tk:.4g} + {m2_tk:.4g}}} = {a_cm:.4g}\ \text{{m/s}}^2"
+    )
+    if st.button("📋 Gem a_CM", key="gem_acm"):
+        gem_resultat(a_cm, "m/s²", "a_CM")
