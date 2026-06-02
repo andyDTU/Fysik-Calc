@@ -309,4 +309,8 @@ with st.expander("📚 Hurtig formeloversigt – hvad beregner hvilken side?"):
 | Ruller ned fra højde h → v | 🔄 Rotation | Rulning uden glidning → v fra faldshøjde h |
 | Identificér rullende legeme fra v og h | 🔄 Rotation | Rulning uden glidning → Identificér rullende legeme |
 | Trisse + ophængt masse | 🔄 Rotation | Trisse + ophængt masse |
+| Dimensionsanalyse / naturlige skalaer | 📐 Dimensionsanalyse | Naturlige skalaer → find λ og τ fra modelvariable |
+| Skaleringsanalyse | 📏 Skalering | Potenslov → hvad sker med Y når X ændres med faktor f |
+| LC-kredsløb resonans | ⚡ Elektricitet | LC-kredsløb: f₀ = 1/(2π√(LC)) |
+| Kirchhoffs love (2-løkke) | ⚡ Elektricitet | Kirchhoffs love (KCL + KVL) |
 """)

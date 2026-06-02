@@ -24,6 +24,8 @@ _ELEK_FORMULAS = [
     ("RC-kredsløb",            "τ = R · C",                   "RC-kredsløb:  τ = R · C"),
     ("RC – kombinationsmatrix", "R×C → τ (find tidskonstant)", "RC – kombinationsmatrix"),
     ("RL-kredsløb",            "τ = L / R",                   "RL-kredsløb:  τ = L / R"),
+    ("LC-kredsløb",            "f = 1/(2π√LC)",               "LC-kredsløb:  f₀ = 1/(2π√(LC))"),
+    ("Kirchhoffs love",        "ΣI=0  ΣU=0",                  "Kirchhoffs love (KCL + KVL)"),
     ("Coulombs lov",           "F = k·q₁q₂/r²",              "Coulombs lov:  F = k · q₁ · q₂ / r²"),
     ("Elektrisk felt",         "E = F/q = k·Q/r²",           "Elektrisk felt:  E = F / q = k · Q / r²"),
     ("Magnetfelt (ledning)",   "B = μ₀I/(2πr)",               "Magnetfelt fra uendelig ledning:  B = μ₀·I / (2π·r)"),
@@ -40,6 +42,8 @@ ELEK_TIPS = {
     "Seriekobling af modstande": "R_total = R₁ + R₂ + ⋯. Samme strøm igennem alle. Spænding fordeles.",
     "Parallelkobling af modstande": "1/R_total = 1/R₁ + 1/R₂ + ⋯. Samme spænding over alle. Strøm fordeles.",
     "Kondensator:  Q = C · U": "Q i Coulomb, C i Farad, U i Volt. Ladning Q er på platerne, ikke i kredsløbet.",
+    "LC-kredsløb:  f₀ = 1/(2π√(LC))": "Resonansfrekvens: f₀ = 1/(2π√(LC)). ω₀ = 1/√(LC). Svinger som mekanisk fjeder-masse (L↔m, 1/C↔k).",
+    "Kirchhoffs love (KCL + KVL)": "KCL: ΣI_ind = ΣI_ud ved knudepunkt. KVL: ΣU = 0 rundt i en lukket løkke. Bruges til at opsætte ligningssystemer.",
     "RC-kredsløb:  τ = R · C": "τ = R·C = tidskonstant. Efter tid τ er kondensatoren 63% ladet / 37% afladet.",
     "Coulombs lov:  F = k · q₁ · q₂ / r²": "k = 8.988×10⁹ N·m²/C². Positiv F = frastødning, negativ = tiltrækning.",
     "Lorentzkraft:  F = q · v · B": "F = qvB·sin(θ). θ er vinklen mellem v og B. Retning: højrehåndsregel (eller venstrehånd for elektroner).",
@@ -587,3 +591,81 @@ elif formel == "Faradays lov:  ε = -N · ΔΦ / Δt":
         dPhi = c3.number_input("ΔΦ (Wb)", value=0.05, min_value=1e-12, format="%.6g")
         dt = N * dPhi / emf
         st.success(f"**Δt = {dt:.6g} s**")
+
+elif formel == "LC-kredsløb:  f₀ = 1/(2π√(LC))":
+    st.latex(r"f_0 = \frac{1}{2\pi\sqrt{LC}} \qquad \omega_0 = \frac{1}{\sqrt{LC}}")
+    st.markdown("LC-kredsløbet svinger spontant — som en elektrisk fjeder-masse. L [H] svarer til masse, 1/C [1/F] svarer til fjederkonstant.")
+    beregn = st.radio("Beregn:", ["f₀ – resonansfrekvens (Hz)", "L – induktans (H)", "C – kapacitans (F)"], horizontal=True, key="lc_beregn")
+    st.divider()
+
+    if beregn == "f₀ – resonansfrekvens (Hz)":
+        c1, c2 = st.columns(2)
+        L_lc = c1.number_input("L – induktans (H)", value=1e-3, min_value=1e-12, format="%.6g")
+        C_lc = c2.number_input("C – kapacitans (F)", value=1e-6, min_value=1e-12, format="%.6g")
+        omega0 = 1 / np.sqrt(L_lc * C_lc)
+        f0 = omega0 / (2 * np.pi)
+        T0 = 1 / f0
+        st.success(f"**f₀ = {f0:.6g} Hz**   (ω₀ = {omega0:.6g} rad/s,  T = {T0:.6g} s)")
+        st.latex(rf"f_0 = \frac{{1}}{{2\pi\sqrt{{{L_lc:.6g}\cdot{C_lc:.6g}}}}} = {f0:.6g}\ \text{{Hz}}")
+
+    elif beregn == "L – induktans (H)":
+        c1, c2 = st.columns(2)
+        f0 = c1.number_input("f₀ – resonansfrekvens (Hz)", value=1000.0, min_value=1e-12, format="%.6g")
+        C_lc = c2.number_input("C – kapacitans (F)", value=1e-6, min_value=1e-12, format="%.6g")
+        omega0 = 2 * np.pi * f0
+        L_lc = 1 / (omega0**2 * C_lc)
+        st.success(f"**L = {L_lc:.6g} H**")
+        st.latex(rf"L = \frac{{1}}{{\omega_0^2 C}} = \frac{{1}}{{(2\pi\cdot{f0:.6g})^2\cdot{C_lc:.6g}}} = {L_lc:.6g}\ \text{{H}}")
+
+    else:
+        c1, c2 = st.columns(2)
+        f0 = c1.number_input("f₀ – resonansfrekvens (Hz)", value=1000.0, min_value=1e-12, format="%.6g")
+        L_lc = c2.number_input("L – induktans (H)", value=1e-3, min_value=1e-12, format="%.6g")
+        omega0 = 2 * np.pi * f0
+        C_lc = 1 / (omega0**2 * L_lc)
+        st.success(f"**C = {C_lc:.6g} F  =  {C_lc*1e6:.4g} μF**")
+        st.latex(rf"C = \frac{{1}}{{\omega_0^2 L}} = \frac{{1}}{{(2\pi\cdot{f0:.6g})^2\cdot{L_lc:.6g}}} = {C_lc:.6g}\ \text{{F}}")
+
+elif formel == "Kirchhoffs love (KCL + KVL)":
+    st.latex(r"\text{KCL: } \sum I_{ind} = \sum I_{ud} \qquad \text{KVL: } \sum U = 0")
+    st.markdown("""
+**KCL** (strømloven) — ved hvert knudepunkt: al strøm ind = al strøm ud
+**KVL** (spændingsloven) — rundt i enhver lukket løkke: summen af spændingsfald = 0
+""")
+    st.divider()
+
+    mode = st.radio("Opgavetype:", ["2 løkker – 2 ukendte strømme", "Spændingsdeler (2 modstande)"], horizontal=True, key="kvl_mode")
+    st.divider()
+
+    if mode == "2 løkker – 2 ukendte strømme":
+        st.markdown("**Opstil KVL for 2 løkker med strømmene I₁ og I₂:**")
+        st.latex(r"\text{Løkke 1: } U_1 = I_1 R_1 + (I_1 - I_2) R_3")
+        st.latex(r"\text{Løkke 2: } U_2 = I_2 R_2 + (I_2 - I_1) R_3")
+        c1, c2, c3, c4, c5 = st.columns(5)
+        U1 = c1.number_input("U₁ (V)", value=12.0, format="%.4g", key="kvl_U1")
+        U2 = c2.number_input("U₂ (V)", value=6.0, format="%.4g", key="kvl_U2")
+        R1 = c3.number_input("R₁ (Ω)", value=4.0, min_value=1e-12, format="%.4g", key="kvl_R1")
+        R2 = c4.number_input("R₂ (Ω)", value=3.0, min_value=1e-12, format="%.4g", key="kvl_R2")
+        R3 = c5.number_input("R₃ (Ω)", value=2.0, min_value=1e-12, format="%.4g", key="kvl_R3")
+        A = np.array([[R1 + R3, -R3], [-R3, R2 + R3]])
+        b = np.array([U1, U2])
+        try:
+            I = np.linalg.solve(A, b)
+            I1, I2 = I
+            st.success(f"**I₁ = {I1:.4g} A,   I₂ = {I2:.4g} A,   I₃ = I₁−I₂ = {I1-I2:.4g} A**")
+            with st.expander("Vis udregning"):
+                st.latex(rf"\begin{{pmatrix}} {R1+R3:.4g} & {-R3:.4g} \\ {-R3:.4g} & {R2+R3:.4g} \end{{pmatrix}} \begin{{pmatrix}} I_1 \\ I_2 \end{{pmatrix}} = \begin{{pmatrix}} {U1:.4g} \\ {U2:.4g} \end{{pmatrix}}")
+        except np.linalg.LinAlgError:
+            st.error("Singulær matrix – tjek at modstandene er > 0.")
+
+    else:
+        st.latex(r"U_{R2} = U \cdot \frac{R_2}{R_1 + R_2}")
+        c1, c2, c3 = st.columns(3)
+        U  = c1.number_input("U – forsyningsspænding (V)", value=12.0, format="%.4g", key="kvl_sp_U")
+        R1 = c2.number_input("R₁ (Ω)", value=3.0, min_value=1e-12, format="%.4g", key="kvl_sp_R1")
+        R2 = c3.number_input("R₂ (Ω)", value=1.0, min_value=1e-12, format="%.4g", key="kvl_sp_R2")
+        U_R2 = U * R2 / (R1 + R2)
+        U_R1 = U * R1 / (R1 + R2)
+        I_tot = U / (R1 + R2)
+        st.success(f"**U_R2 = {U_R2:.4g} V,   U_R1 = {U_R1:.4g} V,   I = {I_tot:.4g} A**")
+        st.latex(rf"U_{{R2}} = {U:.4g} \cdot \frac{{{R2:.4g}}}{{{R1:.4g}+{R2:.4g}}} = {U_R2:.4g}\ \text{{V}}")
