@@ -173,7 +173,7 @@ with st.expander("🚀 Relativitetsteori", expanded=False):
         st.caption("Lorentz-faktoren:")
         st.latex(r"\gamma = \frac{1}{\sqrt{1 - v^2/c^2}}")
         st.caption("Tidsudvidelse:")
-        st.latex(r"\Delta t' = \gamma \cdot \Delta t_0")
+        st.latex(r"\Delta t = \gamma \cdot \Delta t_0")
         st.caption("Længdekontraktion:")
         st.latex(r"L' = \frac{L_0}{\gamma}")
         st.caption("Relativistisk energi:")

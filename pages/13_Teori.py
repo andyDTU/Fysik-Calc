@@ -520,10 +520,10 @@ QUESTIONS = [
     },
     {
         "emne": "Rotation",
-        "q": "Et hjul decelererer fra 300 RPM til 0 på 5 sekunder med konstant vinkelacceleration. Hvad er α?",
+        "q": "Et hjul decelererer fra 300 RPM til 0 på 5 sekunder med konstant vinkelacceleration. Hvad er |α| (størrelsen af vinkelaccelerationen)?",
         "options": ["A) 60 rad/s²", "B) 6.28 rad/s²", "C) 3.14 rad/s²", "D) 10π/3 rad/s² ≈ 10.47 rad/s²", "E) 300 rad/s²"],
         "correct": "B",
-        "explain": "ω₀ = 300·2π/60 = 10π rad/s ≈ 31.4 rad/s. α = (ω−ω₀)/t = (0−10π)/5 = −2π rad/s² ≈ −6.28 rad/s². Husk at omregne RPM → rad/s: ω = RPM·2π/60.",
+        "explain": "ω₀ = 300·2π/60 = 10π rad/s ≈ 31.4 rad/s. α = (ω−ω₀)/t = (0−10π)/5 = −2π rad/s² ≈ −6.28 rad/s² (negativ da decelererende). |α| = 2π ≈ 6.28 rad/s². Husk at omregne RPM → rad/s: ω = RPM·2π/60.",
     },
     {
         "emne": "Rotation",
@@ -551,7 +551,7 @@ QUESTIONS = [
     {
         "emne": "Svingninger",
         "q": "Et fjedermasse-system har T = 2 s. Hvad sker med perioden hvis massen fordobles OG fjederkonstanten halveres?",
-        "options": ["A) T fordobles til 4 s", "B) T er uændret", "C) T firedobles til 8 s", "D) T øges med faktor 2 til 4 s", "E) T øges med faktor √2 til 2.83 s"],
+        "options": ["A) T fordobles til 4 s", "B) T er uændret", "C) T firedobles til 8 s", "D) T øges med faktor √2 til 2.83 s", "E) T tredobles til 6 s"],
         "correct": "A",
         "explain": "T = 2π√(m/k). Ny T' = 2π√(2m/(k/2)) = 2π√(4m/k) = 2·2π√(m/k) = 2T = 4 s. Fordoblet m giver faktor √2 opad, halveret k giver yderligere faktor √2 opad → samlet faktor 2.",
     },
@@ -827,7 +827,9 @@ EKSAMENSTRAP = [
 ]
 
 # ── Faner: Spørgsmål / Eksamenstrap ───────────────────────────────────────────
-tab_spg, tab_trap = st.tabs([f"🧠 Spørgsmål ({len(QUESTIONS)})", "⚠️ Eksamenstrap (top 10)"])
+_emne_filter_now = st.session_state.get("teori_emne", "Alle")
+_filtrerede_count = len(QUESTIONS) if _emne_filter_now == "Alle" else sum(1 for q in QUESTIONS if q["emne"] == _emne_filter_now)
+tab_spg, tab_trap = st.tabs([f"🧠 Spørgsmål ({_filtrerede_count})", "⚠️ Eksamenstrap (top 10)"])
 
 with tab_spg:
     EMNER = ["Alle"] + sorted(list({q["emne"] for q in QUESTIONS}))
@@ -838,9 +840,11 @@ with tab_spg:
     if "teori_revealed" not in st.session_state:
         st.session_state["teori_revealed"] = set()
 
+    _q_global_idx = {id(q): i for i, q in enumerate(QUESTIONS)}
+
     n_revealed = sum(
-        1 for i, q in enumerate(filtrerede)
-        if f"{q['emne']}_{i}_{emne_filter}" in st.session_state["teori_revealed"]
+        1 for q in filtrerede
+        if f"q_{_q_global_idx[id(q)]}" in st.session_state["teori_revealed"]
     )
 
     col_info, col_reset = st.columns([6, 1])
@@ -852,7 +856,7 @@ with tab_spg:
     st.divider()
 
     for i, q in enumerate(filtrerede):
-        q_id = f"{q['emne']}_{i}_{emne_filter}"
+        q_id = f"q_{_q_global_idx[id(q)]}"
         revealed = q_id in st.session_state["teori_revealed"]
 
         header = f"{'✅ ' if revealed else ''}{i+1}. **[{q['emne']}]** {q['q']}"

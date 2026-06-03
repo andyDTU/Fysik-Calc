@@ -62,6 +62,9 @@ show_tips(formel, KIN_TIPS)
 st.divider()
 
 # ── SUVAT – universal løser ────────────────────────────────────────────────────
+if formel != "SUVAT – universal løser":
+    st.session_state.pop("suvat_results", None)
+
 if formel == "SUVAT – universal løser":
     st.latex(r"v = v_0 + at \quad s = v_0 t + \tfrac{1}{2}at^2 \quad v^2 = v_0^2 + 2as \quad s = \tfrac{1}{2}(v_0+v)t")
     st.markdown("Vælg de **2 ukendte** variable. Indtast de 3 kendte, og klik **Beregn**.")

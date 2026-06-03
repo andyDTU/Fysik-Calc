@@ -51,7 +51,9 @@ if kategori == "🌡️ Temperatur":
         st.metric("Kelvin (K)", f"{kelvin:.4f}")
         st.metric("Fahrenheit (°F)", f"{fahrenheit:.4f}")
 
-    if st.button("📋 Gem Kelvin-værdi"):
+    if kelvin < 0:
+        st.error(f"⚠️ {kelvin:.2f} K er under det absolutte nulpunkt (0 K). Tjek din input.")
+    elif st.button("📋 Gem Kelvin-værdi"):
         gem_resultat(kelvin, "K", "T")
 
 elif kategori == "💨 Tryk":
@@ -92,7 +94,7 @@ elif kategori == "⚡ Energi":
     col_in, col_out = st.columns(2)
     with col_in:
         from_unit = st.selectbox("Fra enhed", ["J", "kJ", "MJ", "eV", "cal", "kWh"], key="energi_from")
-        val = st.number_input("Værdi", value=1.0, format="%.6g", key="energi_val")
+        val = st.number_input("Værdi", value=1.0, min_value=0.0, format="%.6g", key="energi_val")
 
     if from_unit == "J":
         joule = val
